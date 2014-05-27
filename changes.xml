@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+	<!--
+		Simple Description: Supported Action Types: add, fix, update, remove
+	-->
+	<properties>
+		<title>Changes</title>
+		<author email="harald.brabenetz@infonova.com">Harald Brabenetz</author>
+	</properties>
+	<body>
+
+		<release version="1.6-PATCH01" date="2010-03-25" description="Patched Version 1.6" >
+			<action dev="brabenetz" type="update" >
+				A pom.xml File to build it with Maven. A generated Site Documentation are available at:
+    			http://tinyurl.com/dumbster-1-6-PATCH01
+			</action>
+			<action dev="brabenetz" type="update" >
+				Additional Check for Body Lines starting with "."
+			</action>
+			<action dev="brabenetz" type="update" >
+				Add commons-logging and replace e.printStackTrace() with LOG.error(e.getMessage(), e);
+			</action>
+			<action dev="brabenetz" type="update" >
+				Add encoding UnitTests for  Content-Transfer-Encoding "7bit", "quoted-printable", "base64".
+			</action>
+			<action dev="brabenetz" type="update" >
+				2009.05.05 Integrated MimeUtility.decodeText(...) from
+			    http://blogs.abril.com.br/java-cabeca/2009/05/dumpster-testando-envio-email.html
+			    Now, the Example Unittests works with ".getHeaderValue(property)" instead
+			    of "MimeUtility.decodeText(...getHeaderValue(property))"
+			</action>
+			<action dev="brabenetz" type="update" issue="1476278" system="patch" due-to="ddkilzer" due-to-email="ddkilzer@user.sourceforge.net" >
+				2006-04-25 18:09 Fix for Bug 1229248...fails to inform if it's stopped or not
+			</action>
+			<action dev="brabenetz" type="update" issue="1354585" system="patch" due-to="rsutphin" due-to-email="rsutphin@user.sourceforge.net">
+				2005-11-11 23:19 Linending Patch "Fix for bug 1307560 (preserve CRLF in body)"
+			</action>
+			<action dev="brabenetz" type="update" issue="1313597" system="patch" due-to="kasatani" due-to-email="kasatani@user.sourceforge.net">
+				2005-10-05 08:12 Fix for non-ASCII charsets
+			</action>
+			<action dev="brabenetz" type="update" issue="1310992" system="patch" due-to="cornedbee" due-to-email="cornedbee@user.sourceforge.net">
+				2005-10-02 15:58 Racing Condition on Server Creation
+			</action>
+		</release>
+
+		<release version="1.6" date="2005-04-04">
+			<action dev="jasonkitchen" type="update" issue="1111796">
+				Fixed threading and synchronization problems. Thanks to Charles Hudak for pointing out these issues.
+			</action>
+			<action dev="jasonkitchen" type="fix" issue="1115202">
+				Build now fails on unit test failure. Thanks
+				to Charles Hudak for complaining about this.
+			</action>
+			<action dev="jasonkitchen" type="fix">
+				Fixed a few more threading issues related to the time required for the server
+				socket to bind. Thanks to Jeremy Hulford for researching and providing a fix for this issue.
+			</action>
+		</release>
+
+		<release version="1.5" date="2004-11-18">
+			<action dev="jasonkitchen" type="update">
+				Moved from LGPL license to Apache License Version 2.0. See
+				http://www.apache.org/licenses/LICENSE-2.0.txt. This provides at least the same freedoms as the LGPL license but
+				does not have the potential legal problems associated with imports from other libraries.
+			</action>
+			<action dev="jasonkitchen" type="fix">
+				Removed vestiges of port 25 from unit tests to allow OSX and *nix to run on
+				non-priveleged ports.
+			</action>
+		</release>
+
+		<release version="1.4" date="2004-11-02">
+			<action dev="jasonkitchen" type="fix" issue="1055322">
+				Fixed bug where misbehaving SMTP clients cause Dumbster to fail with a
+				NullPointerException.
+			</action>
+			<action dev="jasonkitchen" type="add" issue="1059102">
+				Binary distribution (jar with class files) now available in addition to source.
+			</action>
+			<action dev="jasonkitchen" type="fix">
+				Corrected mispelling of SimpleSmtpServer.getReceivedEmailSize() again (can't
+				believe how long I stared at this until I saw it - thanks to Ken Pelletier).
+			</action>
+			<action dev="jasonkitchen" type="fix">
+				Stopped using port 25 and 80 in unit tests - these are priveleged ports under
+				*nix and OSX (thanks to Ken Pelletier and Mark Lowe).
+			</action>
+			<action dev="jasonkitchen" type="fix">
+				Uncommented stack trace on server startup failure (this probably ought to
+				throw an IllegalStateException or something, but at least this way any failure won't be hidden) - thanks Ken
+				Pelletier.
+			</action>
+			<action dev="jasonkitchen" type="add">
+				CVS now operational for the Dumbster project.
+			</action>
+			<action dev="jasonkitchen" type="add">
+				Added javadoc target to "build.xml".
+			</action>
+		</release>
+
+		<release version="1.3" date="2004-10-08">
+			<action dev="jasonkitchen" type="add">
+				Documented internal state transition table (see Javadoc for SmtpRequest).
+			</action>
+			<action dev="jasonkitchen" type="fix" issue="1022357">
+				Fixed bug which prevented mutliple messages in the same connection from being
+				transferred.
+			</action>
+		</release>
+
+		<release version="1.2" date="2004-05-08">
+			<action dev="jasonkitchen" type="add">
+				Configurable SMTP port
+				(thanks Dr. Christian Möller and Kevin Fries).
+				</action>
+			<action dev="jasonkitchen" type="fix" issue="824194">
+				Mispelled getReceievedEmailSize.
+			</action>
+			<action dev="jasonkitchen" type="fix" issue="903326">
+				Not able to enter '\n' in body of message.
+			</action>
+		</release>
+
+		<release version="1.1" date="2003-09-28">
+			<action dev="jasonkitchen" type="update">
+				Change from GPL license to LGPL license
+			</action>
+			<action dev="jasonkitchen" type="add">
+				HELO command is now recognized (not just EHLO)
+			</action>
+		</release>
+
+		<release version="1.0" date="2003-06-08">
+			<action dev="jasonkitchen" type="add">
+				Initial version released in conjunction with the JavaWorld article "Test email
+				components in your software".
+				See: http://www.javaworld.com/javaworld/jw-08-2003/jw-0829-smtp.html
+			</action>
+		</release>
+	</body>
+</document>

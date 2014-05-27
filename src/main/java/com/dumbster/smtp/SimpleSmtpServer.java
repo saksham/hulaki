@@ -29,9 +29,14 @@ import java.io.IOException;
 /**
  * Dummy SMTP server for testing purposes.
  *
- * @todo constructor allowing user to pass preinitialized ServerSocket
+ * TODO constructor allowing user to pass preinitialized ServerSocket
  */
 public class SimpleSmtpServer implements Runnable {
+    
+    /** General Logger for this Class. */
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+        .getLog(SimpleSmtpServer.class);
+
   /**
    * Stores all of the email received since this instance started up.
    */
@@ -75,11 +80,11 @@ public class SimpleSmtpServer implements Runnable {
    * Main loop of the SMTP server.
    */
   public void run() {
-    stopped = false;
     try {
       try {
         serverSocket = new ServerSocket(port);
         serverSocket.setSoTimeout(TIMEOUT); // Block for maximum of 1.5 seconds
+        stopped = false;
       } finally {
         synchronized (this) {
           // Notify when server socket has been created
@@ -101,7 +106,7 @@ public class SimpleSmtpServer implements Runnable {
         }
 
         // Get the input and output streams
-        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "US-ASCII"));
         PrintWriter out = new PrintWriter(socket.getOutputStream());
 
         synchronized (this) {
@@ -117,14 +122,14 @@ public class SimpleSmtpServer implements Runnable {
         socket.close();
       }
     } catch (Exception e) {
-      /** @todo Should throw an appropriate exception here. */
-      e.printStackTrace();
+      /** TODO Should throw an appropriate exception here. */
+      LOG.error(e.getMessage(), e);
     } finally {
       if (serverSocket != null) {
         try {
           serverSocket.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          LOG.error(e.getMessage(), e);
         }
       }
     }
@@ -182,7 +187,8 @@ public class SimpleSmtpServer implements Runnable {
       if (line == null) {
         break;
       }
-
+      //System.out.println("LINE: " + line);
+      
       // Create request from client input and current state
       SmtpRequest request = SmtpRequest.createRequest(line, smtpState);
       // Execute request and create response object
@@ -198,6 +204,7 @@ public class SimpleSmtpServer implements Runnable {
 
       // If message reception is complete save it
       if (smtpState == SmtpState.QUIT) {
+        msg.close();
         msgList.add(msg);
         msg = new SmtpMessage();
       }
@@ -252,17 +259,18 @@ public class SimpleSmtpServer implements Runnable {
   public static SimpleSmtpServer start(int port) {
     SimpleSmtpServer server = new SimpleSmtpServer(port);
     Thread t = new Thread(server);
-    t.start();
     
-    // Block until the server socket is created
     synchronized (server) {
+      t.start();
+
+      // Block until the server socket is created
       try {
         server.wait();
       } catch (InterruptedException e) {
         // Ignore don't care.
       }
     }
-    return server;
+    return server.isStopped() ? null : server;
   }
 
 }

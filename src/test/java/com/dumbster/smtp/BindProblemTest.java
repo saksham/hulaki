@@ -31,7 +31,7 @@ public class BindProblemTest extends TestCase {
    */
   protected void setUp() throws Exception {
     super.setUp();
-    server = SimpleSmtpServer.start();
+    server = SimpleSmtpServer.start(2500);
   }
 
   /**

@@ -167,13 +167,12 @@ public class SmtpRequest {
     } else if (state == SmtpState.DATA_BODY) {
       if (s.equals(".")) {
         action = SmtpActionType.DATA_END;
+      } else if (s.startsWith("..")) {
+        action = SmtpActionType.UNRECOG;
+        params = s.substring(1);
       } else {
         action = SmtpActionType.UNRECOG;
-        if (s.length() < 1) {
-          params = "\n";
-        } else {
-          params = s;
-        }
+        params = s;
       }
     } else {
       String su = s.toUpperCase();

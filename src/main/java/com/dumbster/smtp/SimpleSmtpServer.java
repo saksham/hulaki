@@ -148,7 +148,7 @@ public class SimpleSmtpServer implements Runnable {
    * Stops the server. Server is shutdown after processing of the current request is complete.
    */
   public synchronized void stop() {
-    // Mark us closed
+    // Mark as closed
     stopped = true;
     try {
       // Kick the server accept loop
@@ -234,6 +234,15 @@ public class SimpleSmtpServer implements Runnable {
   public synchronized Iterator getReceivedEmail() {
     return receivedMail.iterator();
   }
+  
+  /**
+   * Returns the email received by this instance at the given index.
+   * @param index
+   * @return 
+   */
+  public synchronized SmtpMessage getReceivedEmail(int index) {
+      return receivedMail.get(index);
+  }
 
   /**
    * Get the number of messages received.
@@ -243,6 +252,13 @@ public class SimpleSmtpServer implements Runnable {
     return receivedMail.size();
   }
 
+  /**
+   * Clears the collection that stores received email messages.
+   */
+  public synchronized void clearReceivedEmails() {
+      receivedMail.clear();
+  }
+  
   /**
    * Creates an instance of SimpleSmtpServer and starts it. Will listen on the default port.
    * @return a reference to the SMTP server

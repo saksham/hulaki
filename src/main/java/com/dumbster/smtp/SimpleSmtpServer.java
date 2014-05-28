@@ -237,11 +237,11 @@ public class SimpleSmtpServer implements Runnable {
   
   /**
    * Returns the email received by this instance at the given index.
-   * @param index
-   * @return 
+   * @param index Index for the mail in collection
+   * @return Email message
    */
   public synchronized SmtpMessage getReceivedEmail(int index) {
-      return receivedMail.get(index);
+      return (SmtpMessage) receivedMail.get(index);
   }
 
   /**

@@ -13,3 +13,7 @@ hs_err_pid*
 
 # Compiled files
 target/
+
+# IDE files
+.idea/*
+*.iml

@@ -16,10 +16,7 @@
  */
 package com.dumbster.smtp;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import junit.framework.TestCase;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -27,16 +24,17 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 
 /**
  * Simple TestCase with Text Messages, contains special Chars in Header and Body and Multiline Tests.
- * <p>
+ * <p/>
  * Original TestCase from <a href="http://blogs.abril.com.br/java-cabeca/2009/05/dumpster-testando-envio-email.html">
  * Dumbster - Testando envio de Email </a>.
- * 
+ *
  * @author Leonardo Campos
  * @author Harald Brabenetz
  */
@@ -50,8 +48,12 @@ public class SimpleTextMessagesTest extends TestCase {
 
     private SimpleSmtpServer mockServer;
 
+    private InMemoryMailStorage storage;
+
     public void setUp() {
         this.mockServer = SimpleSmtpServer.start();
+        this.storage = new InMemoryMailStorage();
+        this.mockServer.addObserver(this.storage);
     }
 
     public void tearDown() {
@@ -71,13 +73,12 @@ public class SimpleTextMessagesTest extends TestCase {
         try {
             msg.setFrom(new InternetAddress(MAIL_FROM, MAIL_FROM));
             List addresses = new ArrayList();
-            String[] array = emails.split(",");
-            for (int i = 0; i < array.length; i++) {
-                String email = array[i];
+            String[] recipients = emails.split(",");
+            for (String email : recipients) {
                 addresses.add(new InternetAddress(email, email));
             }
             msg.setRecipients(Message.RecipientType.TO, (InternetAddress[]) addresses
-                .toArray(new InternetAddress[addresses.size()]));
+                    .toArray(new InternetAddress[addresses.size()]));
             msg.setSubject(subject, CHARSET);
             msg.setText(body, CHARSET);
             setHeaders(msg);
@@ -96,12 +97,12 @@ public class SimpleTextMessagesTest extends TestCase {
 
     public void testEnviarEmailSent() {
         this.sendMessage("sender@email.com", "Test", "Test Body");
-        assertEquals(1, mockServer.getReceivedEmailSize());
+        assertEquals(1, storage.getReceivedEmailSize());
     }
 
     public void testEnviarEmailSentMulti() {
         this.sendMessage("sender@email.com, otherSender@test.com", "Test", "Test Body");
-        assertEquals(1, mockServer.getReceivedEmailSize());
+        assertEquals(1, storage.getReceivedEmailSize());
     }
 
     public void testEnviarEmailFrom() {
@@ -116,7 +117,7 @@ public class SimpleTextMessagesTest extends TestCase {
 
     public void testEnviarEmailSubjectExtended() {
         String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
-            + "http://youtube.com/xyz äüö and secret informations";
+                + "http://youtube.com/xyz äüö and secret informations";
         this.sendMessage("sender@email.com", subject, "Test Body");
         assertSubject(subject);
     }
@@ -141,7 +142,8 @@ public class SimpleTextMessagesTest extends TestCase {
     }
 
     private void assertHeader(final String property, final String expected) {
-        getEmailSent().getHeaderValue(property);
+        String headerValue = getEmailSent().getHeaderValue(property);
+        assertEquals(expected, headerValue);
     }
 
     private void assertBody(final String expected) {
@@ -149,8 +151,7 @@ public class SimpleTextMessagesTest extends TestCase {
     }
 
     private SmtpMessage getEmailSent() {
-        final Iterator emailIter = mockServer.getReceivedEmail();
-        final SmtpMessage email = (SmtpMessage) emailIter.next();
+        final SmtpMessage email = storage.getLatestMail();
         System.out.println("BODY:\n" + email.getBody());
         return email;
     }

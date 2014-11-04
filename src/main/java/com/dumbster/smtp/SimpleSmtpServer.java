@@ -20,7 +20,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -31,16 +30,15 @@ import java.io.IOException;
  *
  * TODO constructor allowing user to pass preinitialized ServerSocket
  */
-public class SimpleSmtpServer implements Runnable {
-    
-    /** General Logger for this Class. */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-        .getLog(SimpleSmtpServer.class);
+public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
 
   /**
-   * Stores all of the email received since this instance started up.
+   * General Logger for this Class.
    */
-  private List receivedMail;
+  private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+          .getLog(SimpleSmtpServer.class);
+
+  private List<Observer<SmtpMessage>> observers = new ArrayList<>();
 
   /**
    * Default SMTP port is 25.
@@ -69,10 +67,10 @@ public class SimpleSmtpServer implements Runnable {
 
   /**
    * Constructor.
+   *
    * @param port port number
    */
   public SimpleSmtpServer(int port) {
-    receivedMail = new ArrayList();
     this.port = port;
   }
 
@@ -109,16 +107,8 @@ public class SimpleSmtpServer implements Runnable {
         BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "US-ASCII"));
         PrintWriter out = new PrintWriter(socket.getOutputStream());
 
-        synchronized (this) {
-          /*
-           * We synchronize over the handle method and the list update because the client call completes inside
-           * the handle method and we have to prevent the client from reading the list until we've updated it.
-           * For higher concurrency, we could just change handle to return void and update the list inside the method
-           * to limit the duration that we hold the lock.
-           */
-          List msgs = handleTransaction(out, input);
-          receivedMail.addAll(msgs);
-        }
+        handleTransaction(out, input);
+
         socket.close();
       }
     } catch (Exception e) {
@@ -138,6 +128,7 @@ public class SimpleSmtpServer implements Runnable {
   /**
    * Check if the server has been placed in a stopped state. Allows another thread to
    * stop the server safely.
+   *
    * @return true if the server has been sent a stop signal, false otherwise
    */
   public synchronized boolean isStopped() {
@@ -163,10 +154,9 @@ public class SimpleSmtpServer implements Runnable {
    *
    * @param out   output stream
    * @param input input stream
-   * @return List of SmtpMessage
    * @throws IOException
    */
-  private List handleTransaction(PrintWriter out, BufferedReader input) throws IOException {
+  private void handleTransaction(PrintWriter out, BufferedReader input) throws IOException {
     // Initialize the state machine
     SmtpState smtpState = SmtpState.CONNECT;
     SmtpRequest smtpRequest = new SmtpRequest(SmtpActionType.CONNECT, "", smtpState);
@@ -178,7 +168,6 @@ public class SimpleSmtpServer implements Runnable {
     sendResponse(out, smtpResponse);
     smtpState = smtpResponse.getNextState();
 
-    List msgList = new ArrayList();
     SmtpMessage msg = new SmtpMessage();
 
     while (smtpState != SmtpState.CONNECT) {
@@ -188,7 +177,7 @@ public class SimpleSmtpServer implements Runnable {
         break;
       }
       //System.out.println("LINE: " + line);
-      
+
       // Create request from client input and current state
       SmtpRequest request = SmtpRequest.createRequest(line, smtpState);
       // Execute request and create response object
@@ -205,12 +194,17 @@ public class SimpleSmtpServer implements Runnable {
       // If message reception is complete save it
       if (smtpState == SmtpState.QUIT) {
         msg.close();
-        msgList.add(msg);
+        notifyAllObservers(msg);
         msg = new SmtpMessage();
       }
     }
+  }
 
-    return msgList;
+
+  private void notifyAllObservers(SmtpMessage smtpMessage) {
+    for(Observer<SmtpMessage> observer : observers) {
+      observer.notify(smtpMessage);
+    }
   }
 
   /**
@@ -227,37 +221,6 @@ public class SimpleSmtpServer implements Runnable {
     }
   }
 
-  /**
-   * Get email received by this instance since start up.
-   * @return List of String
-   */
-  public synchronized Iterator getReceivedEmail() {
-    return receivedMail.iterator();
-  }
-  
-  /**
-   * Returns the email received by this instance at the given index.
-   * @param index Index for the mail in collection
-   * @return Email message
-   */
-  public synchronized SmtpMessage getReceivedEmail(int index) {
-      return (SmtpMessage) receivedMail.get(index);
-  }
-
-  /**
-   * Get the number of messages received.
-   * @return size of received email list
-   */
-  public synchronized int getReceivedEmailSize() {
-    return receivedMail.size();
-  }
-
-  /**
-   * Clears the collection that stores received email messages.
-   */
-  public synchronized void clearReceivedEmails() {
-      receivedMail.clear();
-  }
   
   /**
    * Creates an instance of SimpleSmtpServer and starts it. Will listen on the default port.
@@ -289,4 +252,13 @@ public class SimpleSmtpServer implements Runnable {
     return server.isStopped() ? null : server;
   }
 
+  @Override
+  public void addObserver(Observer<SmtpMessage> observer) {
+    this.observers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(Observer<SmtpMessage> observer) {
+    this.observers.remove(observer);
+  }
 }

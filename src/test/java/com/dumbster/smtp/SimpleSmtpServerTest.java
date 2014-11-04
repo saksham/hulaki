@@ -26,7 +26,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.InternetAddress;
 import java.util.Properties;
 import java.util.Date;
-import java.util.Iterator;
 
 public class SimpleSmtpServerTest extends TestCase {
 
@@ -37,7 +36,8 @@ public class SimpleSmtpServerTest extends TestCase {
             .getLog(SimpleSmtpServerTest.class);
     private static final int SMTP_PORT = 1081;
 
-    SimpleSmtpServer server;
+    private SimpleSmtpServer server;
+    private InMemoryMailStorage storage;
 
     public SimpleSmtpServerTest(String s) {
         super(s);
@@ -46,11 +46,15 @@ public class SimpleSmtpServerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         server = SimpleSmtpServer.start(SMTP_PORT);
+        storage = new InMemoryMailStorage();
+        storage.clearReceivedEmails();
+        server.addObserver(storage);
     }
 
     protected void tearDown() throws Exception {
         super.tearDown();
         server.stop();
+        server.removeObserver(storage);
     }
 
     public void testSend() {
@@ -61,7 +65,7 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertTrue(server.getReceivedEmailSize() == 1);
+        assertTrue(storage.getReceivedEmailSize() == 1);
         SmtpMessage email = getEmailSent();
         assertTrue(email.getHeaderValue("Subject").equals("Test"));
         assertTrue(email.getBody().equals("Test Body"));
@@ -76,7 +80,7 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertEquals(1, server.getReceivedEmailSize());
+        assertEquals(1, storage.getReceivedEmailSize());
         SmtpMessage email = getEmailSent();
         assertEquals(bodyWithCR, email.getBody());
     }
@@ -94,8 +98,7 @@ public class SimpleSmtpServerTest extends TestCase {
             Transport transport = session.getTransport("smtp");
             transport.connect("localhost", SMTP_PORT, null, null);
 
-            for (int i = 0; i < mimeMessages.length; i++) {
-                MimeMessage mimeMessage = mimeMessages[i];
+            for (MimeMessage mimeMessage : mimeMessages) {
                 transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
             }
 
@@ -105,7 +108,7 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertTrue(server.getReceivedEmailSize() == 2);
+        assertTrue(storage.getReceivedEmailSize() == 2);
     }
 
     public void testSendTwoMsgsWithLogin() {
@@ -161,7 +164,7 @@ public class SimpleSmtpServerTest extends TestCase {
             LOG.error(e.getMessage(), e);
         }
 
-        assertTrue(server.getReceivedEmailSize() == 2);
+        assertTrue(storage.getReceivedEmailSize() == 2);
         SmtpMessage email = getEmailSent();
         assertTrue(email.getHeaderValue("Subject").equals("Test"));
         assertTrue(email.getBody().equals("Test Body"));
@@ -193,8 +196,8 @@ public class SimpleSmtpServerTest extends TestCase {
 
         Transport.send(msg);
 
-        assertEquals(1, server.getReceivedEmailSize());
-        SmtpMessage recvd = (SmtpMessage) server.getReceivedEmail().next();
+        assertEquals(1, storage.getReceivedEmailSize());
+        SmtpMessage recvd = (SmtpMessage) storage.getLatestMail();
         assertEquals("1234567890", recvd.getHeaderValue("X-LongHeader"));
         assertEquals("baz  foo barquux", recvd.getHeaderValue("X-LongerHeader"));
     }
@@ -212,7 +215,7 @@ public class SimpleSmtpServerTest extends TestCase {
         sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", charset);
 
-        assertTrue(server.getReceivedEmailSize() == 1);
+        assertTrue(storage.getReceivedEmailSize() == 1);
         SmtpMessage email = getEmailSent();
         assertEquals(charset, email.getCharset());
         assertEquals(body, email.getBody());
@@ -261,9 +264,7 @@ public class SimpleSmtpServerTest extends TestCase {
     }
 
     private SmtpMessage getEmailSent() {
-        Iterator emailIter = server.getReceivedEmail();
-        SmtpMessage email = (SmtpMessage) emailIter.next();
-        return email;
+        return storage.getLatestMail();
     }
 
     private Properties getMailProperties(int port) {

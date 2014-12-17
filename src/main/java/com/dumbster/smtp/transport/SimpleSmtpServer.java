@@ -28,9 +28,7 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 /**
- * Dummy SMTP server for testing purposes.
- *
- * TODO constructor allowing user to pass preinitialized ServerSocket
+ * SMTP server
  */
 public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
 

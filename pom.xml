@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dumbster</groupId>
     <artifactId>dumbster</artifactId>
-    <version>1.9.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     <description>
         The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email messages.

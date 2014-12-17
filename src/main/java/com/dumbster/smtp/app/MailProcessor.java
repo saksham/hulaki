@@ -57,6 +57,10 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
         this.stopped = true;
     }
 
+    public boolean isStopped() {
+        return this.stopped;
+    }
+
     @Override
     public void run() {
         this.stopped = false;

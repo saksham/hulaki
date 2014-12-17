@@ -16,6 +16,8 @@
  */
 package com.dumbster.smtp.transport;
 
+import org.apache.log4j.Logger;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -35,8 +37,7 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
   /**
    * General Logger for this Class.
    */
-  private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-          .getLog(SimpleSmtpServer.class);
+  private static final Logger LOG = Logger.getLogger(SimpleSmtpServer.class);
 
   private List<Observer<SmtpMessage>> observers = new ArrayList<>();
 
@@ -90,6 +91,7 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
         }
       }
 
+      LOG.info("Started SMTP server on port: " + port);
       // Server: loop until stopped
       while (!isStopped()) {
         // Start server socket and listen for client connections
@@ -122,6 +124,7 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
           LOG.error(e.getMessage(), e);
         }
       }
+      LOG.info("Stopped SMTP server");
     }
   }
 

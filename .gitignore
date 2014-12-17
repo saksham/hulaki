@@ -17,3 +17,9 @@ target/
 # IDE files
 .idea/*
 *.iml
+
+# Email files
+EML_*
+
+# Temporary databases
+*.db

@@ -15,7 +15,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     private IMailStorage mailStorage;
     private EmailSender emailSender;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public void setMailStorage(IMailStorage mailStorage) {
         this.mailStorage = mailStorage;

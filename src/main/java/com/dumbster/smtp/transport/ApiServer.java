@@ -20,7 +20,7 @@ public class ApiServer implements Runnable {
     private SimpleSmtpServer smtpServer;
     private MailStorage mailStorage;
     private int apiServerPort;
-    private boolean stopped;
+    private volatile boolean stopped;
     private static Logger logger = Logger.getLogger(ApiServer.class);
 
     public void setApiServerPort(int apiServerPort) {

@@ -1,7 +1,4 @@
-/*
- * Dumbster - a dummy SMTP server
- * Copyright 2004 Jason Paul Kitchen
- * 
+/**
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,50 +11,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dumbster.smtp;
+package com.dumbster.smtp.transport;
 
-import junit.framework.TestCase;
+import com.dumbster.smtp.utils.SimpleSmtpStorage;
+import org.apache.log4j.Logger;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-import javax.mail.Session;
 import javax.mail.Message;
-import javax.mail.Transport;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import java.util.Properties;
+import javax.mail.internet.MimeMessage;
 import java.util.Date;
+import java.util.Properties;
 
-public class SimpleSmtpServerTest extends TestCase {
+import static org.testng.Assert.*;
+
+@Test
+public class SimpleSmtpServerTest {
 
     /**
      * General Logger for this Class.
      */
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(SimpleSmtpServerTest.class);
+    private static final Logger LOG = Logger.getLogger(SimpleSmtpServerTest.class);
     private static final int SMTP_PORT = 1081;
 
     private SimpleSmtpServer server;
-    private InMemoryMailStorage storage;
+    private SimpleSmtpStorage storage;
 
-    public SimpleSmtpServerTest(String s) {
-        super(s);
-    }
-
-    protected void setUp() throws Exception {
-        super.setUp();
+    @BeforeClass
+    private void setUp() throws Exception {
         server = SimpleSmtpServer.start(SMTP_PORT);
-        storage = new InMemoryMailStorage();
-        storage.clearReceivedEmails();
+        storage = new SimpleSmtpStorage();
         server.addObserver(storage);
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @AfterClass
+    private void tearDown() throws Exception {
         server.stop();
         server.removeObserver(storage);
     }
 
-    public void testSend() {
+    public void sendEmail() {
+        int countBefore = storage.getReceivedEmailSize();
         try {
             sendMessage(SMTP_PORT, "sender@here.com", "Test", "Test Body", "receiver@there.com");
         } catch (Exception e) {
@@ -65,13 +64,14 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertTrue(storage.getReceivedEmailSize() == 1);
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
         SmtpMessage email = getEmailSent();
-        assertTrue(email.getHeaderValue("Subject").equals("Test"));
-        assertTrue(email.getBody().equals("Test Body"));
+        assertEquals(email.getHeaderValue("Subject"), "Test");
+        assertEquals(email.getBody(), "Test Body");
     }
 
-    public void testSendMessageWithCarriageReturn() {
+    public void sendMessageWithCarriageReturn() {
+        int countBefore = storage.getReceivedEmailSize();
         String bodyWithCR = "\n\nKeep these pesky carriage returns\n\n.\n\n...";
         try {
             sendMessage(SMTP_PORT, "sender@hereagain.com", "CRTest", bodyWithCR, "receivingagain@there.com");
@@ -80,12 +80,15 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertEquals(1, storage.getReceivedEmailSize());
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
         SmtpMessage email = getEmailSent();
-        assertEquals(bodyWithCR, email.getBody());
+        assertEquals(email.getBody(), bodyWithCR);
     }
 
-    public void testSendTwoMessagesSameConnection() {
+    public void sendTwoMessagesSameConnection() {
+
+        int countBefore = storage.getReceivedEmailSize();
+
         try {
             MimeMessage[] mimeMessages = new MimeMessage[2];
             Properties mailProps = getMailProperties(SMTP_PORT);
@@ -108,10 +111,13 @@ public class SimpleSmtpServerTest extends TestCase {
             fail("Unexpected exception: " + e);
         }
 
-        assertTrue(storage.getReceivedEmailSize() == 2);
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 2);
     }
 
-    public void testSendTwoMsgsWithLogin() {
+    public void sendTwoMsgsWithLogin() {
+
+
+        int countBefore = storage.getReceivedEmailSize();
         try {
             String Server = "localhost";
             String From = "sender@here.com";
@@ -121,18 +127,11 @@ public class SimpleSmtpServerTest extends TestCase {
 
             Properties props = System.getProperties();
 
-            if (Server != null) {
-                props.put("mail.smtp.host", Server);
-            }
+            props.put("mail.smtp.host", Server);
 
             Session session = Session.getDefaultInstance(props, null);
             Message msg = new MimeMessage(session);
-
-            if (From != null) {
-                msg.setFrom(new InternetAddress(From));
-            } else {
-                msg.setFrom();
-            }
+            msg.setFrom(new InternetAddress(From));
 
             InternetAddress.parse(To, false);
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(To, false));
@@ -151,8 +150,6 @@ public class SimpleSmtpServerTest extends TestCase {
                 transport.sendMessage(msg, InternetAddress.parse(To, false));
                 transport.sendMessage(msg, InternetAddress.parse("dimiter.bakardjiev@musala.com", false));
 
-            } catch (javax.mail.MessagingException e) {
-                LOG.error(e.getMessage(), e);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             } finally {
@@ -164,19 +161,10 @@ public class SimpleSmtpServerTest extends TestCase {
             LOG.error(e.getMessage(), e);
         }
 
-        assertTrue(storage.getReceivedEmailSize() == 2);
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 2);
         SmtpMessage email = getEmailSent();
-        assertTrue(email.getHeaderValue("Subject").equals("Test"));
-        assertTrue(email.getBody().equals("Test Body"));
-    }
-
-    /**
-     * TestCase from
-     * http://sourceforge.net/tracker/?func=detail&aid=1476278&group_id=78413&atid=553188
-     */
-    public void testStartReturnsNullOnBindError() {
-        SimpleSmtpServer duplicate = SimpleSmtpServer.start(SMTP_PORT);
-        assertNull(duplicate);
+        assertEquals(email.getHeaderValue("Subject"), "Test");
+        assertEquals(email.getBody(), "Test Body");
     }
 
     /**
@@ -185,7 +173,9 @@ public class SimpleSmtpServerTest extends TestCase {
      *
      * @throws MessagingException if an error occurs
      */
-    public void testContinuedHeadersArriveIntact() throws MessagingException {
+    public void continuedHeadersArriveIntact() throws MessagingException {
+        int countBefore = storage.getReceivedEmailSize();
+
         Session session = Session.getInstance(getMailProperties(SMTP_PORT), null);
         MimeMessage msg = createMessage(session, "sender@example.com", "guy@example.net", "Re: Hello", "Virus");
         msg.addHeaderLine("X-LongHeader: 12345");
@@ -196,10 +186,10 @@ public class SimpleSmtpServerTest extends TestCase {
 
         Transport.send(msg);
 
-        assertEquals(1, storage.getReceivedEmailSize());
-        SmtpMessage recvd = (SmtpMessage) storage.getLatestMail();
-        assertEquals("1234567890", recvd.getHeaderValue("X-LongHeader"));
-        assertEquals("baz  foo barquux", recvd.getHeaderValue("X-LongerHeader"));
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
+        SmtpMessage recvd = storage.getLatestEmail();
+        assertEquals(recvd.getHeaderValue("X-LongHeader"), "1234567890");
+        assertEquals(recvd.getHeaderValue("X-LongerHeader"), "baz  foo barquux");
     }
 
     /**
@@ -208,17 +198,19 @@ public class SimpleSmtpServerTest extends TestCase {
      *
      * @throws MessagingException if an error occurs
      */
-    public void testSendCharsetMessage() throws MessagingException {
+    public void sendCharsetMessage() throws MessagingException {
+        int countBefore = storage.getReceivedEmailSize();
+
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
         String charset = "iso-2022-jp";
         sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", charset);
 
-        assertTrue(storage.getReceivedEmailSize() == 1);
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
         SmtpMessage email = getEmailSent();
-        assertEquals(charset, email.getCharset());
-        assertEquals(body, email.getBody());
+        assertEquals(email.getCharset(), charset);
+        assertEquals(email.getBody(), body);
     }
 
     /**
@@ -226,13 +218,13 @@ public class SimpleSmtpServerTest extends TestCase {
      *
      * @throws MessagingException if an error occurs
      */
-    public void testSendEncoding7BitMessage() throws MessagingException {
+    public void sendEncoding7BitMessage() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
         sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "7bit");
 
-        assertEquals(body, getEmailSent().getBody());
+        assertEquals(getEmailSent().getBody(), body);
     }
 
     /**
@@ -240,13 +232,13 @@ public class SimpleSmtpServerTest extends TestCase {
      *
      * @throws MessagingException if an error occurs
      */
-    public void testSendEncodingQuotedPrintableMessage() throws MessagingException {
+    public void sendEncodingQuotedPrintableMessage() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
         sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "quoted-printable");
 
-        assertEquals(body, getEmailSent().getBody());
+        assertEquals(getEmailSent().getBody(), body);
     }
 
     /**
@@ -254,17 +246,17 @@ public class SimpleSmtpServerTest extends TestCase {
      *
      * @throws MessagingException if an error occurs
      */
-    public void testSendEncodingBase64Message() throws MessagingException {
+    public void sendEncodingBase64Message() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
         sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "base64");
 
-        assertEquals(body, getEmailSent().getBody());
+        assertEquals(getEmailSent().getBody(), body);
     }
 
     private SmtpMessage getEmailSent() {
-        return storage.getLatestMail();
+        return storage.getLatestEmail();
     }
 
     private Properties getMailProperties(int port) {
@@ -299,25 +291,25 @@ public class SimpleSmtpServerTest extends TestCase {
     }
 
     /**
-     * @param session the javax Mail Session
-     * @param from The From Address must be a valid email.
-     * @param to The To Address must be a valid email.
-     * @param subject The Subject
-     * @param body The Body
-     * @param charset The Charset
+     * @param session  the javax Mail Session
+     * @param from     The From Address must be a valid email.
+     * @param to       The To Address must be a valid email.
+     * @param subject  The Subject
+     * @param body     The Body
+     * @param charset  The Charset
      * @param encoding The Content-Transfer-Encoding. valid Values are "7bit",
-     * "quoted-printable", "base64"
+     *                 "quoted-printable", "base64"
      * @return the new created MimeMessage.
      * @throws MessagingException
      */
     private MimeMessage createMessage(//
-            final Session session, //
-            final String from, //
-            final String to, //
-            final String subject, //
-            final String body, //
-            final String charset, //
-            final String encoding) throws MessagingException {
+                                      final Session session, //
+                                      final String from, //
+                                      final String to, //
+                                      final String subject, //
+                                      final String body, //
+                                      final String charset, //
+                                      final String encoding) throws MessagingException {
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(from));
         msg.setSubject(subject);

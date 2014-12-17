@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dumbster.smtp;
+package com.dumbster.smtp.transport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -185,7 +185,7 @@ public class SmtpMessage {
     if (values == null) {
       return new String[0];
     } else {
-      return (String[])values.toArray(new String[0]);
+      return (String[])values.toArray();
     }
   }
 

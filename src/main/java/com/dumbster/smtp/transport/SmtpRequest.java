@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.dumbster.smtp;
+package com.dumbster.smtp.transport;
 
 /**
  * Contains an SMTP client request. Handles state transitions using the following state transition table.
@@ -66,7 +66,7 @@ public class SmtpRequest {
    * @return reponse to the request
    */
   public SmtpResponse execute() {
-    SmtpResponse response = null;
+    SmtpResponse response;
     if (action.isStateless()) {
       if (SmtpActionType.EXPN == action || SmtpActionType.VRFY == action) {
         response = new SmtpResponse(252, "Not supported", this.state);
@@ -152,7 +152,7 @@ public class SmtpRequest {
    * @return a populated SmtpRequest object
    */
   public static SmtpRequest createRequest(String s, SmtpState state) {
-    SmtpActionType action = null;
+    SmtpActionType action;
     String params = null;
 
     if (state == SmtpState.DATA_HDR) {
@@ -204,8 +204,7 @@ public class SmtpRequest {
       }
     }
 
-    SmtpRequest req = new SmtpRequest(action, params, state);
-    return req;
+    return new SmtpRequest(action, params, state);
   }
 
   /**

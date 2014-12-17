@@ -1,7 +1,4 @@
-/*
- * Dumbster - a dummy SMTP server
- * Copyright 2004 Jason Paul Kitchen
- * 
+/**
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dumbster.smtp;
+package com.dumbster.smtp.transport;
 
-import junit.framework.TestCase;
+import com.dumbster.smtp.utils.SimpleSmtpStorage;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * Simple TestCase with Text Messages, contains special Chars in Header and Body and Multiline Tests.
@@ -38,7 +40,8 @@ import java.util.Properties;
  * @author Leonardo Campos
  * @author Harald Brabenetz
  */
-public class SimpleTextMessagesTest extends TestCase {
+@Test
+public class SimpleTextMessagesTest {
 
     private static final String MAIL_HOST = "localhost";
 
@@ -48,18 +51,89 @@ public class SimpleTextMessagesTest extends TestCase {
 
     private SimpleSmtpServer mockServer;
 
-    private InMemoryMailStorage storage;
+    private SimpleSmtpStorage storage;
 
-    public void setUp() {
+    @BeforeClass
+    private void setUp() {
         this.mockServer = SimpleSmtpServer.start();
-        this.storage = new InMemoryMailStorage();
+        this.storage = new SimpleSmtpStorage();
         this.mockServer.addObserver(this.storage);
     }
 
+    @AfterClass
     public void tearDown() {
         if (this.mockServer != null) {
             this.mockServer.stop();
         }
+    }
+
+    public void sendEmail() {
+        int countBefore = storage.getReceivedEmailSize();
+        this.sendMessage("sender@email.com", "Test", "Test Body");
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
+    }
+
+    public void sendEmailMulti() {
+        int countBefore = storage.getReceivedEmailSize();
+        this.sendMessage("sender@email.com, otherSender@test.com", "Test", "Test Body");
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
+    }
+
+    public void sendEmailFrom() {
+        this.sendMessage("sender@email.com", "Test", "Test Body");
+        assertFrom("\"test.from@teste.com\" <test.from@teste.com>");
+    }
+
+    public void sendEmailSubject() {
+        this.sendMessage("sender@email.com", "Test Ão çÇá", "Test Body");
+        assertSubject("Test Ão çÇá");
+    }
+
+    public void sendEmailSubjectExtended() {
+        String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
+                + "http://youtube.com/xyz äüö and secret informations";
+        this.sendMessage("sender@email.com", subject, "Test Body");
+        assertSubject(subject);
+    }
+
+    public void sendEmailBody() {
+        this.sendMessage("sender@email.com", "Test", "Ão çÇá");
+        assertBody("Ão çÇá");
+    }
+
+    public void sendEmailBodyMultiline() {
+        String testBody = "Somthing\nNew Line\n\nTwo new Lines.\n\n...etc.\n\n\n.";
+        this.sendMessage("sender@email.com", "Test", testBody);
+        assertBody(testBody);
+    }
+
+    private void setHeaders(final MimeMessage message) throws MessagingException {
+        message.setHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
+        message.setHeader("X-Accept-Language", "pt-br, pt");
+        message.setHeader("Content-Transfer-Encoding", "quoted-printable");
+    }
+
+    private void assertSubject(final String expected) {
+        assertHeader("Subject", expected);
+    }
+
+    private void assertFrom(final String expected) {
+        assertHeader("From", expected);
+    }
+
+    private void assertHeader(final String property, final String expected) {
+        String headerValue = getEmailSent().getHeaderValue(property);
+        assertEquals(headerValue, expected);
+    }
+
+    private void assertBody(final String expected) {
+        assertEquals(getEmailSent().getBody(), expected);
+    }
+
+    private SmtpMessage getEmailSent() {
+        final SmtpMessage email = storage.getLatestEmail();
+        System.out.println("BODY:\n" + email.getBody());
+        return email;
     }
 
     private void sendMessage(final String emails, final String subject, final String body) {
@@ -87,72 +161,5 @@ public class SimpleTextMessagesTest extends TestCase {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void setHeaders(final MimeMessage message) throws MessagingException {
-        message.setHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
-        message.setHeader("X-Accept-Language", "pt-br, pt");
-        message.setHeader("Content-Transfer-Encoding", "quoted-printable");
-    }
-
-    public void testEnviarEmailSent() {
-        this.sendMessage("sender@email.com", "Test", "Test Body");
-        assertEquals(1, storage.getReceivedEmailSize());
-    }
-
-    public void testEnviarEmailSentMulti() {
-        this.sendMessage("sender@email.com, otherSender@test.com", "Test", "Test Body");
-        assertEquals(1, storage.getReceivedEmailSize());
-    }
-
-    public void testEnviarEmailFrom() {
-        this.sendMessage("sender@email.com", "Test", "Test Body");
-        assertFrom("\"test.from@teste.com\" <test.from@teste.com>");
-    }
-
-    public void testEnviarEmailSubject() {
-        this.sendMessage("sender@email.com", "Test Ão çÇá", "Test Body");
-        assertSubject("Test Ão çÇá");
-    }
-
-    public void testEnviarEmailSubjectExtended() {
-        String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
-                + "http://youtube.com/xyz äüö and secret informations";
-        this.sendMessage("sender@email.com", subject, "Test Body");
-        assertSubject(subject);
-    }
-
-    public void testEnviarEmailBody() {
-        this.sendMessage("sender@email.com", "Test", "Ão çÇá");
-        assertBody("Ão çÇá");
-    }
-
-    public void testEnviarEmailBodyMultiline() {
-        String testBody = "Somthing\nNew Line\n\nTwo new Lines.\n\n...etc.\n\n\n.";
-        this.sendMessage("sender@email.com", "Test", testBody);
-        assertBody(testBody);
-    }
-
-    private void assertSubject(final String expected) {
-        assertHeader("Subject", expected);
-    }
-
-    private void assertFrom(final String expected) {
-        assertHeader("From", expected);
-    }
-
-    private void assertHeader(final String property, final String expected) {
-        String headerValue = getEmailSent().getHeaderValue(property);
-        assertEquals(expected, headerValue);
-    }
-
-    private void assertBody(final String expected) {
-        assertEquals(expected, getEmailSent().getBody());
-    }
-
-    private SmtpMessage getEmailSent() {
-        final SmtpMessage email = storage.getLatestMail();
-        System.out.println("BODY:\n" + email.getBody());
-        return email;
     }
 }

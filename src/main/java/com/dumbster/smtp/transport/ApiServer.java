@@ -105,8 +105,8 @@ public class ApiServer implements Runnable {
     }
 
     private ApiResponse process(SmtpServerStatusRequest request) {
-        SmtpServerStatus status = (!this.smtpServer.isStopped()) ? SmtpServerStatus.RUNNING
-                : SmtpServerStatus.STOPPED;
+        ServerStatus status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING
+                : ServerStatus.STOPPED;
         return new StatusResponse(status.getStatus(), status.getStatusString());
     }
 

@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InMemoryMailStorage extends MailStorage {
+public class InMemoryMailStorage implements IMailStorage {
 
     private HashMap<String, ArrayList<MailMessage>> emailsByRecipients = new HashMap<>();
     private int storedEmailCount = 0;

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FileBasedMailStorage extends MailStorage {
+public class FileBasedMailStorage implements IMailStorage {
     private static final String EMAIL_FILE_PREFIX = "EML_";
     public static final String EMAIL_FILE_SUFFIX = ".xml";
     private static final Logger logger = Logger.getLogger(FileBasedMailStorage.class);

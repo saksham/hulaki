@@ -15,14 +15,4 @@ public interface IMailStorage {
     void clearMessages();
 
     int countAllMessagesReceived();
-
-    List<String> getRelayRecipients();
-
-    void clearRelayRecipients();
-
-    void addRelayRecipient(String email);
-
-    boolean isRelayRecipient(String email);
-
-    void removeRelayRecipient(String email);
 }

@@ -2,7 +2,8 @@ package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
-import com.dumbster.smtp.storage.MailStorage;
+import com.dumbster.smtp.storage.IMailStorage;
+import com.dumbster.smtp.storage.IRelayAddressStorage;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -18,7 +19,8 @@ public class ApiServer implements Runnable {
 
 
     private SimpleSmtpServer smtpServer;
-    private MailStorage mailStorage;
+    private IMailStorage mailStorage;
+    private IRelayAddressStorage relayAddressStorage;
     private int apiServerPort;
     private volatile boolean stopped;
     private static Logger logger = Logger.getLogger(ApiServer.class);
@@ -31,7 +33,7 @@ public class ApiServer implements Runnable {
         this.smtpServer = smtpServer;
     }
 
-    public void setMailStorage(MailStorage storage) {
+    public void setMailStorage(IMailStorage storage) {
         this.mailStorage = storage;
     }
 
@@ -103,7 +105,7 @@ public class ApiServer implements Runnable {
     }
 
     private ApiResponse process(SmtpServerStatusRequest request) {
-        SmtpServerStatus status = (this.smtpServer.isStopped()) ? SmtpServerStatus.RUNNING
+        SmtpServerStatus status = (!this.smtpServer.isStopped()) ? SmtpServerStatus.RUNNING
                 : SmtpServerStatus.STOPPED;
         return new StatusResponse(status.getStatus(), status.getStatusString());
     }
@@ -111,13 +113,13 @@ public class ApiServer implements Runnable {
     private ApiResponse process(RelayRequest relayRequest) {
         if (relayRequest.getRecipient() != null) {
             if (relayRequest.getRelayMode() == RelayMode.ADD) {
-                mailStorage.addRelayRecipient(relayRequest.getRecipient());
+                relayAddressStorage.addRelayRecipient(relayRequest.getRecipient());
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                mailStorage.removeRelayRecipient(relayRequest.getRecipient());
+                relayAddressStorage.removeRelayRecipient(relayRequest.getRecipient());
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                if (mailStorage.isRelayRecipient(relayRequest.getRecipient())) {
+                if (relayAddressStorage.isRelayRecipient(relayRequest.getRecipient())) {
                     return new StatusResponse(200, "OK");
                 } else {
                     return new StatusResponse(404, "NOT FOUND");
@@ -125,10 +127,10 @@ public class ApiServer implements Runnable {
             }
         } else {
             if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                mailStorage.clearRelayRecipients();
+                relayAddressStorage.clearRelayRecipients();
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                return new RelayResponse(mailStorage.getRelayRecipients());
+                return new RelayResponse(relayAddressStorage.getRelayRecipients());
             }
         }
         throw new ApiProtocolException("Parameters missing in the request.");
@@ -174,4 +176,7 @@ public class ApiServer implements Runnable {
         processorThread.start();
     }
 
+    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
+        this.relayAddressStorage = relayAddressStorage;
+    }
 }

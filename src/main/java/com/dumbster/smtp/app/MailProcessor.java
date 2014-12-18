@@ -2,6 +2,7 @@ package com.dumbster.smtp.app;
 
 import com.dumbster.smtp.entities.MailMessage;
 import com.dumbster.smtp.storage.IMailStorage;
+import com.dumbster.smtp.storage.IRelayAddressStorage;
 import com.dumbster.smtp.transport.Observer;
 import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
@@ -14,6 +15,12 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
     private static final Logger logger = Logger.getLogger(MailProcessor.class);
 
     private IMailStorage mailStorage;
+
+    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
+        this.relayAddressStorage = relayAddressStorage;
+    }
+
+    private IRelayAddressStorage relayAddressStorage;
     private EmailSender emailSender;
     private volatile boolean stopped;
 
@@ -31,7 +38,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
         String recipient = normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
         boolean wasMailRelayed = false;
 
-        if (mailStorage.isRelayRecipient(recipient)) {
+        if (relayAddressStorage.isRelayRecipient(recipient)) {
             wasMailRelayed = true;
             emailSender.sendEmail(smtpMessage.getHeaderValue("From"), recipient,
                     smtpMessage.getHeaderValue("Subject"), smtpMessage.getBody());

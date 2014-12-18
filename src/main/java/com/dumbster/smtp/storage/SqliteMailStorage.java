@@ -16,7 +16,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-public class SqliteMailStorage extends MailStorage {
+public class SqliteMailStorage implements IMailStorage {
     private static final Logger log = Logger.getLogger(SqliteMailStorage.class);
     private final String dbFilename;
 

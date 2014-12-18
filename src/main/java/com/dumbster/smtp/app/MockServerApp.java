@@ -1,6 +1,7 @@
 package com.dumbster.smtp.app;
 
 import com.dumbster.smtp.storage.InMemoryMailStorage;
+import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
 import com.dumbster.smtp.transport.ApiServer;
 import com.dumbster.smtp.transport.SimpleSmtpServer;
 
@@ -12,11 +13,14 @@ public class MockServerApp {
     private SimpleSmtpServer smtpServer;
 
     public static void main(String[] args) throws Exception {
-        InMemoryMailStorage storage = new InMemoryMailStorage();
+        InMemoryMailStorage mailStorage = new InMemoryMailStorage();
+        InMemoryRelayAddressStorage relayAddressStorage = new InMemoryRelayAddressStorage();
 
         MockServerApp app = new MockServerApp();
         app.mailProcessor = new MailProcessor();
-        app.mailProcessor.setMailStorage(storage);
+        app.mailProcessor.setMailStorage(mailStorage);
+        app.mailProcessor.setRelayAddressStorage(relayAddressStorage);
+
         Thread mailProcessorThread = new Thread(app.mailProcessor);
         mailProcessorThread.start();
 
@@ -26,7 +30,8 @@ public class MockServerApp {
         app.apiServer = new ApiServer();
         app.apiServer.setSmtpServer(app.smtpServer);
         app.apiServer.setApiServerPort(API_SERVER_PORT);
-        app.apiServer.setMailStorage(storage);
+        app.apiServer.setMailStorage(mailStorage);
+        app.apiServer.setRelayAddressStorage(relayAddressStorage);
         Thread apiServerThread = new Thread(app.apiServer);
         apiServerThread.start();
 

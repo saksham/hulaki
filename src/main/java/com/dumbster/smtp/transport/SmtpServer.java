@@ -14,13 +14,15 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.List;
 
 public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
     private static final Object serverLock = new Object();
     private final int port;
-    private boolean stopped;
+    private volatile boolean stopped;
     private List<Observer<SmtpMessage>> observers;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -55,8 +57,12 @@ public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<S
         } else {
             port = 2500;
         }
+        System.out.println("Type EXIT to exit the program.");
         SmtpServer.start(port);
-        System.in.read();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to exit the program.");
+        }
     }
 
     public boolean isStopped() {

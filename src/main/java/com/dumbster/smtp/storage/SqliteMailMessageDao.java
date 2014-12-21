@@ -16,11 +16,11 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-public class SqliteMailStorage implements IMailStorage {
-    private static final Logger log = Logger.getLogger(SqliteMailStorage.class);
+public class SqliteMailMessageDao implements MailMessageDao {
+    private static final Logger log = Logger.getLogger(SqliteMailMessageDao.class);
     private final String dbFilename;
 
-    public SqliteMailStorage(String dbFilepath) {
+    public SqliteMailMessageDao(String dbFilepath) {
         this.dbFilename = dbFilepath;
         init();
     }

@@ -1,8 +1,8 @@
 package com.dumbster.smtp.app;
 
 import com.dumbster.smtp.api.MailMessage;
-import com.dumbster.smtp.storage.IMailStorage;
-import com.dumbster.smtp.storage.IRelayAddressStorage;
+import com.dumbster.smtp.storage.MailMessageDao;
+import com.dumbster.smtp.storage.RelayAddressDao;
 import com.dumbster.smtp.transport.Observer;
 import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
@@ -12,20 +12,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
+
     private static final Logger logger = Logger.getLogger(MailProcessor.class);
-
-    private IMailStorage mailStorage;
-
-    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
-        this.relayAddressStorage = relayAddressStorage;
-    }
-
-    private IRelayAddressStorage relayAddressStorage;
+    private MailMessageDao mailMessageDao;
+    private RelayAddressDao relayAddressDao;
     private EmailSender emailSender;
     private volatile boolean stopped;
 
-    public void setMailStorage(IMailStorage mailStorage) {
-        this.mailStorage = mailStorage;
+    public void setMailMessageDao(MailMessageDao mailMessageDao) {
+        this.mailMessageDao = mailMessageDao;
+    }
+
+    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
+        this.relayAddressDao = relayAddressDao;
     }
 
     public void setEmailSender(EmailSender emailSender) {
@@ -38,7 +37,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
         String recipient = normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
         boolean wasMailRelayed = false;
 
-        if (relayAddressStorage.isRelayRecipient(recipient)) {
+        if (relayAddressDao.isRelayRecipient(recipient)) {
             wasMailRelayed = true;
             emailSender.sendEmail(smtpMessage.getHeaderValue("From"), recipient,
                     smtpMessage.getHeaderValue("Subject"), smtpMessage.getBody());
@@ -46,7 +45,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
         }
 
         MailMessage message = new MailMessage(smtpMessage, wasMailRelayed);
-        mailStorage.storeMessage(recipient, message);
+        mailMessageDao.storeMessage(recipient, message);
     }
 
     private static String normalizeEmailAddress(String email) {

@@ -3,7 +3,7 @@ import com.dumbster.smtp.api.MailMessage;
 
 import java.util.List;
 
-public interface IMailStorage {
+public interface MailMessageDao {
     void storeMessage(String recipient, MailMessage email);
 
     List<MailMessage> retrieveMessages(String recipient);

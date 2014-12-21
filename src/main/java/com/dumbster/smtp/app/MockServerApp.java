@@ -1,7 +1,7 @@
 package com.dumbster.smtp.app;
 
-import com.dumbster.smtp.storage.InMemoryMailStorage;
-import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
+import com.dumbster.smtp.storage.InMemoryMailMessageDao;
+import com.dumbster.smtp.storage.InMemoryRelayAddressDao;
 import com.dumbster.smtp.transport.ApiServer;
 import com.dumbster.smtp.transport.SmtpServer;
 
@@ -16,13 +16,13 @@ public class MockServerApp {
     private SmtpServer smtpServer;
 
     public static void main(String[] args) throws Exception {
-        InMemoryMailStorage mailStorage = new InMemoryMailStorage();
-        InMemoryRelayAddressStorage relayAddressStorage = new InMemoryRelayAddressStorage();
+        InMemoryMailMessageDao mailMessageDao = new InMemoryMailMessageDao();
+        InMemoryRelayAddressDao relayAddressDao = new InMemoryRelayAddressDao();
 
         MockServerApp app = new MockServerApp();
         app.mailProcessor = new MailProcessor();
-        app.mailProcessor.setMailStorage(mailStorage);
-        app.mailProcessor.setRelayAddressStorage(relayAddressStorage);
+        app.mailProcessor.setMailMessageDao(mailMessageDao);
+        app.mailProcessor.setRelayAddressDao(relayAddressDao);
 
         Thread mailProcessorThread = new Thread(app.mailProcessor);
         mailProcessorThread.start();
@@ -33,8 +33,8 @@ public class MockServerApp {
         app.apiServer = new ApiServer(API_SERVER_PORT);
         app.apiServer.setSmtpServer(app.smtpServer);
         app.apiServer.setMailProcessor(app.mailProcessor);
-        app.apiServer.setMailStorage(mailStorage);
-        app.apiServer.setRelayAddressStorage(relayAddressStorage);
+        app.apiServer.setMailMessageDao(mailMessageDao);
+        app.apiServer.setRelayAddressDao(relayAddressDao);
         app.apiServer.startAndWait();
 
         System.out.println("Type EXIT to quit");

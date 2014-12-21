@@ -4,8 +4,8 @@ package com.dumbster.smtp.transport;
 import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
-import com.dumbster.smtp.storage.IMailStorage;
-import com.dumbster.smtp.storage.IRelayAddressStorage;
+import com.dumbster.smtp.storage.MailMessageDao;
+import com.dumbster.smtp.storage.RelayAddressDao;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -16,17 +16,17 @@ import java.net.Socket;
 
 public class ApiServerHandler {
     private static final Logger logger = Logger.getLogger(ApiServerHandler.class);
-    private IMailStorage mailStorage;
-    private IRelayAddressStorage relayAddressStorage;
+    private MailMessageDao mailMessageDao;
+    private RelayAddressDao relayAddressDao;
     private MailProcessor mailProcessor;
     private SmtpServer smtpServer;
 
-    public void setMailStorage(IMailStorage mailStorage) {
-        this.mailStorage = mailStorage;
+    public void setMailMessageDao(MailMessageDao mailMessageDao) {
+        this.mailMessageDao = mailMessageDao;
     }
 
-    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
-        this.relayAddressStorage = relayAddressStorage;
+    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
+        this.relayAddressDao = relayAddressDao;
     }
 
     public void setMailProcessor(MailProcessor mailProcessor) {
@@ -84,19 +84,19 @@ public class ApiServerHandler {
     private ApiResponse process(CountRequest countRequest) {
         int cnt;
         if (countRequest.getRecipient() != null) {
-            cnt = mailStorage.countMessagesForRecipient(countRequest.getRecipient());
+            cnt = mailMessageDao.countMessagesForRecipient(countRequest.getRecipient());
         } else {
-            cnt = mailStorage.countAllMessagesReceived();
+            cnt = mailMessageDao.countAllMessagesReceived();
         }
         return new CountResponse(countRequest.getRecipient(), cnt);
     }
 
     private ApiResponse process(GetRequest getRequest) {
-        return new GetResponse(getRequest.getRecipient(), mailStorage.retrieveMessages(getRequest.getRecipient()));
+        return new GetResponse(getRequest.getRecipient(), mailMessageDao.retrieveMessages(getRequest.getRecipient()));
     }
 
     private ApiResponse process(ClearRequest clearRequest) {
-        mailStorage.clearMessagesForRecipient(clearRequest.getRecipient());
+        mailMessageDao.clearMessagesForRecipient(clearRequest.getRecipient());
         return new StatusResponse(200, "OK");
     }
 
@@ -113,13 +113,13 @@ public class ApiServerHandler {
     private ApiResponse process(RelayRequest relayRequest) {
         if (relayRequest.getRecipient() != null) {
             if (relayRequest.getRelayMode() == RelayMode.ADD) {
-                relayAddressStorage.addRelayRecipient(relayRequest.getRecipient());
+                relayAddressDao.addRelayRecipient(relayRequest.getRecipient());
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                relayAddressStorage.removeRelayRecipient(relayRequest.getRecipient());
+                relayAddressDao.removeRelayRecipient(relayRequest.getRecipient());
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                if (relayAddressStorage.isRelayRecipient(relayRequest.getRecipient())) {
+                if (relayAddressDao.isRelayRecipient(relayRequest.getRecipient())) {
                     return new StatusResponse(200, "OK");
                 } else {
                     return new StatusResponse(404, "NOT FOUND");
@@ -127,10 +127,10 @@ public class ApiServerHandler {
             }
         } else {
             if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                relayAddressStorage.clearRelayRecipients();
+                relayAddressDao.clearRelayRecipients();
                 return new StatusResponse(200, "OK");
             } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                return new RelayResponse(relayAddressStorage.getRelayRecipients());
+                return new RelayResponse(relayAddressDao.getRelayRecipients());
             }
         }
         throw new ApiProtocolException("Parameters missing in the request.");

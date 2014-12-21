@@ -19,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FileBasedMailStorage implements IMailStorage {
+public class FileBasedMailMessageDao implements MailMessageDao {
     private static final String EMAIL_FILE_PREFIX = "EML_";
     public static final String EMAIL_FILE_SUFFIX = ".xml";
-    private static final Logger logger = Logger.getLogger(FileBasedMailStorage.class);
+    private static final Logger logger = Logger.getLogger(FileBasedMailMessageDao.class);
     private final File mailsFolder;
     private Map<String, List<String>> fileNamesByRecipients = Maps.newConcurrentMap();
     private int storedEmailsCount = 0;
 
-    public FileBasedMailStorage(String mailsFolderPath) {
+    public FileBasedMailMessageDao(String mailsFolderPath) {
         this.mailsFolder = recreateFolder(mailsFolderPath);
     }
 

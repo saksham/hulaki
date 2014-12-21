@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class InMemoryMailStorage implements IMailStorage {
+public class InMemoryMailMessageDao implements MailMessageDao {
 
     private Map<String, ArrayList<MailMessage>> emailsByRecipients = Maps.newConcurrentMap();
     private int storedEmailCount = 0;

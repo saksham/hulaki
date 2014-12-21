@@ -2,10 +2,10 @@ package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiException;
-import com.dumbster.smtp.storage.IMailStorage;
-import com.dumbster.smtp.storage.IRelayAddressStorage;
-import com.dumbster.smtp.storage.InMemoryMailStorage;
-import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
+import com.dumbster.smtp.storage.MailMessageDao;
+import com.dumbster.smtp.storage.RelayAddressDao;
+import com.dumbster.smtp.storage.InMemoryMailMessageDao;
+import com.dumbster.smtp.storage.InMemoryRelayAddressDao;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -27,8 +27,8 @@ public class ApiServer implements Runnable {
 
     private SmtpServer smtpServer;
     private MailProcessor mailProcessor;
-    private IMailStorage mailStorage;
-    private IRelayAddressStorage relayAddressStorage;
+    private MailMessageDao mailMessageDao;
+    private RelayAddressDao relayAddressDao;
 
     public ApiServer(int port) {
         this.port = port;
@@ -42,12 +42,12 @@ public class ApiServer implements Runnable {
         this.mailProcessor = mailProcessor;
     }
 
-    public void setMailStorage(IMailStorage mailStorage) {
-        this.mailStorage = mailStorage;
+    public void setMailMessageDao(MailMessageDao mailMessageDao) {
+        this.mailMessageDao = mailMessageDao;
     }
 
-    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
-        this.relayAddressStorage = relayAddressStorage;
+    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
+        this.relayAddressDao = relayAddressDao;
     }
 
     public boolean isStopped() {
@@ -127,8 +127,8 @@ public class ApiServer implements Runnable {
     public static void main(String[] args) throws Exception {
         final int port = 6869;
         ApiServer server = new ApiServer(port);
-        server.setRelayAddressStorage(new InMemoryRelayAddressStorage());
-        server.setMailStorage(new InMemoryMailStorage());
+        server.setRelayAddressDao(new InMemoryRelayAddressDao());
+        server.setMailMessageDao(new InMemoryMailMessageDao());
 
         System.out.println("Type EXIT to quit");
         server.startAndWait();
@@ -150,8 +150,8 @@ public class ApiServer implements Runnable {
         Thread processorThread = new Thread() {
             public void run() {
                 ApiServerHandler handler = new ApiServerHandler();
-                handler.setMailStorage(mailStorage);
-                handler.setRelayAddressStorage(relayAddressStorage);
+                handler.setMailMessageDao(mailMessageDao);
+                handler.setRelayAddressDao(relayAddressDao);
                 handler.setMailProcessor(mailProcessor);
                 handler.setSmtpServer(smtpServer);
                 handler.processRequest(connectionSocket);

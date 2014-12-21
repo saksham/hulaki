@@ -2,7 +2,7 @@ package com.dumbster.smtp.storage;
 
 import java.util.List;
 
-public interface IRelayAddressStorage {
+public interface RelayAddressDao {
     List<String> getRelayRecipients();
 
     void clearRelayRecipients();

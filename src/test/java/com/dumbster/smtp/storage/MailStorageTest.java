@@ -39,15 +39,15 @@ public class MailStorageTest {
     @DataProvider
     private Object[][] provideMailStorages() {
         return new Object[][]{
-                {new InMemoryMailStorage()},
-                {new FileBasedMailStorage(MAILS_FOLDER)},
-                {new SqliteMailStorage(SQLITE_DB_FILENAME)}
+                {new InMemoryMailMessageDao()},
+                {new FileBasedMailMessageDao(MAILS_FOLDER)},
+                {new SqliteMailMessageDao(SQLITE_DB_FILENAME)}
         };
     }
 
 
     @Test(dataProvider = "provideMailStorages")
-    public void shouldStoreAndRetrieveEmails(IMailStorage mailStorage) throws Exception {
+    public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
         // Given
         startMockServer(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
@@ -77,12 +77,12 @@ public class MailStorageTest {
 
 
 
-    private void startMockServer(IMailStorage mailStorage) throws Exception {
+    private void startMockServer(MailMessageDao mailStorage) throws Exception {
         smtpServer = SmtpServer.start(SMTP_PORT);
         mailProcessor = new MailProcessor();
         smtpServer.addObserver(mailProcessor);
-        mailProcessor.setMailStorage(mailStorage);
-        mailProcessor.setRelayAddressStorage(new InMemoryRelayAddressStorage());
+        mailProcessor.setMailMessageDao(mailStorage);
+        mailProcessor.setRelayAddressDao(new InMemoryRelayAddressDao());
         Thread smtpMockServerThread = new Thread(mailProcessor);
         smtpMockServerThread.start();
     }

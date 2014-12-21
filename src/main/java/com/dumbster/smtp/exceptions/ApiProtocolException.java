@@ -1,6 +1,6 @@
 package com.dumbster.smtp.exceptions;
 
-public class ApiProtocolException extends RuntimeException {
+public class ApiProtocolException extends ApiException {
 
     public ApiProtocolException(String message) {
         super(message);

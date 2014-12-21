@@ -1,14 +1,14 @@
 package com.dumbster.smtp.transport;
 
-import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.app.MailProcessor;
-import com.dumbster.smtp.exceptions.ApiProtocolException;
+import com.dumbster.smtp.exceptions.ApiException;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
+import com.dumbster.smtp.storage.InMemoryMailStorage;
+import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
@@ -18,17 +18,20 @@ import java.nio.channels.SocketChannel;
 
 public class ApiServer implements Runnable {
 
+    public static final long TIMEOUT = 2000L;
+    private static final Logger logger = Logger.getLogger(ApiServer.class);
+    private volatile boolean stopped = true;
+    private ServerSocketChannel serverSocketChannel;
+    private int port;
+
 
     private SmtpServer smtpServer;
     private MailProcessor mailProcessor;
     private IMailStorage mailStorage;
     private IRelayAddressStorage relayAddressStorage;
-    private int apiServerPort;
-    private volatile boolean stopped;
-    private static Logger logger = Logger.getLogger(ApiServer.class);
 
-    public void setApiServerPort(int apiServerPort) {
-        this.apiServerPort = apiServerPort;
+    public ApiServer(int port) {
+        this.port = port;
     }
 
     public void setSmtpServer(SmtpServer smtpServer) {
@@ -39,121 +42,71 @@ public class ApiServer implements Runnable {
         this.mailProcessor = mailProcessor;
     }
 
-    public void setMailStorage(IMailStorage storage) {
-        this.mailStorage = storage;
+    public void setMailStorage(IMailStorage mailStorage) {
+        this.mailStorage = mailStorage;
     }
 
-    public void stop() {
-        this.stopped = true;
+    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
+        this.relayAddressStorage = relayAddressStorage;
     }
 
-    private  void processRequest(Socket clientSocket) {
-        try {
-            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String messageFromClient = inFromClient.readLine();
-            logger.info("Client: " + messageFromClient);
+    public boolean isStopped() {
+        return stopped;
+    }
 
-            ApiRequest request = parseRequest(messageFromClient);
-
-            ApiResponse response;
-            if (request == null || request.getCommand() == ApiCommand.INVALID) {
-                response = new StatusResponse(404, "Invalid command!");
-            } else if (request.getCommand() == ApiCommand.COUNT) {
-                response = process((CountRequest) request);
-            } else if (request.getCommand() == ApiCommand.GET) {
-                response = process((GetRequest) request);
-            } else if (request.getCommand() == ApiCommand.CLEAR) {
-                response = process((ClearRequest) request);
-            } else if (request.getCommand() == ApiCommand.RELAY) {
-                response = process((RelayRequest) request);
-            } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
-                response = process((ServerStatusRequest) request);
-            } else {
-                response = new StatusResponse(403, "Bad request!");
+    public void startAndWait() throws InterruptedException {
+        Thread apiServerThread = new Thread(this);
+        apiServerThread.start();
+        synchronized (this) {
+            this.wait(TIMEOUT);
+            if(stopped) {
+                throw new ApiException("Couldn't start the server.");
             }
-            DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());
-            response.marshalResponse(outputStream);
-            outputStream.close();
-            clientSocket.close();
-
-        } catch (IOException ioe) {
-            throw new ApiProtocolException(ioe);
         }
+
     }
 
-    private ApiRequest parseRequest(String messageFromClient) {
-        ApiRequest request = null;
-        try {
-            request = ApiRequest.fromRequestString(messageFromClient);
-        } catch (ApiProtocolException ex) {
-            logger.warn("Failed to parse request from client.");
-        }
-        return request;
-    }
-
-    private ApiResponse process(CountRequest countRequest) {
-        int cnt;
-        if (countRequest.getRecipient() != null) {
-            cnt = mailStorage.countMessagesForRecipient(countRequest.getRecipient());
-        } else {
-            cnt = mailStorage.countAllMessagesReceived();
-        }
-        return new CountResponse(countRequest.getRecipient(), cnt);
-    }
-
-    private ApiResponse process(GetRequest getRequest) {
-        return new GetResponse(getRequest.getRecipient(), mailStorage.retrieveMessages(getRequest.getRecipient()));
-    }
-
-    private ApiResponse process(ClearRequest clearRequest) {
-        mailStorage.clearMessagesForRecipient(clearRequest.getRecipient());
-        return new StatusResponse(200, "OK");
-    }
-
-    private ApiResponse process(ServerStatusRequest request) {
-        ServerStatus status;
-        if(request.getServerName() == ServerName.MAIL_PROCESSOR) {
-            status = (!this.mailProcessor.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
-        } else {
-            status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
-        }
-        return new StatusResponse(status.getStatus(), status.getStatusString());
-    }
-
-    private ApiResponse process(RelayRequest relayRequest) {
-        if (relayRequest.getRecipient() != null) {
-            if (relayRequest.getRelayMode() == RelayMode.ADD) {
-                relayAddressStorage.addRelayRecipient(relayRequest.getRecipient());
-                return new StatusResponse(200, "OK");
-            } else if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                relayAddressStorage.removeRelayRecipient(relayRequest.getRecipient());
-                return new StatusResponse(200, "OK");
-            } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                if (relayAddressStorage.isRelayRecipient(relayRequest.getRecipient())) {
-                    return new StatusResponse(200, "OK");
-                } else {
-                    return new StatusResponse(404, "NOT FOUND");
+    private void start() throws Exception {
+        synchronized (this) {
+            if(stopped) {
+                stopped = false;
+                try {
+                    openServerSocketChannel();
+                    logger.info("Started!");
+                } catch (IOException ex) {
+                    this.stopped = true;
+                    throw ex;
+                } finally {
+                    this.notifyAll();
                 }
             }
-        } else {
-            if (relayRequest.getRelayMode() == RelayMode.REMOVE) {
-                relayAddressStorage.clearRelayRecipients();
-                return new StatusResponse(200, "OK");
-            } else if (relayRequest.getRelayMode() == RelayMode.GET) {
-                return new RelayResponse(relayAddressStorage.getRelayRecipients());
+        }
+    }
+
+    public void stop() throws Exception {
+        synchronized (this) {
+            if (!stopped) {
+                logger.info("Stopping server...");
+                stopped = true;
+                this.wait(TIMEOUT);
+            } else {
+                logger.warn("Server was already stopped!");
             }
         }
-        throw new ApiProtocolException("Parameters missing in the request.");
     }
+
 
     @Override
     public void run() {
-        logger.info("Started API server on port: " + apiServerPort);
-        this.stopped = false;
+        if (!stopped) {
+            logger.warn("Server already started. So, it won't be started again.");
+            return;
+        }
         try {
-            ServerSocketChannel serverSocketChannel = openServerSocketChannel();
+            logger.info("Starting server...");
+            start();
+            while (!stopped) {
 
-            while (!this.stopped) {
                 SocketChannel sc = serverSocketChannel.accept();
                 if (sc != null) {
                     processMockRequestAsync(sc);
@@ -161,32 +114,49 @@ public class ApiServer implements Runnable {
                     Thread.sleep(100);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            stop();
-            logger.info("Stopped API server");
+            synchronized (this) {
+                serverSocketChannel.close();
+                this.notifyAll();
+                logger.info("Stopped!");
+            }
+        } catch (Exception ex) {
+            throw new ApiException(ex);
         }
     }
 
-    private ServerSocketChannel openServerSocketChannel() throws IOException {
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.socket().bind(new InetSocketAddress(this.apiServerPort));
-        ssc.configureBlocking(false);
-        return ssc;
+    public static void main(String[] args) throws Exception {
+        final int port = 6869;
+        ApiServer server = new ApiServer(port);
+        server.setRelayAddressStorage(new InMemoryRelayAddressStorage());
+        server.setMailStorage(new InMemoryMailStorage());
+
+        System.out.println("Type EXIT to quit");
+        server.startAndWait();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to quit");
+        }
+        server.stop();
+    }
+
+    private void openServerSocketChannel() throws IOException {
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.socket().bind(new InetSocketAddress(this.port));
+        serverSocketChannel.configureBlocking(false);
     }
 
     private void processMockRequestAsync(SocketChannel sc) {
         final Socket connectionSocket = sc.socket();
         Thread processorThread = new Thread() {
             public void run() {
-                processRequest(connectionSocket);
+                ApiServerHandler handler = new ApiServerHandler();
+                handler.setMailStorage(mailStorage);
+                handler.setRelayAddressStorage(relayAddressStorage);
+                handler.setMailProcessor(mailProcessor);
+                handler.setSmtpServer(smtpServer);
+                handler.processRequest(connectionSocket);
             }
         };
         processorThread.start();
-    }
-
-    public void setRelayAddressStorage(IRelayAddressStorage relayAddressStorage) {
-        this.relayAddressStorage = relayAddressStorage;
     }
 }

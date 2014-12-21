@@ -24,7 +24,7 @@ public class FileBasedMailStorage implements IMailStorage {
     public static final String EMAIL_FILE_SUFFIX = ".xml";
     private static final Logger logger = Logger.getLogger(FileBasedMailStorage.class);
     private final File mailsFolder;
-    private Map<String, List<String>> fileNamesByRecipients = Maps.newHashMap();
+    private Map<String, List<String>> fileNamesByRecipients = Maps.newConcurrentMap();
     private int storedEmailsCount = 0;
 
     public FileBasedMailStorage(String mailsFolderPath) {
@@ -86,10 +86,14 @@ public class FileBasedMailStorage implements IMailStorage {
 
     @Override
     public synchronized void clearMessages() {
-        this.mailsFolder.delete();
-        this.storedEmailsCount = 0;
-        this.fileNamesByRecipients.clear();
-        logger.info("Deleted ALL messages sum total: " + storedEmailsCount);
+        try {
+            FileUtils.deleteDirectory(this.mailsFolder);
+            this.storedEmailsCount = 0;
+            this.fileNamesByRecipients.clear();
+            logger.info("Deleted ALL messages sum total: " + storedEmailsCount);
+        } catch(IOException ex) {
+            throw new SmtpException(ex);
+        }
     }
 
     @Override
@@ -117,11 +121,13 @@ public class FileBasedMailStorage implements IMailStorage {
     }
 
     private File ensureFolderExists(String folderPath) {
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            folder.mkdir();
+        try {
+            File folder = new File(folderPath);
+            FileUtils.forceMkdir(folder);
+            return folder;
+        } catch(IOException ex) {
+            throw new SmtpException(ex);
         }
-        return folder;
     }
 
     private File getRecipientMailsFolder(String recipient) {
@@ -129,8 +135,12 @@ public class FileBasedMailStorage implements IMailStorage {
     }
 
     private void deleteRecipientFolder(String recipient) {
-        File recipientFolder = getRecipientMailsFolder(recipient);
-        recipientFolder.delete();
+        try {
+            File recipientFolder = getRecipientMailsFolder(recipient);
+            FileUtils.deleteDirectory(recipientFolder);
+        } catch(IOException ex) {
+            throw new SmtpException(ex);
+        }
     }
 
     private static MailMessage unmarshal(File file) {

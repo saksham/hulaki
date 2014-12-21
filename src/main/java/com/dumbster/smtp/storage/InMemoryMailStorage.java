@@ -2,14 +2,15 @@ package com.dumbster.smtp.storage;
 
 
 import com.dumbster.smtp.api.MailMessage;
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 public class InMemoryMailStorage implements IMailStorage {
 
-    private HashMap<String, ArrayList<MailMessage>> emailsByRecipients = new HashMap<>();
+    private Map<String, ArrayList<MailMessage>> emailsByRecipients = Maps.newConcurrentMap();
     private int storedEmailCount = 0;
     private Logger logger = Logger.getLogger(this.getClass());
 

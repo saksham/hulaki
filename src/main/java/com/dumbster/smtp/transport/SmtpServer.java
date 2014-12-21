@@ -2,7 +2,6 @@ package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.exceptions.SmtpException;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -16,7 +15,6 @@ import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Map;
 
 public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
@@ -32,8 +30,8 @@ public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<S
         this.port = port;
         this.stopped = true;
         this.observers = Lists.newArrayList();
-        this.bossGroup = new NioEventLoopGroup();
-        this.workerGroup = new NioEventLoopGroup();
+        this.bossGroup = new NioEventLoopGroup(10);
+        this.workerGroup = new NioEventLoopGroup(20);
     }
 
     public static SmtpServer start(int port) throws Exception {
@@ -50,20 +48,6 @@ public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<S
         return smtpServer;
     }
 
-    public boolean isStopped() {
-        return this.stopped;
-    }
-
-
-    @Override
-    public void run() {
-        try {
-            start();
-        } catch (Exception ex) {
-            throw new SmtpException(ex);
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         int port;
         if (args.length > 0) {
@@ -75,6 +59,18 @@ public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<S
         System.in.read();
     }
 
+    public boolean isStopped() {
+        return this.stopped;
+    }
+
+    @Override
+    public void run() {
+        try {
+            start();
+        } catch (Exception ex) {
+            throw new SmtpException(ex);
+        }
+    }
 
     private void start() throws Exception {
         if (!stopped) {
@@ -132,8 +128,6 @@ public class SmtpServer implements Runnable, Observable<SmtpMessage>, Observer<S
             serverLock.wait();
         }
     }
-
-
 
 
     @Override

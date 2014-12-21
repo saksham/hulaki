@@ -3,12 +3,17 @@ package com.dumbster.smtp.transport;
 import com.dumbster.smtp.exceptions.SmtpException;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import javax.mail.internet.MimeUtility;
 import java.io.*;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SmtpMessage {
+    private static final Pattern headerPattern = Pattern.compile("(?<name>[^:]*): (?<value>.*)");
+    private static final Logger logger = Logger.getLogger(SmtpServer.class);
     private final Map<String, String> headers = Maps.newHashMap();
     private final StringBuffer body = new StringBuffer();
     private String latestHeader;
@@ -51,6 +56,16 @@ public class SmtpMessage {
     }
 
 
+    private String encodedText(String encodedText) {
+        try {
+            return MimeUtility.decodeText(encodedText);
+        } catch (UnsupportedEncodingException e) {
+            logger.warn("Error decode text '" + encodedText
+                    + "'. The unencoded Text will be returned.", e);
+            return encodedText;
+        }
+    }
+
     public String getHeaderValue(String headerName) {
         if(headers.containsKey(headerName)) {
             return headers.get(headerName);
@@ -60,14 +75,14 @@ public class SmtpMessage {
 
 
     private void addHeader(String line) {
-        int headerNameEnd = line.indexOf(':');
-        if(headerNameEnd >= 0) {
-            String name = line.substring(0, headerNameEnd).trim();
+        Matcher headerMatcher = headerPattern.matcher(line);
+        if (headerMatcher.matches()) {
+            String name = headerMatcher.group("name");
             latestHeader = name;
-            String value = line.substring(headerNameEnd + 1).trim();
-            headers.put(name, value);
+            String value = headerMatcher.group("value");
+            headers.put(name, encodedText(value));
         } else {
-            String value = headers.get(latestHeader) + line.substring(1);
+            String value = headers.get(latestHeader) + encodedText(line.substring(1));
             headers.put(latestHeader, value);
         }
     }

@@ -50,7 +50,7 @@ public class MailStorageTest {
         // Given
         startMockServer(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
-        String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(10);
+        String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(100);
 
         // When
         for (int i = 0; i < 3; i++) {

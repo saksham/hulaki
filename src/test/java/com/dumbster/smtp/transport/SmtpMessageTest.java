@@ -33,10 +33,10 @@ import static org.testng.Assert.assertEquals;
 
 
 @Test
-public class TextMessagesTest {
+public class SmtpMessageTest {
 
     public static final int PORT = 2500;
-    public static final String SENDER = "sender@email.com";
+    public static final String RECIPIENT = "sender@email.com";
     private static final String MAIL_FROM = "test.from@teste.com";
     public static final String CHARSET = "UTF-8";
     private SmtpServer smtpServer;
@@ -59,23 +59,22 @@ public class TextMessagesTest {
     public void sendEmail() throws Exception {
         int countBefore = storage.getReceivedEmailSize();
 
-        sendMessage("sender@email.com", "Test", "Test Body");
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Some subject", "Some message text");
 
         assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
     }
 
     public void sendEmailMultipleRecipients() throws Exception {
         int countBefore = storage.getReceivedEmailSize();
+        String recipient = "sender@email.com, otherSender@test.com";
 
-        this.sendMessage("sender@email.com, otherSender@test.com", "Test", "Test Body");
+        emailSender.sendEmail(MAIL_FROM, recipient, "Test", "Test Body");
 
         assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
     }
 
     public void sendEmailFrom() throws Exception {
-        String sender = "sender@email.com";
-
-        this.sendMessage(sender, "Test", "Test Body");
+        this.sendMessage(RECIPIENT, "subject", "Test Body");
 
         assertFrom("\"test.from@teste.com\" <test.from@teste.com>");
     }
@@ -83,7 +82,7 @@ public class TextMessagesTest {
     public void sendEmailSubject() throws Exception {
         String subject = "Test Ão çÇá";
 
-        this.sendMessage(SENDER, subject, "Test Body");
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Some message text");
 
         assertSubject(subject);
     }
@@ -92,7 +91,7 @@ public class TextMessagesTest {
         String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
                 + "http://youtube.com/xyz äüö and secret informations";
 
-        this.sendMessage(SENDER, subject, "Test Body");
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Test Body");
 
         assertSubject(subject);
     }
@@ -100,7 +99,7 @@ public class TextMessagesTest {
     public void sendEmailBody() throws Exception{
         String body = "Ão çÇá";
 
-        this.sendMessage("sender@email.com", "Test", body);
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject", body);
 
         assertBody(body);
     }

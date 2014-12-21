@@ -13,6 +13,8 @@
  */
 package com.dumbster.smtp.transport;
 
+import com.dumbster.smtp.transport.old.SimpleSmtpServer;
+import com.dumbster.smtp.transport.old.SmtpMessage;
 import com.dumbster.smtp.utils.SimpleSmtpStorage;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

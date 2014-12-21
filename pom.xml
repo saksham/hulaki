@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>dumbster</groupId>
     <artifactId>dumbster</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.0-ALPHA</version>
     <packaging>jar</packaging>
     <description>
-        The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email messages.
+        The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email
+        messages.
     </description>
     <url>https://github.com/saksham/dumbster</url>
     <properties>
@@ -87,6 +89,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>5.0.0.Alpha1</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

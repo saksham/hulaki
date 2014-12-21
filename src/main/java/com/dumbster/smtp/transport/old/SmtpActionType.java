@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dumbster.smtp.transport;
+package com.dumbster.smtp.transport.old;
 
 /**
  * Represents an SMTP action or command.

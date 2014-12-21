@@ -14,54 +14,86 @@
 
 package com.dumbster.smtp.transport;
 
+import com.beust.jcommander.internal.Lists;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Iterator;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
 @Test
 public class SmtpRequestTest {
 
-    public void testUnrecognizedCommandConnectState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.CONNECT);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), 500);
+    private static final SmtpCommand[] statelessCommands = {SmtpCommand.RSET, SmtpCommand.VRFY, SmtpCommand.EXPN, SmtpCommand.HELP, SmtpCommand.NOOP};
+    private static final SmtpState[] commandStates = {SmtpState.CONNECT, SmtpState.GREET, SmtpState.MAIL, SmtpState.RCPT};
+
+
+    @DataProvider
+    private Iterator<Object[]> commandStates() {
+        List<Object[]> data = Lists.newArrayList();
+        for (SmtpState state : commandStates) {
+            data.add(new Object[]{state});
+        }
+        return data.iterator();
     }
 
-    public void testUnrecognizedCommandGreetState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.GREET);
-        SmtpResponse response = request.execute();
-        assertEquals(500, response.getCode());
+    @Test(dataProvider = "commandStates")
+    public void unrecognizedCommandIsIdentifiedOnAllStates(SmtpState currentState) {
+        SmtpRequest request = new SmtpRequest(currentState, SmtpCommand.parse("incorrect command"));
+
+        SmtpResult smtpResult = request.execute();
+
+        assertEquals(smtpResult.getNextState(), currentState);
+        assertEquals(smtpResult.getSmtpResponse().getResponseCode(), 500);
+        assertEquals(smtpResult.getSmtpResponse().getMessage(), "Command not recognized");
     }
 
-    public void testUnrecognizedCommandMailState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.MAIL);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), 500);
+    @DataProvider
+    private Object[][] validTransitions() {
+        return new Object[][]{
+                {SmtpState.CONNECT, SmtpCommand.CONNECT, SmtpState.GREET},
+                {SmtpState.GREET, SmtpCommand.HELO, SmtpState.MAIL},
+                {SmtpState.GREET, SmtpCommand.EHLO, SmtpState.MAIL},
+                {SmtpState.MAIL, SmtpCommand.MAIL, SmtpState.RCPT},
+                {SmtpState.RCPT, SmtpCommand.DATA, SmtpState.DATA_HEADER},
+                {SmtpState.RCPT, SmtpCommand.RCPT, SmtpState.RCPT},
+                {SmtpState.DATA_HEADER, SmtpCommand.BLANK_LINE, SmtpState.DATA_BODY},
+                {SmtpState.DATA_HEADER, SmtpCommand.DATA_END, SmtpState.QUIT},
+        };
     }
 
-    public void testUnrecognizedCommandQuitState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.QUIT);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), 500);
+    @Test(dataProvider = "validTransitions")
+    public void validTransitionsAreSupported(SmtpState currentState, SmtpCommand command, SmtpState newState) {
+        SmtpRequest request = new SmtpRequest(currentState, command);
+
+        SmtpResult smtpResult = request.execute();
+
+        assertEquals(smtpResult.getNextState(), newState);
     }
 
-    public void testUnrecognizedCommandRcptState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.RCPT);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), 500);
+    @DataProvider
+    private Iterator<Object[]> statelessCommandsWithAllStates() {
+        List<Object[]> data = Lists.newArrayList();
+        for (SmtpState state : commandStates) {
+            for (SmtpCommand command : statelessCommands) {
+                data.add(new Object[]{state, command});
+            }
+        }
+        return data.iterator();
     }
 
-    public void testUnrecognizedCommandDataBodyState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.DATA_BODY);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), -1);
+    @Test(dataProvider = "statelessCommandsWithAllStates")
+    public void statelessCommandDoNotChangeStatesExceptRset(SmtpState currentState, SmtpCommand command) {
+        SmtpRequest request = new SmtpRequest(currentState, command);
+
+        SmtpResult smtpResult = request.execute();
+
+        if(command == SmtpCommand.RSET) {
+            assertEquals(smtpResult.getNextState(), SmtpState.GREET);
+        } else {
+            assertEquals(smtpResult.getNextState(), currentState);
+        }
     }
-
-    public void testUnrecognizedCommandDataHdrState() {
-        SmtpRequest request = new SmtpRequest(SmtpActionType.UNRECOG, null, SmtpState.DATA_HDR);
-        SmtpResponse response = request.execute();
-        assertEquals(response.getCode(), -1);
-    }
-
-
 }

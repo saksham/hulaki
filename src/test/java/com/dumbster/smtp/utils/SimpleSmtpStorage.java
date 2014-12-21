@@ -1,7 +1,7 @@
 package com.dumbster.smtp.utils;
 
 import com.dumbster.smtp.transport.Observer;
-import com.dumbster.smtp.transport.SmtpMessage;
+import com.dumbster.smtp.transport.old.SmtpMessage;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class SimpleSmtpStorage implements Observer<SmtpMessage> {
 
 
     @Override
-    public void notify(SmtpMessage data) {
+    public void added(SmtpMessage data) {
         smtpMessages.add(data);
     }
 

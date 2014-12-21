@@ -1,21 +1,7 @@
-/*
- * Dumbster - a dummy SMTP server
- * Copyright 2004 Jason Paul Kitchen
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.dumbster.smtp.transport;
+
+
+import java.net.InetAddress;
 
 /**
  * Contains an SMTP client request. Handles state transitions using the following state transition table.
@@ -41,177 +27,68 @@ package com.dumbster.smtp.transport;
  * noop       | 250/CONNECT | 250/GREET | 250/MAIL  | 250/RCPT     | 250|DATA_HDR  | 250/DATA_BODY | 250/QUIT
  * </PRE>
  */
+
 public class SmtpRequest {
-  /** SMTP action received from client. */
-  private SmtpActionType action;
-  /** Current state of the SMTP state table. */
-  private SmtpState state;
-  /** Additional information passed from the client with the SMTP action. */
-  private String params;
+    private final SmtpState currentState;
+    private final SmtpCommand command;
+    private static String hostname;
 
-  /**
-   * Create a new SMTP client request.
-   * @param actionType type of action/command
-   * @param params remainder of command line once command is removed
-   * @param state current SMTP server state
-   */
-  public SmtpRequest(SmtpActionType actionType, String params, SmtpState state) {
-    this.action = actionType;
-    this.state = state;
-    this.params = params;
-  }
-
-  /**
-   * Execute the SMTP request returning a response. This method models the state transition table for the SMTP server.
-   * @return reponse to the request
-   */
-  public SmtpResponse execute() {
-    SmtpResponse response;
-    if (action.isStateless()) {
-      if (SmtpActionType.EXPN == action || SmtpActionType.VRFY == action) {
-        response = new SmtpResponse(252, "Not supported", this.state);
-      } else if (SmtpActionType.HELP == action) {
-        response = new SmtpResponse(211, "No help available", this.state);
-      } else if (SmtpActionType.NOOP == action) {
-        response = new SmtpResponse(250, "OK", this.state);
-      } else if (SmtpActionType.VRFY == action) {
-        response = new SmtpResponse(252, "Not supported", this.state);
-      } else if (SmtpActionType.RSET == action) {
-        response = new SmtpResponse(250, "OK", SmtpState.GREET);
-      } else {
-        response = new SmtpResponse(500, "Command not recognized", this.state);
-      }
-    } else { // Stateful commands
-      if (SmtpActionType.CONNECT == action) {
-        if (SmtpState.CONNECT == state) {
-          response = new SmtpResponse(220, "localhost Dumbster SMTP service ready", SmtpState.GREET);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
+    static {
+        try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (java.net.UnknownHostException e) {
+            hostname = "?";
         }
-      } else if (SmtpActionType.EHLO == action) {
-        if (SmtpState.GREET == state) {
-          response = new SmtpResponse(250, "OK", SmtpState.MAIL);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.MAIL == action) {
-        if (SmtpState.MAIL == state || SmtpState.QUIT == state) {
-          response = new SmtpResponse(250, "OK", SmtpState.RCPT);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.RCPT == action) {
-        if (SmtpState.RCPT == state) {
-          response = new SmtpResponse(250, "OK", this.state);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.DATA == action) {
-        if (SmtpState.RCPT == state) {
-          response = new SmtpResponse(354, "Start mail input; end with <CRLF>.<CRLF>", SmtpState.DATA_HDR);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.UNRECOG == action) {
-        if (SmtpState.DATA_HDR == state || SmtpState.DATA_BODY == state) {
-          response = new SmtpResponse(-1, "", this.state);
-        } else {
-          response = new SmtpResponse(500, "Command not recognized", this.state);
-        }
-      } else if (SmtpActionType.DATA_END == action) {
-        if (SmtpState.DATA_HDR == state || SmtpState.DATA_BODY == state) {
-          response = new SmtpResponse(250, "OK", SmtpState.QUIT);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.BLANK_LINE == action) {
-        if (SmtpState.DATA_HDR == state) {
-          response = new SmtpResponse(-1, "", SmtpState.DATA_BODY);
-        } else if (SmtpState.DATA_BODY == state) {
-          response = new SmtpResponse(-1, "", this.state);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-      } else if (SmtpActionType.QUIT == action) {
-        if (SmtpState.QUIT == state) {
-          response = new SmtpResponse(221, "localhost Dumbster service closing transmission channel", SmtpState.CONNECT);
-        } else {
-          response = new SmtpResponse(503, "Bad sequence of commands: "+action, this.state);
-        }
-    } else {
-        response = new SmtpResponse(500, "Command not recognized", this.state);
-      }
-    }
-    return response;
-  }
-
-  /**
-   * Create an SMTP request object given a line of the input stream from the client and the current internal state.
-   * @param s line of input
-   * @param state current state
-   * @return a populated SmtpRequest object
-   */
-  public static SmtpRequest createRequest(String s, SmtpState state) {
-    SmtpActionType action;
-    String params = null;
-
-    if (state == SmtpState.DATA_HDR) {
-      if (s.equals(".")) {
-        action = SmtpActionType.DATA_END;
-      } else if (s.length() < 1) {
-        action = SmtpActionType.BLANK_LINE;
-      } else {
-        action = SmtpActionType.UNRECOG;
-        params = s;
-      }
-    } else if (state == SmtpState.DATA_BODY) {
-      if (s.equals(".")) {
-        action = SmtpActionType.DATA_END;
-      } else if (s.startsWith("..")) {
-        action = SmtpActionType.UNRECOG;
-        params = s.substring(1);
-      } else {
-        action = SmtpActionType.UNRECOG;
-        params = s;
-      }
-    } else {
-      String su = s.toUpperCase();
-      if (su.startsWith("EHLO ") || su.startsWith("HELO")) {
-        action = SmtpActionType.EHLO;
-        params = s.substring(5);
-      } else if (su.startsWith("MAIL FROM:")) {
-        action = SmtpActionType.MAIL;
-        params = s.substring(10);
-      } else if (su.startsWith("RCPT TO:")) {
-        action = SmtpActionType.RCPT;
-        params = s.substring(8);
-      } else if (su.startsWith("DATA")) {
-        action = SmtpActionType.DATA;
-      } else if (su.startsWith("QUIT")) {
-        action = SmtpActionType.QUIT;
-      } else if (su.startsWith("RSET")) {
-        action = SmtpActionType.RSET;
-      } else if (su.startsWith("NOOP")) {
-        action = SmtpActionType.NOOP;
-      } else if (su.startsWith("EXPN")) {
-        action = SmtpActionType.EXPN;
-      } else if (su.startsWith("VRFY")) {
-        action = SmtpActionType.VRFY;
-      } else if (su.startsWith("HELP")) {
-        action = SmtpActionType.HELP;
-      } else {
-        action = SmtpActionType.UNRECOG;
-      }
     }
 
-    return new SmtpRequest(action, params, state);
-  }
+    public SmtpRequest(SmtpState currentState, SmtpCommand command) {
+        this.command = command;
+        this.currentState = currentState;
+    }
 
-  /**
-   * Get the parameters of this request (remainder of command line once the command is removed.
-   * @return parameters
-   */
-  public String getParams() {
-    return params;
-  }
+    public SmtpResult execute() {
+        switch(command) {
+            case VRFY:
+            case EXPN:
+                return new SmtpResult(currentState, 252, "Not supported");
+            case HELP:
+                return new SmtpResult(currentState, 211, "No help available");
+            case NOOP:
+                return new SmtpResult(currentState, 250, "OK");
+            case RSET:
+                return new SmtpResult(SmtpState.GREET, 250, "OK");
+            case CONNECT:
+                return toStatefulResponse(new SmtpResult(SmtpState.GREET, 220, "ESMTP " + hostname + " service ready"), SmtpState.CONNECT);
+            case EHLO:
+            case HELO:
+                return toStatefulResponse(new SmtpResult(SmtpState.MAIL, 250, "OK"), SmtpState.GREET);
+            case MAIL:
+                return toStatefulResponse(new SmtpResult(SmtpState.RCPT, 250, "OK"), SmtpState.MAIL, SmtpState.QUIT);
+            case RCPT:
+                return toStatefulResponse(new SmtpResult(SmtpState.RCPT, 250, "OK"), SmtpState.RCPT);
+            case DATA:
+                return toStatefulResponse(new SmtpResult(SmtpState.DATA_HEADER, 354, "Start mail input; end with <CRLF>.<CRLF>"), SmtpState.RCPT);
+            case DATA_END:
+                return toStatefulResponse(new SmtpResult(SmtpState.QUIT, 250, "OK"), SmtpState.DATA_HEADER, SmtpState.DATA_BODY);
+            case BLANK_LINE:
+                if(currentState == SmtpState.DATA_HEADER) {
+                    return toStatefulResponse(new SmtpResult(SmtpState.DATA_BODY), SmtpState.DATA_HEADER);
+                } else {
+                    return toStatefulResponse(new SmtpResult(currentState), SmtpState.DATA_BODY);
+                }
+            case QUIT:
+                return toStatefulResponse(new SmtpResult(SmtpState.QUIT, 221, hostname + " closing transmission channel"), SmtpState.CONNECT);
+            default:
+                return new SmtpResult(currentState, 500, "Command not recognized");
+        }
+    }
+
+    private SmtpResult toStatefulResponse(SmtpResult correctResponse, SmtpState... allowedCurrentStates) {
+        for(SmtpState allowedCurrentState : allowedCurrentStates) {
+            if(currentState == allowedCurrentState) {
+                return correctResponse;
+            }
+        }
+        return new SmtpResult(currentState, 503, "Bad sequence of commands: "+ command.name());
+    }
 }

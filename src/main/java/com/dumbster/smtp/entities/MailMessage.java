@@ -1,6 +1,6 @@
 package com.dumbster.smtp.entities;
 
-import com.dumbster.smtp.transport.SmtpMessage;
+import com.dumbster.smtp.transport.old.SmtpMessage;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

@@ -1,7 +1,7 @@
 package com.dumbster.smtp.storage;
 
 import com.dumbster.smtp.app.MailProcessor;
-import com.dumbster.smtp.transport.SimpleSmtpServer;
+import com.dumbster.smtp.transport.old.SimpleSmtpServer;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.AfterMethod;

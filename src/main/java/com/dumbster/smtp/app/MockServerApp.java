@@ -3,7 +3,7 @@ package com.dumbster.smtp.app;
 import com.dumbster.smtp.storage.InMemoryMailStorage;
 import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
 import com.dumbster.smtp.transport.ApiServer;
-import com.dumbster.smtp.transport.SimpleSmtpServer;
+import com.dumbster.smtp.transport.old.SimpleSmtpServer;
 
 public class MockServerApp {
     public static final int SMTP_SERVER_PORT = 2500;

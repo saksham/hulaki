@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dumbster.smtp.transport;
+package com.dumbster.smtp.transport.old;
 
+import com.dumbster.smtp.transport.Observable;
+import com.dumbster.smtp.transport.Observer;
 import org.apache.log4j.Logger;
 
 import java.net.ServerSocket;
@@ -177,7 +179,7 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
       if (line == null) {
         break;
       }
-      //System.out.println("LINE: " + line);
+      System.out.println("LINE: " + line);
 
       // Create request from client input and current state
       SmtpRequest request = SmtpRequest.createRequest(line, smtpState);
@@ -204,7 +206,7 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
 
   private void notifyAllObservers(SmtpMessage smtpMessage) {
     for(Observer<SmtpMessage> observer : observers) {
-      observer.notify(smtpMessage);
+      observer.added(smtpMessage);
     }
   }
 
@@ -261,5 +263,11 @@ public class SimpleSmtpServer implements Observable<SmtpMessage>, Runnable {
   @Override
   public void removeObserver(Observer<SmtpMessage> observer) {
     this.observers.remove(observer);
+  }
+
+
+  public static void main(String[] args) throws Exception {
+    SimpleSmtpServer server = SimpleSmtpServer.start(2560);
+    System.in.read();
   }
 }

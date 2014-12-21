@@ -4,6 +4,7 @@ import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
+import com.dumbster.smtp.transport.old.SimpleSmtpServer;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;

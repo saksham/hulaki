@@ -4,7 +4,7 @@ import com.dumbster.smtp.entities.MailMessage;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
 import com.dumbster.smtp.transport.Observer;
-import com.dumbster.smtp.transport.SmtpMessage;
+import com.dumbster.smtp.transport.old.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.log4j.Logger;
 
@@ -34,7 +34,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
 
     @Override
-    public void notify(SmtpMessage smtpMessage) {
+    public void added(SmtpMessage smtpMessage) {
         String recipient = normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
         boolean wasMailRelayed = false;
 

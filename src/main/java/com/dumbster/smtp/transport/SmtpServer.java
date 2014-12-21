@@ -8,15 +8,23 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class SmtpServer {
-    private int port;
+    private final int port;
+    private boolean stopped;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+
 
     public SmtpServer(int port) {
         this.port = port;
+        bossGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
+    }
+
+    public boolean isStopped() {
+        return this.stopped;
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(10);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(25);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup);
@@ -29,9 +37,17 @@ public class SmtpServer {
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
         } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            stop();
         }
+    }
+
+    public void stop() {
+        if(stopped) {
+            return;
+        }
+        stopped = true;
+        workerGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
     }
 
     public static void main(String[] args) throws Exception {

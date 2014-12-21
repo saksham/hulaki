@@ -93,4 +93,7 @@ public class SmtpMessage {
         return new String(res, charset);
     }
 
+    public String getBody() {
+        return body.toString();
+    }
 }

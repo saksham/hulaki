@@ -13,8 +13,6 @@
  */
 package com.dumbster.smtp.transport;
 
-import com.dumbster.smtp.transport.old.SimpleSmtpServer;
-import com.dumbster.smtp.transport.old.SmtpMessage;
 import com.dumbster.smtp.utils.SimpleSmtpStorage;
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterClass;
@@ -30,7 +28,8 @@ import javax.mail.internet.MimeMessage;
 import java.util.Date;
 import java.util.Properties;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 @Test
 public class SimpleSmtpServerTest {
@@ -41,7 +40,7 @@ public class SimpleSmtpServerTest {
     private static final Logger LOG = Logger.getLogger(SimpleSmtpServerTest.class);
     private static final int SMTP_PORT = 2500;
 
-    private SimpleSmtpServer server;
+    private SmtpServer server;
     private SimpleSmtpStorage storage;
 
     @BeforeClass

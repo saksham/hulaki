@@ -4,7 +4,6 @@ import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
-import com.dumbster.smtp.transport.old.SimpleSmtpServer;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -19,7 +18,7 @@ import java.nio.channels.SocketChannel;
 public class ApiServer implements Runnable {
 
 
-    private SimpleSmtpServer smtpServer;
+    private SmtpServer smtpServer;
     private IMailStorage mailStorage;
     private IRelayAddressStorage relayAddressStorage;
     private int apiServerPort;
@@ -30,7 +29,7 @@ public class ApiServer implements Runnable {
         this.apiServerPort = apiServerPort;
     }
 
-    public void setSmtpServer(SimpleSmtpServer smtpServer) {
+    public void setSmtpServer(SmtpServer smtpServer) {
         this.smtpServer = smtpServer;
     }
 
@@ -64,7 +63,7 @@ public class ApiServer implements Runnable {
             } else if (request.getCommand() == ApiCommand.SMTP_SERVER_STATUS) {
                 response = process((SmtpServerStatusRequest) request);
             } else {
-                response = new StatusResponse(404, "Bad request!");
+                response = new StatusResponse(403, "Bad request!");
             }
             DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());
             response.marshalResponse(outputStream);
@@ -106,8 +105,7 @@ public class ApiServer implements Runnable {
     }
 
     private ApiResponse process(SmtpServerStatusRequest request) {
-        ServerStatus status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING
-                : ServerStatus.STOPPED;
+        ServerStatus status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
         return new StatusResponse(status.getStatus(), status.getStatusString());
     }
 

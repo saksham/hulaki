@@ -1,8 +1,6 @@
 package com.dumbster.smtp.transport;
 
 import com.google.common.collect.Lists;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.log4j.Logger;
@@ -43,10 +41,7 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
 
 
         if (result.getSmtpResponse() != null) {
-            ChannelFuture f = ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
-            if (currentState == SmtpState.QUIT) {
-                f.addListener(ChannelFutureListener.CLOSE);
-            }
+            ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
         }
     }
 

@@ -11,6 +11,7 @@ import java.util.Map;
 public class SmtpMessage {
     private final Map<String, String> headers = Maps.newHashMap();
     private final StringBuffer body = new StringBuffer();
+    private String latestHeader;
     private boolean isReadingHeader = true;
     private boolean closed = false;
 
@@ -62,13 +63,17 @@ public class SmtpMessage {
         int headerNameEnd = line.indexOf(':');
         if(headerNameEnd >= 0) {
             String name = line.substring(0, headerNameEnd).trim();
+            latestHeader = name;
             String value = line.substring(headerNameEnd + 1).trim();
             headers.put(name, value);
+        } else {
+            String value = headers.get(latestHeader) + line.substring(1);
+            headers.put(latestHeader, value);
         }
     }
 
 
-    private String getCharset() {
+    String getCharset() {
         String contentType = getHeaderValue("Content-Type");
         if (contentType != null) {
             int n = contentType.indexOf("charset=");

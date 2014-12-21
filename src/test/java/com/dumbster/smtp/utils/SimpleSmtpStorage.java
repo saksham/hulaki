@@ -12,7 +12,7 @@ public class SimpleSmtpStorage implements Observer<SmtpMessage> {
 
 
     @Override
-    public void added(SmtpMessage data) {
+    public void notify(SmtpMessage data) {
         smtpMessages.add(data);
     }
 

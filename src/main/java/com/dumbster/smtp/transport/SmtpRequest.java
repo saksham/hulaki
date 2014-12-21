@@ -1,6 +1,8 @@
 package com.dumbster.smtp.transport;
 
 
+import com.dumbster.smtp.exceptions.SmtpProtocolException;
+
 import java.net.InetAddress;
 
 /**
@@ -68,6 +70,12 @@ public class SmtpRequest {
                 return toStatefulResponse(new SmtpResult(SmtpState.RCPT, 250, "OK"), SmtpState.RCPT);
             case DATA:
                 return toStatefulResponse(new SmtpResult(SmtpState.DATA_HEADER, 354, "Start mail input; end with <CRLF>.<CRLF>"), SmtpState.RCPT);
+            case UNRECOGNIZED:
+                if(currentState == SmtpState.DATA_HEADER || currentState == SmtpState.DATA_BODY) {
+                    return toStatefulResponse(new SmtpResult(currentState), SmtpState.DATA_HEADER, SmtpState.DATA_BODY);
+                } else {
+                    return new SmtpResult(currentState, 500, "Command not recognized");
+                }
             case DATA_END:
                 return toStatefulResponse(new SmtpResult(SmtpState.QUIT, 250, "OK"), SmtpState.DATA_HEADER, SmtpState.DATA_BODY);
             case BLANK_LINE:
@@ -79,7 +87,7 @@ public class SmtpRequest {
             case QUIT:
                 return toStatefulResponse(new SmtpResult(SmtpState.QUIT, 221, hostname + " closing transmission channel"), SmtpState.CONNECT);
             default:
-                return new SmtpResult(currentState, 500, "Command not recognized");
+                throw new SmtpProtocolException("Unable to process request");
         }
     }
 

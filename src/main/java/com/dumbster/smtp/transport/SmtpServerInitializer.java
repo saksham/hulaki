@@ -7,16 +7,26 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 
 
 public class SmtpServerInitializer extends ChannelInitializer<SocketChannel> {
+    private SmtpServer smtpServer;
+
+    public SmtpServerInitializer(SmtpServer smtpServer) {
+        this.smtpServer = smtpServer;
+    }
+
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1000, Delimiters.lineDelimiter()));
-        pipeline.addLast("decoder", new StringDecoder()); // CharsetUtil.US-ASCII
+        pipeline.addLast("decoder", new StringDecoder(CharsetUtil.US_ASCII));
         pipeline.addLast("encoder", new StringEncoder());
-        pipeline.addLast("handler", new SmtpServerHandler());
+
+        SmtpServerHandler serverHandler = new SmtpServerHandler();
+        serverHandler.addObserver(this.smtpServer);
+        pipeline.addLast("handler", serverHandler);
     }
 }

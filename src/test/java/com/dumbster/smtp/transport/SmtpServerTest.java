@@ -13,6 +13,7 @@
  */
 package com.dumbster.smtp.transport;
 
+import com.dumbster.smtp.utils.EmailSender;
 import com.dumbster.smtp.utils.SimpleSmtpStorage;
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterClass;
@@ -32,50 +33,47 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 @Test
-public class SimpleSmtpServerTest {
+public class SmtpServerTest {
 
     /**
      * General Logger for this Class.
      */
-    private static final Logger LOG = Logger.getLogger(SimpleSmtpServerTest.class);
-    private static final int SMTP_PORT = 2500;
-
-    private SmtpServer server;
+    private static final Logger LOG = Logger.getLogger(SmtpServerTest.class);
+    public static final int PORT = 2500;
+    public static final String RECIPIENT = "recipient@here.com";
+    public static final String SENDER = "sender@here.com";
     private SimpleSmtpStorage storage;
+    private SmtpServer smtpServer;
 
     @BeforeClass
     private void setUp() throws Exception {
-        //server = SimpleSmtpServer.start(SMTP_PORT);
-        //storage = new SimpleSmtpStorage();
-        //server.addObserver(storage);
+        storage = new SimpleSmtpStorage();
+        smtpServer = SmtpServer.start(PORT);
+        smtpServer.addObserver(storage);
     }
 
     @AfterClass
     private void tearDown() throws Exception {
-        //server.stop();
-        //server.removeObserver(storage);
+        smtpServer.removeObserver(storage);
+        smtpServer.stop();
     }
 
-    public void sendEmail() {
-        int countBefore = 0;//storage.getReceivedEmailSize();
-        try {
-            sendMessage(SMTP_PORT, "sender@here.com", "Test", "Test Body", "receiver@there.com");
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            fail("Unexpected exception: " + e);
-        }
+    public void sendEmail() throws Exception {
+        int countBefore = storage.getReceivedEmailSize();
 
-        //assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
-        //SmtpMessage email = getEmailSent();
-        //assertEquals(email.getHeaderValue("Subject"), "Test");
-        //assertEquals(email.getBody(), "Test Body");
+        EmailSender.sendEmail(SENDER, RECIPIENT, "Test", "Test Body", "localhost", PORT);
+
+        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
+        SmtpMessage email = getEmailSent();
+        assertEquals(email.getHeaderValue("Subject"), "Test");
+        assertEquals(email.getBody(), "Test Body");
     }
 
     public void sendMessageWithCarriageReturn() {
         //int countBefore = storage.getReceivedEmailSize();
         String bodyWithCR = "\n\nKeep these pesky carriage returns\n\n.\n\n...";
         try {
-            sendMessage(SMTP_PORT, "sender@hereagain.com", "CRTest", bodyWithCR, "receivingagain@there.com");
+            sendMessage(PORT, "sender@hereagain.com", "CRTest", bodyWithCR, "receivingagain@there.com");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             fail("Unexpected exception: " + e);
@@ -92,7 +90,7 @@ public class SimpleSmtpServerTest {
 
         try {
             MimeMessage[] mimeMessages = new MimeMessage[2];
-            Properties mailProps = getMailProperties(SMTP_PORT);
+            Properties mailProps = getMailProperties(PORT);
             Session session = Session.getInstance(mailProps, null);
             //session.setDebug(true);
 
@@ -100,7 +98,7 @@ public class SimpleSmtpServerTest {
             mimeMessages[1] = createMessage(session, "sender@whatever.com", "receiver@home.com", "Doodle2", "Bug2");
 
             Transport transport = session.getTransport("smtp");
-            transport.connect("localhost", SMTP_PORT, null, null);
+            transport.connect("localhost", PORT, null, null);
 
             for (MimeMessage mimeMessage : mimeMessages) {
                 transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
@@ -147,7 +145,7 @@ public class SimpleSmtpServerTest {
 
             try {
                 transport = session.getTransport("smtp");
-                transport.connect(Server, SMTP_PORT, "ddd", "ddd");
+                transport.connect(Server, PORT, "ddd", "ddd");
                 transport.sendMessage(msg, InternetAddress.parse(To, false));
                 transport.sendMessage(msg, InternetAddress.parse("dimiter.bakardjiev@musala.com", false));
 
@@ -177,7 +175,7 @@ public class SimpleSmtpServerTest {
     public void continuedHeadersArriveIntact() throws MessagingException {
         int countBefore = storage.getReceivedEmailSize();
 
-        Session session = Session.getInstance(getMailProperties(SMTP_PORT), null);
+        Session session = Session.getInstance(getMailProperties(PORT), null);
         MimeMessage msg = createMessage(session, "sender@example.com", "guy@example.net", "Re: Hello", "Virus");
         msg.addHeaderLine("X-LongHeader: 12345");
         msg.addHeaderLine("\t67890");
@@ -205,7 +203,7 @@ public class SimpleSmtpServerTest {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
         String charset = "iso-2022-jp";
-        sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
+        sendMessage(PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", charset);
 
         //assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
@@ -223,7 +221,7 @@ public class SimpleSmtpServerTest {
     public void sendEncoding7BitMessage() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
-        sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
+        sendMessage(PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "7bit");
 
         assertEquals(getEmailSent().getBody(), body);
@@ -237,7 +235,7 @@ public class SimpleSmtpServerTest {
     public void sendEncodingQuotedPrintableMessage() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
-        sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
+        sendMessage(PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "quoted-printable");
 
         assertEquals(getEmailSent().getBody(), body);
@@ -251,7 +249,7 @@ public class SimpleSmtpServerTest {
     public void sendEncodingBase64Message() throws MessagingException {
         // some Japanese letters
         String body = "\u3042\u3044\u3046\u3048\u304a";
-        sendMessage(SMTP_PORT, "sender@hereagain.com", "EncodedMessage", body,
+        sendMessage(PORT, "sender@hereagain.com", "EncodedMessage", body,
                 "receivingagain@there.com", "iso-2022-jp", "base64");
 
         assertEquals(getEmailSent().getBody(), body);

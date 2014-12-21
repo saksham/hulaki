@@ -1,7 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.dumbster.smtp.storage;
 
 import com.dumbster.smtp.app.MailProcessor;
-import com.dumbster.smtp.transport.old.SimpleSmtpServer;
+import com.dumbster.smtp.transport.SmtpServer;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.AfterMethod;
@@ -11,14 +25,13 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class MailStorageTest {
-    private static final String SMTP_HOSTNAME = "localhost";
-    private final int SMTP_PORT = 12500;
-    private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/" + "emails";
-    public static final String SQLITE_DB_FILENAME = "test.db";
+    public static final String SQLITE_DB_FILENAME = "target/test.db";
     public static final String EMAIL_1 = "someone_first@somewhere.com";
     public static final String EMAIL_2 = "someone_second@somewhere.com";
-
-    private SimpleSmtpServer simpleSmtpServer;
+    private static final String SMTP_HOSTNAME = "localhost";
+    private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/" + "target/emails";
+    private final int SMTP_PORT = 12500;
+    private SmtpServer smtpServer;
     private MailProcessor mailProcessor;
     private EmailSender emailSender = new EmailSender(SMTP_HOSTNAME, SMTP_PORT);
 
@@ -55,10 +68,10 @@ public class MailStorageTest {
     }
 
 
-    private void startMockServer(IMailStorage mailStorage) {
-        simpleSmtpServer = SimpleSmtpServer.start(SMTP_PORT);
+    private void startMockServer(IMailStorage mailStorage) throws Exception {
+        smtpServer = SmtpServer.start(SMTP_PORT);
         mailProcessor = new MailProcessor();
-        simpleSmtpServer.addObserver(mailProcessor);
+        smtpServer.addObserver(mailProcessor);
         mailProcessor.setMailStorage(mailStorage);
         Thread smtpMockServerThread = new Thread(mailProcessor);
         smtpMockServerThread.start();
@@ -66,7 +79,7 @@ public class MailStorageTest {
 
     @AfterMethod
     private void stopSmtpMockServer() {
-        simpleSmtpServer.stop();
+        smtpServer.stop();
         mailProcessor.stop();
     }
 

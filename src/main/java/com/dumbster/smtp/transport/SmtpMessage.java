@@ -20,7 +20,11 @@ public class SmtpMessage {
             throw new SmtpException("Can't add content once the message is closed.");
         }
 
-        isReadingHeader = isReadingHeader && !StringUtils.isEmpty(line);
+        if (isReadingHeader && StringUtils.isEmpty(line)) {
+            isReadingHeader = false;
+            return;
+        }
+
         if (isReadingHeader) {
             addHeader(line);
             return;
@@ -42,6 +46,7 @@ public class SmtpMessage {
 
     public void close() {
         this.closed = true;
+        body.deleteCharAt(body.length() - 1);
     }
 
 
@@ -56,8 +61,8 @@ public class SmtpMessage {
     private void addHeader(String line) {
         int headerNameEnd = line.indexOf(':');
         if(headerNameEnd >= 0) {
-            String name = line.substring(0, headerNameEnd);
-            String value = line.substring(headerNameEnd + 1);
+            String name = line.substring(0, headerNameEnd).trim();
+            String value = line.substring(headerNameEnd + 1).trim();
             headers.put(name, value);
         }
     }

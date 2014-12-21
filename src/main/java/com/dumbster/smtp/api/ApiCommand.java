@@ -7,7 +7,7 @@ public enum ApiCommand {
     GET("GET"),
     RELAY("RELAY"),
     INVALID("INVALID"),
-    SMTP_SERVER_STATUS("SMTP_SERVER_STATUS");
+    SERVER_STATUS("SERVER_STATUS");
 
     private final String command;
 

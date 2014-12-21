@@ -6,6 +6,10 @@ public class SmtpException extends RuntimeException {
         super(message);
     }
 
+    public SmtpException(Exception cause) {
+        super(cause);
+    }
+
     public SmtpException(String message, Exception cause) {
         super(message, cause);
     }

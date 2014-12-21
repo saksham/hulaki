@@ -20,7 +20,7 @@ public enum SmtpCommand {
     NOOP("NOOP"),
     BLANK_LINE("Blank line"),
 
-    UNRECOGNIZED("Unrecognized command");
+    UNRECOGNIZED("Unrecognized command / data");
 
     SmtpCommand(String command) {
         this.command = command;
@@ -46,9 +46,5 @@ public enum SmtpCommand {
             }
         }
         return UNRECOGNIZED;
-    }
-
-    public String getCommand() {
-        return command;
     }
 }

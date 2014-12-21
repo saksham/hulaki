@@ -22,13 +22,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @Test
 public class SmtpRequestTest {
 
     private static final SmtpCommand[] statelessCommands = {SmtpCommand.RSET, SmtpCommand.VRFY, SmtpCommand.EXPN, SmtpCommand.HELP, SmtpCommand.NOOP};
     private static final SmtpState[] commandStates = {SmtpState.CONNECT, SmtpState.GREET, SmtpState.MAIL, SmtpState.RCPT};
-
+    private static final SmtpState[] dataStates = {SmtpState.DATA_HEADER, SmtpState.DATA_BODY};
 
     @DataProvider
     private Iterator<Object[]> commandStates() {
@@ -40,7 +41,7 @@ public class SmtpRequestTest {
     }
 
     @Test(dataProvider = "commandStates")
-    public void unrecognizedCommandIsIdentifiedOnAllStates(SmtpState currentState) {
+    public void unrecognizedCommandIsIdentifiedOnAllCommandStates(SmtpState currentState) {
         SmtpRequest request = new SmtpRequest(currentState, SmtpCommand.parse("incorrect command"));
 
         SmtpResult smtpResult = request.execute();
@@ -48,6 +49,25 @@ public class SmtpRequestTest {
         assertEquals(smtpResult.getNextState(), currentState);
         assertEquals(smtpResult.getSmtpResponse().getResponseCode(), 500);
         assertEquals(smtpResult.getSmtpResponse().getMessage(), "Command not recognized");
+    }
+
+    @DataProvider
+    private Iterator<Object[]> dataStates() {
+        List<Object[]> data = Lists.newArrayList();
+        for(SmtpState state : dataStates) {
+            data.add(new Object[]{state});
+        }
+        return data.iterator();
+    }
+
+    @Test(dataProvider = "dataStates")
+    public void unrecognizedCommandProducesNoResponseOnDataStates(SmtpState currentState) {
+        SmtpRequest request = new SmtpRequest(currentState, SmtpCommand.parse("some invalid command, but valid data"));
+
+        SmtpResult smtpResult = request.execute();
+
+        assertEquals(smtpResult.getNextState(), currentState);
+        assertNull(smtpResult.getSmtpResponse());
     }
 
     @DataProvider

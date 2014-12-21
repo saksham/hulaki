@@ -13,8 +13,6 @@
  */
 package com.dumbster.smtp.transport;
 
-import com.dumbster.smtp.transport.old.SimpleSmtpServer;
-import com.dumbster.smtp.transport.old.SmtpMessage;
 import com.dumbster.smtp.utils.SimpleSmtpStorage;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,40 +31,30 @@ import java.util.Properties;
 import static org.testng.Assert.assertEquals;
 
 
-/**
- * Simple TestCase with Text Messages, contains special Chars in Header and Body and Multiline Tests.
- * <p/>
- * Original TestCase from <a href="http://blogs.abril.com.br/java-cabeca/2009/05/dumpster-testando-envio-email.html">
- * Dumbster - Testando envio de Email </a>.
- *
- * @author Leonardo Campos
- * @author Harald Brabenetz
- */
 @Test
 public class SimpleTextMessagesTest {
 
-    private static final String MAIL_HOST = "localhost";
-
     private static final String CHARSET = "UTF-8";
-
     private static final String MAIL_FROM = "test.from@teste.com";
-
-    private SimpleSmtpServer mockServer;
-
+    private SmtpServer smtpServer;
+    private Thread smtpServerThread;
     private SimpleSmtpStorage storage;
 
     @BeforeClass
     private void setUp() {
-        this.mockServer = SimpleSmtpServer.start();
+        this.smtpServer = new SmtpServer(2050);
+        this.smtpServerThread = new Thread(smtpServer);
         this.storage = new SimpleSmtpStorage();
-        this.mockServer.addObserver(this.storage);
+        this.smtpServer.addObserver(this.storage);
+        this.smtpServerThread.start();
     }
 
     @AfterClass
-    public void tearDown() {
-        if (this.mockServer != null) {
-            this.mockServer.stop();
+    public void tearDown() throws Exception {
+        if (this.smtpServer != null) {
+            this.smtpServer.stop();
         }
+        this.smtpServerThread.join();
     }
 
     public void sendEmail() {
@@ -140,7 +128,7 @@ public class SimpleTextMessagesTest {
 
     private void sendMessage(final String emails, final String subject, final String body) {
         final Properties properties = new Properties();
-        properties.put("mail.host", MAIL_HOST);
+        properties.put("mail.host", "localhost");
         properties.put("mail.mime.charset", CHARSET);
         properties.put("mail.from", MAIL_FROM);
         final Session session = Session.getInstance(properties, null);

@@ -41,8 +41,8 @@ public abstract class ApiRequest {
             return new ClearRequest(requestBody);
         } else if (command.equalsIgnoreCase(ApiCommand.RELAY.getCommand())) {
             return new RelayRequest(requestBody);
-        } else if (command.equalsIgnoreCase(ApiCommand.SMTP_SERVER_STATUS.getCommand())) {
-            return new SmtpServerStatusRequest(requestBody);
+        } else if (command.equalsIgnoreCase(ApiCommand.SERVER_STATUS.getCommand())) {
+            return new ServerStatusRequest(requestBody);
         } else {
             return new InvalidRequest(requestBody);
         }

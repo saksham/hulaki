@@ -1,7 +1,10 @@
 package com.dumbster.smtp.transport;
 
 import com.google.common.collect.Lists;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -30,50 +33,44 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
         String line = (String) msg;
         logger.info("CLIENT: " + line);
 
-        SmtpResult result;
-        if(currentState == SmtpState.DATA_HEADER || currentState == SmtpState.DATA_BODY) {
-            result = onData(line);
-        } else {
-            result = onCommand(line);
+        SmtpResult result = executeCommand(line);
+        SmtpState prevState = currentState;
+        currentState = result.getNextState();
+
+        if (prevState == SmtpState.DATA_HEADER || prevState == SmtpState.DATA_BODY) {
+            onData(line, prevState);
         }
 
-        if(result != null) {
-            currentState = result.getNextState();
-            if (result.getSmtpResponse() != null) {
-                ChannelFuture f = ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
-                if(currentState == SmtpState.QUIT) {
-                    f.addListener(ChannelFutureListener.CLOSE);
-                }
+
+        if (result.getSmtpResponse() != null) {
+            ChannelFuture f = ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
+            if (currentState == SmtpState.QUIT) {
+                f.addListener(ChannelFutureListener.CLOSE);
             }
         }
     }
 
-    private SmtpResult onCommand(String line) {
+    private SmtpResult executeCommand(String line) {
         SmtpCommand command = SmtpCommand.parse(line);
         SmtpRequest request = new SmtpRequest(currentState, command);
         return request.execute();
     }
 
-    private SmtpResult onData(String line) {
-        SmtpResult executionResult = null;
-        if (line.trim().equals(SmtpCommand.DATA_END.getCommand())) {
+    private void onData(String line, SmtpState prevState) {
+        if (prevState == SmtpState.DATA_BODY && currentState == SmtpState.QUIT) {
             smtpMessage.close();
             notifyObservers(smtpMessage);
             smtpMessage = new SmtpMessage();
-            SmtpRequest request = new SmtpRequest(currentState, SmtpCommand.DATA_END);
-            executionResult = request.execute();
-        } else {
-            if (line.startsWith("..")) {
-                line = line.substring(1);
-            }
-            smtpMessage.addLine(line);
         }
-        return executionResult;
+        if (line.startsWith("..")) {
+            line = line.substring(1);
+        }
+        smtpMessage.addLine(line);
     }
 
     private void notifyObservers(SmtpMessage smtpMessage) {
-        for(Observer<SmtpMessage> observer : observers) {
-            observer.added(smtpMessage);
+        for (Observer<SmtpMessage> observer : observers) {
+            observer.notify(smtpMessage);
         }
     }
 

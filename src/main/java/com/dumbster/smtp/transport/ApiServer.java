@@ -1,6 +1,7 @@
 package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.api.*;
+import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
@@ -19,6 +20,7 @@ public class ApiServer implements Runnable {
 
 
     private SmtpServer smtpServer;
+    private MailProcessor mailProcessor;
     private IMailStorage mailStorage;
     private IRelayAddressStorage relayAddressStorage;
     private int apiServerPort;
@@ -31,6 +33,10 @@ public class ApiServer implements Runnable {
 
     public void setSmtpServer(SmtpServer smtpServer) {
         this.smtpServer = smtpServer;
+    }
+
+    public void setMailProcessor(MailProcessor mailProcessor) {
+        this.mailProcessor = mailProcessor;
     }
 
     public void setMailStorage(IMailStorage storage) {
@@ -60,8 +66,8 @@ public class ApiServer implements Runnable {
                 response = process((ClearRequest) request);
             } else if (request.getCommand() == ApiCommand.RELAY) {
                 response = process((RelayRequest) request);
-            } else if (request.getCommand() == ApiCommand.SMTP_SERVER_STATUS) {
-                response = process((SmtpServerStatusRequest) request);
+            } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
+                response = process((ServerStatusRequest) request);
             } else {
                 response = new StatusResponse(403, "Bad request!");
             }
@@ -104,8 +110,13 @@ public class ApiServer implements Runnable {
         return new StatusResponse(200, "OK");
     }
 
-    private ApiResponse process(SmtpServerStatusRequest request) {
-        ServerStatus status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
+    private ApiResponse process(ServerStatusRequest request) {
+        ServerStatus status;
+        if(request.getServerName() == ServerName.MAIL_PROCESSOR) {
+            status = (!this.mailProcessor.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
+        } else {
+            status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
+        }
         return new StatusResponse(status.getStatus(), status.getStatusString());
     }
 

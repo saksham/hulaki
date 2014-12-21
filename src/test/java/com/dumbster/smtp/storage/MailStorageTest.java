@@ -50,7 +50,7 @@ public class MailStorageTest {
         // Given
         startMockServer(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
-        String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(100);
+        String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(10);
 
         // When
         for (int i = 0; i < 3; i++) {
@@ -68,17 +68,20 @@ public class MailStorageTest {
     }
 
 
+
     private void startMockServer(IMailStorage mailStorage) throws Exception {
         smtpServer = SmtpServer.start(SMTP_PORT);
         mailProcessor = new MailProcessor();
         smtpServer.addObserver(mailProcessor);
         mailProcessor.setMailStorage(mailStorage);
+        mailProcessor.setRelayAddressStorage(new InMemoryRelayAddressStorage());
         Thread smtpMockServerThread = new Thread(mailProcessor);
         smtpMockServerThread.start();
     }
 
     @AfterMethod
-    private void stopSmtpMockServer() {
+    private void stopSmtpMockServer() throws Exception {
+        smtpServer.removeObserver(mailProcessor);
         smtpServer.stop();
         mailProcessor.stop();
     }

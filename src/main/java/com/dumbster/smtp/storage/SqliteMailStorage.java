@@ -59,7 +59,7 @@ public class SqliteMailStorage implements IMailStorage {
         JdbcTemplate template = new JdbcTemplate(getDataSource());
         template.update("INSERT INTO emails (sender, recipient, subject, body, is_relayed, inserted_on) " +
                         "VALUES(?, ?, ?, ?, ? , ?)",
-                email.getFrom(), email.getTo(), email.getSubject(), email.getBody(), email.isRelayed(), new DateTime().getMillis());
+                email.getFrom(), recipient, email.getSubject(), email.getBody(), email.isRelayed(), new DateTime().getMillis());
         log.info("Stored message for " + recipient);
     }
 

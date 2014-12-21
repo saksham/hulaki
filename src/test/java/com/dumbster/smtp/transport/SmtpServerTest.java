@@ -38,24 +38,31 @@ public class SmtpServerTest {
     public static final String SENDER = "sender@here.com";
     private SimpleSmtpStorage storage;
     private SmtpServer smtpServer;
+    private EmailSender emailSender;
 
     @BeforeClass
     private void setUp() throws Exception {
-        storage = new SimpleSmtpStorage();
-        smtpServer = SmtpServer.start(PORT);
-        smtpServer.addObserver(storage);
+        emailSender = new EmailSender("localhost", PORT);
+        startSmtpServer();
     }
 
     @AfterClass
     private void tearDown() throws Exception {
-        smtpServer.removeObserver(storage);
-        smtpServer.stop();
+        stopSmtpServer();
     }
+
+    public void restartServerMulitpleTimes() throws Exception {
+        for(int i = 0; i < 10; i ++) {
+            stopSmtpServer();
+            startSmtpServer();
+        }
+    }
+
 
     public void sendEmail() throws Exception {
         int countBefore = storage.getReceivedEmailSize();
 
-        EmailSender.sendEmail(SENDER, RECIPIENT, "Test", "Test Body", "localhost", PORT);
+        emailSender.sendEmail(SENDER, RECIPIENT, "Test", "Test Body");
 
         assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
         SmtpMessage email = storage.getLatestEmail();
@@ -67,7 +74,7 @@ public class SmtpServerTest {
         int countBefore = storage.getReceivedEmailSize();
         String bodyWithCR = "\n\nKeep these pesky carriage returns\n\n.\n\n...";
 
-        EmailSender.sendEmail(SENDER, RECIPIENT, "CRTest", bodyWithCR, "localhost", PORT);
+        emailSender.sendEmail(SENDER, RECIPIENT, "CRTest", bodyWithCR);
 
 
         assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
@@ -170,7 +177,6 @@ public class SmtpServerTest {
         assertEquals(email.getBody(), body);
     }
 
-
     public void sendEncoding7BitJapaneseMessage() throws MessagingException {
         String body = "\u3042\u3044\u3046\u3048\u304a";
 
@@ -178,6 +184,7 @@ public class SmtpServerTest {
 
         assertEquals(storage.getLatestEmail().getBody(), body);
     }
+
 
     public void sendEncodingQuotedPrintableJapaneseMessage() throws MessagingException {
         String body = "\u3042\u3044\u3046\u3048\u304a";
@@ -193,6 +200,17 @@ public class SmtpServerTest {
         sendMessage(PORT, SENDER, "EncodedMessage", body, RECIPIENT, "iso-2022-jp", "base64");
 
         assertEquals(storage.getLatestEmail().getBody(), body);
+    }
+
+    private void startSmtpServer() throws Exception {
+        storage = new SimpleSmtpStorage();
+        smtpServer = SmtpServer.start(PORT);
+        smtpServer.addObserver(storage);
+    }
+
+    private void stopSmtpServer() throws Exception {
+        smtpServer.removeObserver(storage);
+        smtpServer.stop();
     }
 
     private Properties getMailProperties(int port) {

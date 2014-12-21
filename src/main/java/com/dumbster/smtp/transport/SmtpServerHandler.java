@@ -3,6 +3,7 @@ package com.dumbster.smtp.transport;
 import com.google.common.collect.Lists;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         String line = (String) msg;
-        logger.info("CLIENT: " + line);
+        logger.debug("CLIENT: " + line);
 
         SmtpResult result = executeCommand(line);
         SmtpState prevState = currentState;
@@ -75,8 +76,16 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
     }
 
     @Override
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        this.observers.clear();
+        this.observers = null;
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("An error occurred while processing the request", cause);
+        this.observers.clear();
+        this.observers = null;
         ctx.channel().close();
     }
 

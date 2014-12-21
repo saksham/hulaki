@@ -32,7 +32,7 @@ import java.util.Properties;
 import static org.testng.Assert.assertEquals;
 
 
-@Test
+@Test(groups = "Component")
 public class SmtpMessageTest {
 
     public static final int PORT = 2500;

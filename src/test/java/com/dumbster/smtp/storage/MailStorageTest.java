@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
+@Test(groups = "Component")
 public class MailStorageTest {
     public static final String SQLITE_DB_FILENAME = "target/test.db";
     public static final String EMAIL_1 = "someone_first@somewhere.com";

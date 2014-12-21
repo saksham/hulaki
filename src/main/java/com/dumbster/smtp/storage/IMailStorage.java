@@ -1,5 +1,5 @@
 package com.dumbster.smtp.storage;
-import com.dumbster.smtp.entities.MailMessage;
+import com.dumbster.smtp.api.MailMessage;
 
 import java.util.List;
 

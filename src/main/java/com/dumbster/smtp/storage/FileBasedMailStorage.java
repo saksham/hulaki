@@ -1,7 +1,7 @@
 package com.dumbster.smtp.storage;
 
 
-import com.dumbster.smtp.entities.MailMessage;
+import com.dumbster.smtp.api.MailMessage;
 import com.dumbster.smtp.exceptions.SmtpException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

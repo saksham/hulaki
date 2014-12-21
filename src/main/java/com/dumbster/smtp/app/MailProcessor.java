@@ -1,6 +1,6 @@
 package com.dumbster.smtp.app;
 
-import com.dumbster.smtp.entities.MailMessage;
+import com.dumbster.smtp.api.MailMessage;
 import com.dumbster.smtp.storage.IMailStorage;
 import com.dumbster.smtp.storage.IRelayAddressStorage;
 import com.dumbster.smtp.transport.Observer;

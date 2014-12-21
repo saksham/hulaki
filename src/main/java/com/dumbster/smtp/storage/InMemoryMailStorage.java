@@ -1,7 +1,7 @@
 package com.dumbster.smtp.storage;
 
 
-import com.dumbster.smtp.entities.MailMessage;
+import com.dumbster.smtp.api.MailMessage;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;

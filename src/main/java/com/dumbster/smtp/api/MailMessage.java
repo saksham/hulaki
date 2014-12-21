@@ -1,4 +1,4 @@
-package com.dumbster.smtp.entities;
+package com.dumbster.smtp.api;
 
 import com.dumbster.smtp.transport.SmtpMessage;
 

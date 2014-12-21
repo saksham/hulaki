@@ -1,6 +1,6 @@
 package com.dumbster.smtp.entities;
 
-import com.dumbster.smtp.transport.old.SmtpMessage;
+import com.dumbster.smtp.transport.SmtpMessage;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,8 +10,6 @@ import java.io.Serializable;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "mail-message", namespace = "https://github.com/saksham/dumbster")
 public class MailMessage implements Serializable {
-    private static final long serialVersionUID = -7673328451852229617L;
-
     private String to;
     private String from;
     private String subject;

@@ -66,6 +66,13 @@ public class MailStorageTest {
         assertEquals(mailStorage.countMessagesForRecipient(EMAIL_1), 3, "Email should have been stored by the server");
         assertEquals(mailStorage.retrieveMessages(EMAIL_1).get(0).getSubject(), subject + "0", "Body should match");
         assertEquals(mailStorage.retrieveMessages(EMAIL_1).get(0).getBody(), messageBody + "0", "Body should match");
+
+
+        // When
+        mailStorage.clearMessages();
+
+        // Then
+        assertEquals(mailStorage.countAllMessagesReceived(), 0);
     }
 
 

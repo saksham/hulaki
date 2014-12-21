@@ -5,6 +5,9 @@ import com.dumbster.smtp.storage.InMemoryRelayAddressStorage;
 import com.dumbster.smtp.transport.ApiServer;
 import com.dumbster.smtp.transport.SmtpServer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class MockServerApp {
     public static final int SMTP_SERVER_PORT = 2500;
     public static final int API_SERVER_PORT = 6869;
@@ -27,18 +30,18 @@ public class MockServerApp {
         app.smtpServer = SmtpServer.start(SMTP_SERVER_PORT);
         app.smtpServer.addObserver(app.mailProcessor);
 
-        app.apiServer = new ApiServer();
+        app.apiServer = new ApiServer(API_SERVER_PORT);
         app.apiServer.setSmtpServer(app.smtpServer);
         app.apiServer.setMailProcessor(app.mailProcessor);
-        app.apiServer.setApiServerPort(API_SERVER_PORT);
         app.apiServer.setMailStorage(mailStorage);
         app.apiServer.setRelayAddressStorage(relayAddressStorage);
-        Thread apiServerThread = new Thread(app.apiServer);
-        apiServerThread.start();
+        app.apiServer.startAndWait();
 
-        System.out.println("Press any key to quit: ");
-        int read = System.in.read();
-        System.out.println(read);
+        System.out.println("Type EXIT to quit");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to quit");
+        }
 
         app.mailProcessor.stop();
         app.smtpServer.stop();

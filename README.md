@@ -6,14 +6,44 @@ testing applications that send email messages.
 The following are key features of this SMTP test double
 
 * Understands ESMTP protocol and can receive emails sent using javax.mail
-* Can store emails using a variety of mechanisms
+* All emails sent to the server can be stored irrespective of whether or not the recipient address or mailbox exists.
+* Can store emails using a variety of mechanisms. All emails are indexed using the recipient address for rapid retrieval.
  * Files: stores the emails in XML files
  * In memory: stores them in memory for quick access
- * SQLite: stores them in an SQLite database
+ * SQLite: stores them in an SQLite database 
 * Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
+* Provides serialization and deserialization methods on all requests and responses for constructing API clients
+* Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port
 
+The API
+=======
+Current version of the API supports the following actions:
+
+* *CLEAR*
+ * Deletes the emails for a given recipient.
+ * Can be used without parameters to delete all saved emails.
+ * For more details: see: ClearRequest.java
+* *SERVER_STATUS*
+ * Queries the server status.
+ * Can query status of mail-processor or the SMTP server
+ * For more details, see: ServerStatusRequest.java
+* *GET*
+ * Retrieves the saved emails.
+ * Supports specifying recipient address to selectively download emails.
+ * For more details, see: GetRequest.java
+* *COUNT*
+ * Counts the saved emails.
+ * Supports speficying recipient address to selectively download emails.
+ * For more details, see: CountRequest.java
+* *RELAY*
+ * Configures the relay behavior.
+ * Can add/remove relay recipients.
+ * For more details, see: RelayRequest.java
+
+Example
+=======
 For more details on how to start the server, please look at MockServerApp.java.
 
 #### Credits

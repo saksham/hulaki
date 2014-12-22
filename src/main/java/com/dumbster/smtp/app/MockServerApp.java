@@ -27,8 +27,9 @@ public class MockServerApp {
         Thread mailProcessorThread = new Thread(app.mailProcessor);
         mailProcessorThread.start();
 
-        app.smtpServer = SmtpServer.start(SMTP_SERVER_PORT);
+        app.smtpServer = new SmtpServer(SMTP_SERVER_PORT);
         app.smtpServer.addObserver(app.mailProcessor);
+        app.smtpServer.startServer();
 
         app.apiServer = new ApiServer(API_SERVER_PORT);
         app.apiServer.setSmtpServer(app.smtpServer);

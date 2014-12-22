@@ -204,7 +204,8 @@ public class SmtpServerTest {
 
     private void startSmtpServer() throws Exception {
         storage = new SimpleSmtpStorage();
-        smtpServer = SmtpServer.start(PORT);
+        smtpServer = new SmtpServer(PORT);
+        smtpServer.startServer();
         smtpServer.addObserver(storage);
     }
 

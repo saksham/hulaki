@@ -1,0 +1,49 @@
+<!DOCTYPE import-control PUBLIC "-//Puppy Crawl//DTD Import Control 1.1//EN"
+        "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
+<import-control pkg="com.dumbster">
+
+    <allow pkg=".*" regex="true"/>
+    <!-- Use explicit XML wiring instead. Mixing annotations and XML can cause spring context issues. -->
+    <!--<disallow class="org.springframework.beans.factory.annotation.Autowired"/>-->
+
+
+    <subpackage name="api">
+        <!-- API package should not make any references to other core packages because it is intended to contain only entities -->
+        <disallow pkg="com.dumbster.app" />
+        <disallow pkg="com.dumbster.storage" />
+        <disallow pkg="com.dumbster.transport" />
+
+        <disallow pkg="javax.sql" />
+        <disallow pkg="java.sql" />
+    </subpackage>
+
+    <subpackage name="app">
+        <!-- Application package should not contain references to technical implementations -->
+        <disallow pkg="javax.sql" />
+        <disallow pkg="java.sql" />
+    </subpackage>
+
+    <subpackage name="exceptions">
+        <!-- Exception package should not make any references to other core packages because it is intended to contain only entities -->
+        <disallow pkg="com.dumbster.api" />
+        <disallow pkg="com.dumbster.app" />
+        <disallow pkg="com.dumbster.storage" />
+        <disallow pkg="com.dumbster.transport" />
+
+        <disallow pkg="javax.sql" />
+        <disallow pkg="java.sql" />
+    </subpackage>
+
+    <subpackage name="storage">
+        <!-- Storage package should not know about application or transport -->
+        <disallow pkg="com.dumbster.app" />
+        <disallow pkg="com.dumbster.transport" />
+    </subpackage>
+
+    <subpackage name="transport">
+        <!-- Transport package should not know about how the application starts up or how the data is stored -->
+        <disallow pkg="com.dumbster.app" />
+        <disallow pkg="com.dumbster.storage" />
+    </subpackage>
+
+</import-control>

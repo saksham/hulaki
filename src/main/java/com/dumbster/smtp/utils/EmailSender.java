@@ -16,8 +16,8 @@ public class EmailSender {
     private String charset = DEFAULT_CHARSET;
     private String encoding;
 
-    private String smtpHostname;
-    private int smtpPort;
+    private final String smtpHostname;
+    private final int smtpPort;
 
 
     public EmailSender(String smtpHostname, int smtpPort) {
@@ -25,7 +25,11 @@ public class EmailSender {
         this.smtpPort = smtpPort;
     }
 
-    public static void sendEmail(String from, String[] to, String subject, String messageBody, String smtpHostname, int smtpPort, String charset, String encoding) {
+    public void sendEmail(String from, String to, String subject, String body) {
+        sendEmail(from, new String[]{to}, subject, body);
+    }
+
+    public void sendEmail(String from, String[] to, String subject, String body) {
         Properties properties = System.getProperties();
         properties.setProperty("mail.smtp.host", smtpHostname);
         properties.setProperty("mail.smtp.port", Integer.toString(smtpPort));
@@ -48,30 +52,13 @@ public class EmailSender {
             }
             message.addRecipients(Message.RecipientType.TO, recipients.toArray(new InternetAddress[recipients.size()]));
             message.setSubject(subject);
-            message.setText(messageBody);
+            message.setText(body);
 
 
             Transport.send(message);
         } catch (Exception ex) {
             throw new SmtpException(ex);
         }
-    }
-
-    public static void sendEmail(String from, String to, String subject, String messageBody, String smtpHostname, int smtpPort, String charset, String encoding) {
-        sendEmail(from, to.split(","), subject, messageBody, smtpHostname, smtpPort, charset, encoding);
-    }
-
-
-    public void sendEmail(String from, String to, String subject, String messageBody) {
-        sendEmail(from, to, subject, messageBody, smtpHostname, smtpPort, charset, encoding);
-    }
-
-    public void setSmtpHostname(String smtpHostname) {
-        this.smtpHostname = smtpHostname;
-    }
-
-    public void setSmtpPort(int smtpPort) {
-        this.smtpPort = smtpPort;
     }
 
     public void setEncoding(String encoding) {

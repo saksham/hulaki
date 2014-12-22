@@ -22,7 +22,7 @@ import static org.testng.Assert.assertTrue;
 @Test(groups = "Component")
 public class ApiServerTest {
 
-    public static final int PORT = 6869;
+    public static final int PORT = 6870;
 
     public void restartApiServerMultipleTimes() throws Exception {
         ApiServer apiServer = new ApiServer(PORT);

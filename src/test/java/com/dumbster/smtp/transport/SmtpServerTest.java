@@ -33,7 +33,7 @@ import static org.testng.Assert.assertEquals;
 @Test(groups = "Component")
 public class SmtpServerTest {
 
-    public static final int PORT = 2500;
+    public static final int PORT = 2501;
     public static final String RECIPIENT = "recipient@here.com";
     public static final String SENDER = "sender@here.com";
     private SimpleSmtpStorage storage;

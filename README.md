@@ -7,9 +7,9 @@ The following are key features of this SMTP test double
 
 * Understands ESMTP protocol and can receive emails sent using javax.mail
 * Can store emails using a variety of mechanisms
-** Files: stores the emails in XML files
-** In memory: stores them in memory for quick access
-** SQLite: stores them in an SQLite database
+ * Files: stores the emails in XML files
+ * In memory: stores them in memory for quick access
+ * SQLite: stores them in an SQLite database
 * Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port

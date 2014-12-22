@@ -4,6 +4,7 @@ The Dumbster is a very simple fake SMTP server designed for unit and system
 testing applications that send email messages.
 
 The following are key features of this SMTP test double
+
 * Understands ESMTP protocol and can receive emails sent using javax.mail
 * Can store emails using a variety of mechanisms
 ** Files: stores the emails in XML files

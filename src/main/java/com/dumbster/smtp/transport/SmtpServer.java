@@ -27,23 +27,9 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         this.workerGroup = new NioEventLoopGroup(20);
     }
 
-    public static void main(String[] args) throws Exception {
-        int port = 2500;
-
-        System.out.println("Type EXIT to exit the program.");
-        SmtpServer smtpServer = new SmtpServer(port);
-        smtpServer.startServer();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to exit the program.");
-        }
-        smtpServer.stop();
-    }
-
     public boolean isStopped() {
         return this.bossGroup.isShutdown() && this.workerGroup.isShutdown();
     }
-
 
     public void startServer() throws Exception {
         logger.info("Starting SMTP server on port: " + port + "...");
@@ -58,11 +44,25 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         logger.info("Started SMTP server!");
     }
 
+
     public void stop() throws Exception {
         logger.info("Stopping SMTP server...");
         workerGroup.shutdownGracefully().sync();
         bossGroup.shutdownGracefully().sync();
         logger.info("Stopped SMTP server!");
+    }
+
+    public static void main(String[] args) throws Exception {
+        int port = 2500;
+
+        System.out.println("Type EXIT to exit the program.");
+        SmtpServer smtpServer = new SmtpServer(port);
+        smtpServer.startServer();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to exit the program.");
+        }
+        smtpServer.stop();
     }
 
 

@@ -16,5 +16,5 @@ The following are key features of this SMTP test double
 
 For more details on how to start the server, please look at MockServerApp.java.
 
-## Credits
+#### Credits
 This project is based on the original implementation of Dumbster available at: http://quintanasoft.com/dumbster/

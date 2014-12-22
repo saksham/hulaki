@@ -79,7 +79,7 @@ public class MailStorageTest {
 
     private void startMockServer(MailMessageDao mailStorage) throws Exception {
         smtpServer = new SmtpServer(SMTP_PORT);
-        smtpServer.startServer();
+        smtpServer.start();
         mailProcessor = new MailProcessor();
         smtpServer.addObserver(mailProcessor);
         Thread smtpMockServerThread = new Thread(mailProcessor);

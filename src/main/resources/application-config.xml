@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.dumbster.smtp.app, com.dumbster.smtp.storage" use-default-filters="true"/>
+
+    <bean id="com.dmbster.smtp.app.MockServerApp" class="com.dumbster.smtp.app.MockServerApp"/>
+    <bean id="com.dumbster.smtp.app.MailProcessor" class="com.dumbster.smtp.app.MailProcessor"/>
+    <!--<bean id="com.dumbster.smtp.transport.SmtpServer" class="com.dumbster.smtp.transport.SmtpServer"/>-->
+    <!--<bean id="com.dumbster.smtp.transport.ApiServer" class="com.dumbster.smtp.transport.ApiServer"/>-->
+    <bean id="com.dumbster.smtp.storage.MailMessageDaoFactory" class="com.dumbster.smtp.storage.MailMessageDaoFactory"
+          factory-method="getInstance"/>
+    <bean id="com.dumbster.smtp.storage.RelayAddressDaoFactory" class="com.dumbster.smtp.storage.RelayAddressDaoFactory"
+          factory-method="getInstance"/>
+    <!--<bean id="com.dumbster.smtp.utils.EmailSender" class="com.dumbster.smtp.utils.EmailSender"/>-->
+    <!--<bean id="com.dumbster.smtp.storage.InMemoryMailMessageDao" parent="com.dumbster.smtp.storage.MailMessageDao" class="com.dumbster.smtp.storage.InMemoryMailMessageDao"/>-->
+</beans>

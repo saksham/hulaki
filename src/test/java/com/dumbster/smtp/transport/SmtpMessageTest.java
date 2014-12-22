@@ -46,7 +46,7 @@ public class SmtpMessageTest {
     @BeforeClass
     private void setUp() throws Exception {
         this.smtpServer = new SmtpServer(PORT);
-        this.smtpServer.startServer();
+        this.smtpServer.start();
         this.storage = new SimpleSmtpStorage();
         this.smtpServer.addObserver(this.storage);
         emailSender = new EmailSender("localhost", PORT);

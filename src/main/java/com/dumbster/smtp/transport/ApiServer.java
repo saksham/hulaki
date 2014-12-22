@@ -12,10 +12,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+@Component
 public class ApiServer {
     private static final Logger logger = Logger.getLogger(ApiServer.class);
     private EventLoopGroup bossGroup;
@@ -23,9 +26,16 @@ public class ApiServer {
     private int port;
 
 
+    @Autowired
     private SmtpServer smtpServer;
+
+    @Autowired
     private MailProcessor mailProcessor;
+
+    @Autowired
     private MailMessageDao mailMessageDao;
+
+    @Autowired
     private RelayAddressDao relayAddressDao;
 
     public ApiServer(int port) {
@@ -41,11 +51,6 @@ public class ApiServer {
     public void start() throws InterruptedException {
         logger.info("Starting API server on port: " + port + "...");
         ApiServerInitializer initializer = new ApiServerInitializer();
-        initializer.setSmtpServer(smtpServer);
-        initializer.setMailProcessor(mailProcessor);
-        initializer.setMailMessageDao(mailMessageDao);
-        initializer.setRelayAddressDao(relayAddressDao);
-
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup);
         b.channel(NioServerSocketChannel.class);
@@ -69,8 +74,6 @@ public class ApiServer {
     public static void main(String[] args) throws Exception {
         final int port = 6869;
         ApiServer server = new ApiServer(port);
-        server.setRelayAddressDao(new InMemoryRelayAddressDao());
-        server.setMailMessageDao(new InMemoryMailMessageDao());
 
         System.out.println("Type EXIT to quit");
         server.start();
@@ -79,14 +82,6 @@ public class ApiServer {
             System.out.println("Type EXIT to quit");
         }
         server.stop();
-    }
-
-    public void setSmtpServer(SmtpServer smtpServer) {
-        this.smtpServer = smtpServer;
-    }
-
-    public void setMailProcessor(MailProcessor mailProcessor) {
-        this.mailProcessor = mailProcessor;
     }
 
     public void setMailMessageDao(MailMessageDao mailMessageDao) {

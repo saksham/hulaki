@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
+
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
     private final int port;

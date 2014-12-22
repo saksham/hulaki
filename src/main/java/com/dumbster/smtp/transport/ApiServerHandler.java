@@ -11,28 +11,21 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 public class ApiServerHandler extends ChannelHandlerAdapter {
+    @Autowired
     private MailMessageDao mailMessageDao;
+
+    @Autowired
     private RelayAddressDao relayAddressDao;
+
+    @Autowired
     private MailProcessor mailProcessor;
+
+    @Autowired
     private SmtpServer smtpServer;
-
-    public void setMailMessageDao(MailMessageDao mailMessageDao) {
-        this.mailMessageDao = mailMessageDao;
-    }
-
-    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
-        this.relayAddressDao = relayAddressDao;
-    }
-
-    public void setMailProcessor(MailProcessor mailProcessor) {
-        this.mailProcessor = mailProcessor;
-    }
-
-    public void setSmtpServer(SmtpServer smtpServer) {
-        this.smtpServer = smtpServer;
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

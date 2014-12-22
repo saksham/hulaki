@@ -82,8 +82,6 @@ public class MailStorageTest {
         smtpServer.startServer();
         mailProcessor = new MailProcessor();
         smtpServer.addObserver(mailProcessor);
-        mailProcessor.setMailMessageDao(mailStorage);
-        mailProcessor.setRelayAddressDao(new InMemoryRelayAddressDao());
         Thread smtpMockServerThread = new Thread(mailProcessor);
         smtpMockServerThread.start();
     }

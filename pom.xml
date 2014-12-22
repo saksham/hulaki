@@ -26,6 +26,14 @@
     </licenses>
     <developers>
         <developer>
+            <name>Saksham Gautam</name>
+            <id>saksham</id>
+            <email>saksham.gautam@github.com</email>
+            <roles>
+                <role>Core Developer</role>
+            </roles>
+        </developer>
+        <developer>
             <name>Jason Kitchen</name>
             <id>jasonkitchen</id>
             <email>jasonkitchen@user.sourceforge.net</email>
@@ -80,12 +88,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.3.2</version>
@@ -113,7 +115,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>4.0.7.RELEASE</version>
+            <version>4.1.3.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.1.3.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>

@@ -7,30 +7,27 @@ import com.dumbster.smtp.transport.Observer;
 import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     private static final Logger logger = Logger.getLogger(MailProcessor.class);
-    private MailMessageDao mailMessageDao;
-    private RelayAddressDao relayAddressDao;
-    private EmailSender emailSender;
+
     private volatile boolean stopped;
 
-    public void setMailMessageDao(MailMessageDao mailMessageDao) {
-        this.mailMessageDao = mailMessageDao;
-    }
+    @Autowired
+    private MailMessageDao mailMessageDao;
 
-    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
-        this.relayAddressDao = relayAddressDao;
-    }
+    @Autowired
+    private RelayAddressDao relayAddressDao;
 
-    public void setEmailSender(EmailSender emailSender) {
-        this.emailSender = emailSender;
-    }
-
+    @Autowired
+    private EmailSender emailSender;
 
     @Override
     public void notify(SmtpMessage smtpMessage) {

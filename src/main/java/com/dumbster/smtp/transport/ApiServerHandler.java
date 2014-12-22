@@ -6,6 +6,10 @@ import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.MailMessageDao;
 import com.dumbster.smtp.storage.RelayAddressDao;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -14,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class ApiServerHandler {
+public class ApiServerHandler extends ChannelHandlerAdapter {
     private static final Logger logger = Logger.getLogger(ApiServerHandler.class);
     private MailMessageDao mailMessageDao;
     private RelayAddressDao relayAddressDao;
@@ -37,38 +41,31 @@ public class ApiServerHandler {
         this.smtpServer = smtpServer;
     }
 
-    public void processRequest(Socket clientSocket) {
-        try {
-            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String messageFromClient = inFromClient.readLine();
-            logger.info("Client: " + messageFromClient);
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        String messageFromClient = (String) msg;
+        logger.info("Client: " + messageFromClient);
 
-            ApiRequest request = parseRequest(messageFromClient);
+        ApiRequest request = parseRequest(messageFromClient);
 
-            ApiResponse response;
-            if (request == null || request.getCommand() == ApiCommand.INVALID) {
-                response = new StatusResponse(404, "Invalid command!");
-            } else if (request.getCommand() == ApiCommand.COUNT) {
-                response = process((CountRequest) request);
-            } else if (request.getCommand() == ApiCommand.GET) {
-                response = process((GetRequest) request);
-            } else if (request.getCommand() == ApiCommand.CLEAR) {
-                response = process((ClearRequest) request);
-            } else if (request.getCommand() == ApiCommand.RELAY) {
-                response = process((RelayRequest) request);
-            } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
-                response = process((ServerStatusRequest) request);
-            } else {
-                response = new StatusResponse(403, "Bad request!");
-            }
-            DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());
-            response.marshalResponse(outputStream);
-            outputStream.close();
-            clientSocket.close();
-
-        } catch (IOException ioe) {
-            throw new ApiProtocolException(ioe);
+        ApiResponse response;
+        if (request == null || request.getCommand() == ApiCommand.INVALID) {
+            response = new StatusResponse(404, "Invalid command!");
+        } else if (request.getCommand() == ApiCommand.COUNT) {
+            response = process((CountRequest) request);
+        } else if (request.getCommand() == ApiCommand.GET) {
+            response = process((GetRequest) request);
+        } else if (request.getCommand() == ApiCommand.CLEAR) {
+            response = process((ClearRequest) request);
+        } else if (request.getCommand() == ApiCommand.RELAY) {
+            response = process((RelayRequest) request);
+        } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
+            response = process((ServerStatusRequest) request);
+        } else {
+            response = new StatusResponse(403, "Bad request!");
         }
+        ChannelFuture f = ctx.writeAndFlush(response.marshalResponse());
+        f.addListener(ChannelFutureListener.CLOSE);
     }
 
     private ApiRequest parseRequest(String messageFromClient) {

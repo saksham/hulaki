@@ -6,12 +6,12 @@ import com.dumbster.smtp.exceptions.ApiProtocolException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 public abstract class ApiResponse {
-
-    public void marshalResponse(OutputStream out) throws ApiProtocolException {
+    public String marshalResponse() {
+        StringWriter out = new StringWriter();
         try {
             JAXBContext context = JAXBContext.newInstance(this.getClass());
             Marshaller m = context.createMarshaller();
@@ -20,6 +20,7 @@ public abstract class ApiResponse {
         } catch (Exception ex) {
             throw new ApiProtocolException("Error while marshalling the response.", ex);
         }
+        return out.toString();
     }
 
     public static ApiResponse unmarshalResponse(String response, Class responseClass) {

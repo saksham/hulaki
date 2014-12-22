@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-@Test
+@Test(groups = "Component")
 public class ApiServerTest {
     private ApiServer apiServer = new ApiServer(6869);
 

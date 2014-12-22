@@ -20,11 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RelayRequest extends ApiRequest {
 
+    private final RelayMode relayMode;
     private String recipient;
-    private RelayMode relayMode;
 
-    public RelayRequest() {
+    public RelayRequest(RelayMode relayMode) {
         super(ApiCommand.RELAY);
+        this.relayMode = relayMode;
     }
 
     public RelayRequest(String requestBody) throws ApiProtocolException {
@@ -53,11 +54,6 @@ public class RelayRequest extends ApiRequest {
 
     public RelayMode getRelayMode() {
         return relayMode;
-    }
-
-    public RelayRequest setRelayMode(RelayMode relayMode) {
-        this.relayMode = relayMode;
-        return this;
     }
 
 

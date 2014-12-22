@@ -21,6 +21,11 @@ public class ServerStatusRequest extends ApiRequest {
 
     private final ServerName serverName;
 
+    public ServerStatusRequest(ServerName serverName) {
+        super("", ApiCommand.SERVER_STATUS);
+        this.serverName = serverName;
+    }
+    
     public ServerStatusRequest(String requestBody) throws ApiProtocolException {
         super(requestBody, ApiCommand.SERVER_STATUS);
         String[] tokens = requestBody.split(" ");
@@ -33,7 +38,7 @@ public class ServerStatusRequest extends ApiRequest {
 
     @Override
     public String toRequestString() {
-        return ApiCommand.SERVER_STATUS.getCommand();
+        return ApiCommand.SERVER_STATUS.toString() + " " + serverName ;
     }
 
     public ServerName getServerName() {

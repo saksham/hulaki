@@ -1,7 +1,21 @@
 package com.dumbster.smtp.transport;
 
 
-import com.dumbster.smtp.api.*;
+import com.dumbster.smtp.api.ApiCommand;
+import com.dumbster.smtp.api.ApiRequest;
+import com.dumbster.smtp.api.ApiResponse;
+import com.dumbster.smtp.api.ClearRequest;
+import com.dumbster.smtp.api.CountRequest;
+import com.dumbster.smtp.api.CountResponse;
+import com.dumbster.smtp.api.GetRequest;
+import com.dumbster.smtp.api.GetResponse;
+import com.dumbster.smtp.api.RelayMode;
+import com.dumbster.smtp.api.RelayRequest;
+import com.dumbster.smtp.api.RelayResponse;
+import com.dumbster.smtp.api.ServerName;
+import com.dumbster.smtp.api.ServerStatus;
+import com.dumbster.smtp.api.ServerStatusRequest;
+import com.dumbster.smtp.api.StatusResponse;
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.MailMessageDao;
@@ -12,8 +26,10 @@ import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 
+@Component
 public class ApiServerHandler extends ChannelHandlerAdapter {
     @Autowired
     private MailMessageDao mailMessageDao;
@@ -80,7 +96,7 @@ public class ApiServerHandler extends ChannelHandlerAdapter {
         if (request.getServerName() == ServerName.MAIL_PROCESSOR) {
             status = (!this.mailProcessor.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
         } else {
-            status = (!this.smtpServer.isStopped()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
+            status = (this.smtpServer.isRunning()) ? ServerStatus.RUNNING : ServerStatus.STOPPED;
         }
         return new StatusResponse(status.getStatus(), status.getStatusString());
     }

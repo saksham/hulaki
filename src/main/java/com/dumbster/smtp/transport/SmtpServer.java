@@ -7,17 +7,21 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
 
+@Component
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
     private final int port;
+    private volatile boolean running = false;
     private List<Observer<SmtpMessage>> observers;
     private EventLoopGroup bossGroup;
+
     private EventLoopGroup workerGroup;
 
 
@@ -28,11 +32,17 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         this.workerGroup = new NioEventLoopGroup(20);
     }
 
-    public boolean isStopped() {
-        return this.bossGroup.isShutdown() && this.workerGroup.isShutdown();
+    public boolean isRunning() {
+        return running && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
+                (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
-    public void start() throws Exception {
+    public synchronized void start() throws Exception {
+        if(running) {
+            logger.warn("SMTP Server already started.");
+            return;
+        }
+
         logger.info("Starting SMTP server on port: " + port + "...");
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup);
@@ -43,10 +53,16 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
 
         b.bind(port).sync();
         logger.info("Started SMTP server!");
+        running = true;
     }
 
 
-    public void stop() throws Exception {
+    public synchronized void stop() throws Exception {
+        if(!running) {
+            logger.warn("SMTP Server already stopped.");
+            return;
+        }
+        running = false;
         logger.info("Stopping SMTP server...");
         workerGroup.shutdownGracefully().sync();
         bossGroup.shutdownGracefully().sync();

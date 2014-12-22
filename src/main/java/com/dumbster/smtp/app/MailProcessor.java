@@ -57,6 +57,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
     }
 
     public void stop() {
+        logger.info("Stopping Mail processor...");
         this.stopped = true;
     }
 
@@ -66,7 +67,9 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     @Override
     public void run() {
+        logger.info("Starting Mail processor...");
         this.stopped = false;
+        logger.info("Mail processor started!");
         while (!this.stopped) {
             try {
                 Thread.sleep(100L);
@@ -74,5 +77,6 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
                 this.stopped = true;
             }
         }
+        logger.info("Mail processor stopped!");
     }
 }

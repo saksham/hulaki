@@ -1,18 +1,11 @@
 package com.dumbster.smtp.transport;
 
-import com.dumbster.smtp.app.MailProcessor;
-import com.dumbster.smtp.storage.InMemoryMailMessageDao;
-import com.dumbster.smtp.storage.InMemoryRelayAddressDao;
-import com.dumbster.smtp.storage.MailMessageDao;
-import com.dumbster.smtp.storage.RelayAddressDao;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.Future;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -21,22 +14,11 @@ import java.io.InputStreamReader;
 @Component
 public class ApiServer {
     private static final Logger logger = Logger.getLogger(ApiServer.class);
+    private final int port;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
-    private int port;
+    private volatile boolean running = false;
 
-
-    @Autowired
-    private SmtpServer smtpServer;
-
-    @Autowired
-    private MailProcessor mailProcessor;
-
-    @Autowired
-    private MailMessageDao mailMessageDao;
-
-    @Autowired
-    private RelayAddressDao relayAddressDao;
 
     public ApiServer(int port) {
         this.port = port;
@@ -44,11 +26,17 @@ public class ApiServer {
         this.workerGroup = new NioEventLoopGroup(20);
     }
 
-    public boolean isStopped() {
-        return this.bossGroup.isShutdown() && this.workerGroup.isShutdown();
+    public boolean isRunning() {
+        return running && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
+                (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
-    public void start() throws InterruptedException {
+    public synchronized void start() throws InterruptedException {
+        if (running) {
+            logger.warn("Server already started.");
+            return;
+        }
+
         logger.info("Starting API server on port: " + port + "...");
         ApiServerInitializer initializer = new ApiServerInitializer();
         ServerBootstrap b = new ServerBootstrap();
@@ -60,15 +48,21 @@ public class ApiServer {
 
         b.bind(port).sync();
         logger.info("Started API server!");
+        running = true;
     }
 
-    public void stop() throws Exception {
+    public synchronized void stop() throws Exception {
+        if (!running) {
+            logger.warn("Server already stopped.");
+            return;
+        }
         logger.info("Stopping API server...");
-        Future<?> fw = workerGroup.shutdownGracefully();
-        Future<?> fb = bossGroup.shutdownGracefully();
-        fw.await();
-        fb.await();
+        workerGroup.shutdownGracefully();
+        workerGroup.terminationFuture().sync();
+        bossGroup.shutdownGracefully();
+        bossGroup.terminationFuture().sync();
         logger.info("Stopped API server!");
+        running = false;
     }
 
     public static void main(String[] args) throws Exception {
@@ -82,13 +76,5 @@ public class ApiServer {
             System.out.println("Type EXIT to quit");
         }
         server.stop();
-    }
-
-    public void setMailMessageDao(MailMessageDao mailMessageDao) {
-        this.mailMessageDao = mailMessageDao;
-    }
-
-    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
-        this.relayAddressDao = relayAddressDao;
     }
 }

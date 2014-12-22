@@ -4,16 +4,27 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <context:annotation-config/>
     <context:component-scan base-package="com.dumbster.smtp.app, com.dumbster.smtp.storage" use-default-filters="true"/>
 
-    <bean id="com.dmbster.smtp.app.MockServerApp" class="com.dumbster.smtp.app.MockServerApp"/>
-    <bean id="com.dumbster.smtp.app.MailProcessor" class="com.dumbster.smtp.app.MailProcessor"/>
-    <!--<bean id="com.dumbster.smtp.transport.SmtpServer" class="com.dumbster.smtp.transport.SmtpServer"/>-->
-    <!--<bean id="com.dumbster.smtp.transport.ApiServer" class="com.dumbster.smtp.transport.ApiServer"/>-->
+    <bean id="com.dmbster.smtp.app.MaiProcessor" class="com.dumbster.smtp.app.MailProcessor" primary="true"/>
+    <bean id="com.dumbster.smtp.transport.SmtpServer" class="com.dumbster.smtp.transport.SmtpServer" primary="true">
+        <constructor-arg name="port" value="2500"/>
+    </bean>
+    <bean id="com.dumbster.smtp.transport.ApiServer" class="com.dumbster.smtp.transport.ApiServer" primary="true">
+        <constructor-arg name="port" value="6869"/>
+    </bean>
+
     <bean id="com.dumbster.smtp.storage.MailMessageDaoFactory" class="com.dumbster.smtp.storage.MailMessageDaoFactory"
-          factory-method="getInstance"/>
+          factory-method="getInstance" primary="true"/>
+    <bean id="com.dumbster.smtp.storage.MailMessageDao" class="com.dumbster.smtp.storage.MailMessageDao"
+          factory-bean="com.dumbster.smtp.storage.MailMessageDaoFactory" factory-method="getDao"/>
     <bean id="com.dumbster.smtp.storage.RelayAddressDaoFactory" class="com.dumbster.smtp.storage.RelayAddressDaoFactory"
-          factory-method="getInstance"/>
-    <!--<bean id="com.dumbster.smtp.utils.EmailSender" class="com.dumbster.smtp.utils.EmailSender"/>-->
-    <!--<bean id="com.dumbster.smtp.storage.InMemoryMailMessageDao" parent="com.dumbster.smtp.storage.MailMessageDao" class="com.dumbster.smtp.storage.InMemoryMailMessageDao"/>-->
+          factory-method="getInstance" primary="true"/>
+    <bean id="com.dumbster.smtp.storage.RelayAddressDao" class="com.dumbster.smtp.storage.RelayAddressDao"
+          factory-bean="com.dumbster.smtp.storage.RelayAddressDaoFactory" factory-method="getDao"/>
+    <bean id="com.dumbster.smtp.utils.EmailSender" class="com.dumbster.smtp.utils.EmailSender">
+        <constructor-arg name="smtpHostname" value="smtp.gmail.com"/>
+        <constructor-arg name="smtpPort" value="567"/>
+    </bean>
 </beans>

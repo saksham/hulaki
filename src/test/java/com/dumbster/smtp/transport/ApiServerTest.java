@@ -21,38 +21,42 @@ import static org.testng.Assert.assertTrue;
 
 @Test(groups = "Component")
 public class ApiServerTest {
-    private ApiServer apiServer = new ApiServer(6869);
+
+    public static final int PORT = 6869;
 
     public void restartApiServerMultipleTimes() throws Exception {
+        ApiServer apiServer = new ApiServer(PORT);
         int numOfRestarts = 2;
 
         for (int i = 0; i < numOfRestarts; i++) {
             apiServer.start();
-            assertFalse(apiServer.isStopped());
+            assertTrue(apiServer.isRunning());
             apiServer.stop();
-            assertTrue(apiServer.isStopped());
+            assertFalse(apiServer.isRunning());
         }
     }
 
-    public void serverCantBeStartedMultipleTimes() throws Exception {
+    public void serverCanBeStartedMultipleTimes() throws Exception {
+        ApiServer apiServer = new ApiServer(PORT);
         int numOfStarts = 10;
 
         for (int i = 0; i < numOfStarts; i++) {
             apiServer.start();
-            assertFalse(apiServer.isStopped());
+            assertTrue(apiServer.isRunning());
         }
         apiServer.stop();
-        assertTrue(apiServer.isStopped());
+        assertFalse(apiServer.isRunning());
     }
 
     public void serverCanBeStoppedMultipleTimes() throws Exception {
+        ApiServer apiServer = new ApiServer(PORT);
         int numOfStops = 10;
 
         apiServer.start();
         for (int i = 0; i < numOfStops; i++) {
             apiServer.stop();
         }
-        assertTrue(apiServer.isStopped());
+        assertFalse(apiServer.isRunning());
     }
 
 

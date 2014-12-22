@@ -44,9 +44,9 @@ public class SmtpMessage {
             } catch (Exception ex) {
                 throw new SmtpException("Error decoding String '" + line + "': " + ex.getMessage(), ex);
             }
-            body.append(line);
-            body.append("\n");
         }
+        body.append(line);
+        body.append("\n");
     }
 
 

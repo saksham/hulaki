@@ -48,9 +48,8 @@ public class RelayRequest extends ApiRequest {
         return recipient;
     }
 
-    public RelayRequest setRecipient(String recipient) {
+    public void setRecipient(String recipient) {
         this.recipient = recipient;
-        return this;
     }
 
     public RelayMode getRelayMode() {

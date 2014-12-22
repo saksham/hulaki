@@ -36,20 +36,10 @@ public class MailStorageTest {
     private MailProcessor mailProcessor;
     private EmailSender emailSender = new EmailSender(SMTP_HOSTNAME, SMTP_PORT);
 
-    @DataProvider
-    private Object[][] provideMailStorages() {
-        return new Object[][]{
-                {new InMemoryMailMessageDao()},
-                {new FileBasedMailMessageDao(MAILS_FOLDER)},
-                {new SqliteMailMessageDao(SQLITE_DB_FILENAME)}
-        };
-    }
-
-
     @Test(dataProvider = "provideMailStorages")
     public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
         // Given
-        startMockServer(mailStorage);
+        startServer(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
         String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(100);
 
@@ -76,14 +66,24 @@ public class MailStorageTest {
     }
 
 
+    @DataProvider
+    private Object[][] provideMailStorages() {
+        return new Object[][]{
+                {new InMemoryMailMessageDao()},
+                {new FileBasedMailMessageDao(MAILS_FOLDER)},
+                {new SqliteMailMessageDao(SQLITE_DB_FILENAME)}
+        };
+    }
 
-    private void startMockServer(MailMessageDao mailStorage) throws Exception {
+
+
+    private void startServer(MailMessageDao mailStorage) throws Exception {
         smtpServer = new SmtpServer(SMTP_PORT);
         smtpServer.start();
         mailProcessor = new MailProcessor();
         smtpServer.addObserver(mailProcessor);
-        Thread smtpMockServerThread = new Thread(mailProcessor);
-        smtpMockServerThread.start();
+        Thread mailProcessorThread = new Thread(mailProcessor);
+        mailProcessorThread.start();
     }
 
     @AfterMethod

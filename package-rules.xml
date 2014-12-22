@@ -3,8 +3,9 @@
 <import-control pkg="com.dumbster">
 
     <allow pkg=".*" regex="true"/>
-    <!-- Use explicit XML wiring instead. Mixing annotations and XML can cause spring context issues. -->
-    <!--<disallow class="org.springframework.beans.factory.annotation.Autowired"/>-->
+    
+    <!-- Use explicit XML wiring -->
+    <disallow class="org.springframework.beans.factory.annotation.Autowired"/>
 
 
     <subpackage name="api">

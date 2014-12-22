@@ -27,6 +27,7 @@ public class MockServerApp implements ApplicationListener<ContextStartedEvent> {
         smtpServer.start();
 
         MailProcessor mailProcessor = context.getBean(MailProcessor.class);
+        smtpServer.addObserver(mailProcessor);
         Thread mailProcessorThread = new Thread(mailProcessor);
         mailProcessorThread.start();
 

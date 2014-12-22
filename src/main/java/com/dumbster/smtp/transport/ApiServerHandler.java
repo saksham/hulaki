@@ -10,16 +10,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.log4j.Logger;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import io.netty.util.ReferenceCountUtil;
 
 public class ApiServerHandler extends ChannelHandlerAdapter {
-    private static final Logger logger = Logger.getLogger(ApiServerHandler.class);
     private MailMessageDao mailMessageDao;
     private RelayAddressDao relayAddressDao;
     private MailProcessor mailProcessor;
@@ -43,39 +36,31 @@ public class ApiServerHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        String messageFromClient = (String) msg;
-        logger.info("Client: " + messageFromClient);
+        ApiRequest request = (ApiRequest) msg;
 
-        ApiRequest request = parseRequest(messageFromClient);
-
-        ApiResponse response;
-        if (request == null || request.getCommand() == ApiCommand.INVALID) {
-            response = new StatusResponse(404, "Invalid command!");
-        } else if (request.getCommand() == ApiCommand.COUNT) {
-            response = process((CountRequest) request);
-        } else if (request.getCommand() == ApiCommand.GET) {
-            response = process((GetRequest) request);
-        } else if (request.getCommand() == ApiCommand.CLEAR) {
-            response = process((ClearRequest) request);
-        } else if (request.getCommand() == ApiCommand.RELAY) {
-            response = process((RelayRequest) request);
-        } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
-            response = process((ServerStatusRequest) request);
-        } else {
-            response = new StatusResponse(403, "Bad request!");
-        }
-        ChannelFuture f = ctx.writeAndFlush(response.marshalResponse());
-        f.addListener(ChannelFutureListener.CLOSE);
-    }
-
-    private ApiRequest parseRequest(String messageFromClient) {
-        ApiRequest request = null;
         try {
-            request = ApiRequest.fromRequestString(messageFromClient);
-        } catch (ApiProtocolException ex) {
-            logger.warn("Failed to parse request from client: " + messageFromClient);
+            ApiResponse response;
+            if (request == null || request.getCommand() == ApiCommand.INVALID) {
+                response = new StatusResponse(404, "Invalid command!");
+            } else if (request.getCommand() == ApiCommand.COUNT) {
+                response = process((CountRequest) request);
+            } else if (request.getCommand() == ApiCommand.GET) {
+                response = process((GetRequest) request);
+            } else if (request.getCommand() == ApiCommand.CLEAR) {
+                response = process((ClearRequest) request);
+            } else if (request.getCommand() == ApiCommand.RELAY) {
+                response = process((RelayRequest) request);
+            } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
+                response = process((ServerStatusRequest) request);
+            } else {
+                response = new StatusResponse(403, "Bad request!");
+            }
+
+            ChannelFuture f = ctx.writeAndFlush(response);
+            f.addListener(ChannelFutureListener.CLOSE);
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
-        return request;
     }
 
     private ApiResponse process(CountRequest countRequest) {

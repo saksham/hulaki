@@ -24,10 +24,10 @@ public class ApiServerTest {
     private ApiServer apiServer = new ApiServer(6869);
 
     public void restartApiServerMultipleTimes() throws Exception {
-        int numOfRestarts = 10;
+        int numOfRestarts = 2;
 
         for (int i = 0; i < numOfRestarts; i++) {
-            apiServer.startAndWait();
+            apiServer.start();
             assertFalse(apiServer.isStopped());
             apiServer.stop();
             assertTrue(apiServer.isStopped());
@@ -38,7 +38,7 @@ public class ApiServerTest {
         int numOfStarts = 10;
 
         for (int i = 0; i < numOfStarts; i++) {
-            apiServer.startAndWait();
+            apiServer.start();
             assertFalse(apiServer.isStopped());
         }
         apiServer.stop();
@@ -48,7 +48,7 @@ public class ApiServerTest {
     public void serverCanBeStoppedMultipleTimes() throws Exception {
         int numOfStops = 10;
 
-        apiServer.startAndWait();
+        apiServer.start();
         for (int i = 0; i < numOfStops; i++) {
             apiServer.stop();
         }

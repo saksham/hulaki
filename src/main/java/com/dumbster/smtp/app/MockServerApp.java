@@ -36,7 +36,7 @@ public class MockServerApp {
         app.apiServer.setMailProcessor(app.mailProcessor);
         app.apiServer.setMailMessageDao(mailMessageDao);
         app.apiServer.setRelayAddressDao(relayAddressDao);
-        app.apiServer.startAndWait();
+        app.apiServer.start();
 
         System.out.println("Type EXIT to quit");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));

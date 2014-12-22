@@ -13,7 +13,7 @@ public class BindTest {
         ApiServer firstServer = new ApiServer(PORT);
         ApiServer secondServer = new ApiServer(PORT);
 
-        firstServer.startAndWait();
-        secondServer.startAndWait();
+        firstServer.start();
+        secondServer.start();
     }
 }

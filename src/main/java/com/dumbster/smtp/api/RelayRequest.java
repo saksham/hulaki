@@ -16,6 +16,7 @@ package com.dumbster.smtp.api;
 
 
 import com.dumbster.smtp.exceptions.ApiProtocolException;
+import com.dumbster.smtp.utils.EmailUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class RelayRequest extends ApiRequest {
@@ -35,7 +36,7 @@ public class RelayRequest extends ApiRequest {
             this.relayMode = RelayMode.parse(tokens[1]);
         } else if (tokens.length == 3) {
             this.relayMode = RelayMode.parse(tokens[1]);
-            this.recipient = tokens[2];
+            this.recipient = EmailUtils.normalizeEmailAddress(tokens[2]);
         } else {
             throw new ApiProtocolException("Invalid format. Should be in format: " + ApiCommand.RELAY.toString() + " [" +
                     StringUtils.join(RelayMode.all(), "|") + "] [email-address]");

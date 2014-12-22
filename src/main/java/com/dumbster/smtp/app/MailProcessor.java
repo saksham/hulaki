@@ -6,12 +6,10 @@ import com.dumbster.smtp.storage.RelayAddressDao;
 import com.dumbster.smtp.transport.Observer;
 import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
+import com.dumbster.smtp.utils.EmailUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
@@ -31,7 +29,7 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     @Override
     public void notify(SmtpMessage smtpMessage) {
-        String recipient = normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
+        String recipient = EmailUtils.normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
         boolean wasMailRelayed = false;
 
         if (relayAddressDao.isRelayRecipient(recipient)) {
@@ -43,17 +41,6 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
         MailMessage message = new MailMessage(smtpMessage, wasMailRelayed);
         mailMessageDao.storeMessage(recipient, message);
-    }
-
-    private static String normalizeEmailAddress(String email) {
-        Pattern pattern = Pattern.compile("<[^<]*@[^>]*>");
-        Matcher matcher = pattern.matcher(email);
-
-        if (matcher.find()) {
-            return email.substring(matcher.start() + 1, matcher.end() - 1);
-        } else {
-            return email;
-        }
     }
 
     public void stop() {

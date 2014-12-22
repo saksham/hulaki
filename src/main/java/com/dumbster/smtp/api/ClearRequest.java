@@ -15,6 +15,7 @@
 package com.dumbster.smtp.api;
 
 import com.dumbster.smtp.exceptions.ApiProtocolException;
+import com.dumbster.smtp.utils.EmailUtils;
 
 public class ClearRequest extends ApiRequest {
 
@@ -26,7 +27,7 @@ public class ClearRequest extends ApiRequest {
         if (tokens.length != 2) {
             throw new ApiProtocolException("The count request should be in format COUNT <email-address>");
         }
-        this.recipient = tokens[1];
+        this.recipient = EmailUtils.normalizeEmailAddress(tokens[1]);
     }
 
     public ClearRequest() {

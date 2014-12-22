@@ -12,6 +12,7 @@ The following are key features of this SMTP test double
  * In memory: stores them in memory for quick access
  * SQLite: stores them in an SQLite database 
 * Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
+* Provides serialization and deserialization methods on all requests and responses for constructing API clients
 * Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port

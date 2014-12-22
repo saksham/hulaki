@@ -29,7 +29,7 @@ public class MockServerApp {
 
         app.smtpServer = new SmtpServer(SMTP_SERVER_PORT);
         app.smtpServer.addObserver(app.mailProcessor);
-        app.smtpServer.startServer();
+        app.smtpServer.start();
 
         app.apiServer = new ApiServer(API_SERVER_PORT);
         app.apiServer.setSmtpServer(app.smtpServer);

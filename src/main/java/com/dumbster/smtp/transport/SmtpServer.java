@@ -31,7 +31,7 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         return this.bossGroup.isShutdown() && this.workerGroup.isShutdown();
     }
 
-    public void startServer() throws Exception {
+    public void start() throws Exception {
         logger.info("Starting SMTP server on port: " + port + "...");
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup);
@@ -57,7 +57,7 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
 
         System.out.println("Type EXIT to exit the program.");
         SmtpServer smtpServer = new SmtpServer(port);
-        smtpServer.startServer();
+        smtpServer.start();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while (!reader.readLine().equalsIgnoreCase("EXIT")) {
             System.out.println("Type EXIT to exit the program.");

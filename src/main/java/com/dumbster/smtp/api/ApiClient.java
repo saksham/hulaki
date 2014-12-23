@@ -97,7 +97,7 @@ public class ApiClient implements IApiClient {
         response = sendRequestToApiServer(getRequest);
 
         GetResponse getResponse = unmarshalResponse(response, GetResponse.class);
-        return getResponse.getMessages().getMessages();
+        return getResponse.getMessages();
     }
 
     @Override

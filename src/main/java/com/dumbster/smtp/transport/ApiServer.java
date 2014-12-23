@@ -51,6 +51,7 @@ public class ApiServer {
             return;
         }
 
+        running = true;
         Assert.notNull(this.apiServerInitializerFactory);
         Assert.notNull(this.apiServerHandlerFactory);
         logger.info("Starting API server on port: " + port + "...");
@@ -63,7 +64,6 @@ public class ApiServer {
 
         b.bind(port).sync();
         logger.info("Started API server!");
-        running = true;
     }
 
     public synchronized void stop() throws Exception {

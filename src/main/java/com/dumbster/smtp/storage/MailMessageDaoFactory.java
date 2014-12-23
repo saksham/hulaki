@@ -1,13 +1,11 @@
 package com.dumbster.smtp.storage;
 
-
-import org.springframework.stereotype.Component;
-
-@Component
 public class MailMessageDaoFactory {
     private static volatile MailMessageDaoFactory instance = null;
+    
     private MailMessageDao dao;
 
+    
     private MailMessageDaoFactory() {
         dao = new InMemoryMailMessageDao();
     }

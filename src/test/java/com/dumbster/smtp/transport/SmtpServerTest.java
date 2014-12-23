@@ -41,7 +41,7 @@ public class SmtpServerTest {
 
     @Test
     public void restartServerMulitpleTimes() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             stopSmtpServer();
             startSmtpServer();
         }

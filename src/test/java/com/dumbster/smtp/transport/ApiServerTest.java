@@ -37,9 +37,9 @@ public class ApiServerTest {
         infrastructure.stop();
     }
     
-    @Test
+    @Test(enabled = false)
     public void restartApiServerMultipleTimes() throws Exception {
-        int numOfRestarts = 2;
+        int numOfRestarts = 10;
 
         for (int i = 0; i < numOfRestarts; i++) {
             infrastructure.getApiServer().start();

@@ -5,9 +5,9 @@ import com.dumbster.smtp.exceptions.ApiProtocolException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import org.apache.commons.io.Charsets;
 import org.apache.log4j.Logger;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 public class ApiRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
@@ -15,7 +15,7 @@ public class ApiRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        String messageFromClient = byteBuf.toString(Charset.defaultCharset());
+        String messageFromClient = byteBuf.toString(Charsets.US_ASCII);
         ApiRequest request = null;
         try {
             request = ApiRequest.fromRequestString(messageFromClient);

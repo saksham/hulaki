@@ -14,6 +14,8 @@
 
 package com.dumbster.smtp.transport;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertFalse;
@@ -22,10 +24,20 @@ import static org.testng.Assert.assertTrue;
 @Test(groups = "Component")
 public class ApiServerTest {
 
-    public static final int PORT = 6870;
+    public static final int PORT = 6869;
+    private ApiServer apiServer;
 
+    @BeforeMethod
+    private void createNewServer() {
+        apiServer = new ApiServer(PORT);
+    }
+    
+    @AfterMethod
+    private void stopServer() throws Exception {
+        apiServer.stop();
+    }
+    
     public void restartApiServerMultipleTimes() throws Exception {
-        ApiServer apiServer = new ApiServer(PORT);
         int numOfRestarts = 2;
 
         for (int i = 0; i < numOfRestarts; i++) {
@@ -37,7 +49,6 @@ public class ApiServerTest {
     }
 
     public void serverCanBeStartedMultipleTimes() throws Exception {
-        ApiServer apiServer = new ApiServer(PORT);
         int numOfStarts = 10;
 
         for (int i = 0; i < numOfStarts; i++) {
@@ -49,7 +60,6 @@ public class ApiServerTest {
     }
 
     public void serverCanBeStoppedMultipleTimes() throws Exception {
-        ApiServer apiServer = new ApiServer(PORT);
         int numOfStops = 10;
 
         apiServer.start();
@@ -58,6 +68,7 @@ public class ApiServerTest {
         }
         assertFalse(apiServer.isRunning());
     }
-
+    
+    
 
 }

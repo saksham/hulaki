@@ -27,7 +27,7 @@ public interface IApiClient {
 
     void clearMails(String recipient);
 
-    MailMessages getMessages(String recipient);
+    List<MailMessage> getMessages(String recipient);
 
     List<MailMessage> getMessagesBySubject(String recipient, String subject);
 

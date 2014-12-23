@@ -27,7 +27,7 @@ public class GetResponse extends ApiResponse {
     private String recipient;
 
     @XmlElement(name = "mail-messages", type = MailMessages.class)
-    private MailMessages messages;
+    private MailMessages messages = new MailMessages();
 
     public GetResponse() { } // Empty constructor for JAXB
 

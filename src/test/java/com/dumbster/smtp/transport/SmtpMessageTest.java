@@ -35,7 +35,7 @@ import static org.testng.Assert.assertEquals;
 @Test(groups = "Component")
 public class SmtpMessageTest {
 
-    public static final int PORT = 2502;
+    public static final int PORT = 2500;
     public static final String RECIPIENT = "sender@email.com";
     private static final String MAIL_FROM = "test.from@teste.com";
     public static final String CHARSET = "UTF-8";

@@ -15,6 +15,8 @@
 package com.dumbster.smtp.api;
 
 
+import com.google.common.collect.Lists;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -25,7 +27,7 @@ import java.util.List;
 public class MailMessages {
 
     @XmlElement(name="mail-message", type = MailMessage.class)
-    private List<MailMessage> messages;
+    private List<MailMessage> messages = Lists.newArrayList();
 
     public MailMessages() {} // Empty constructor for JAXB
 

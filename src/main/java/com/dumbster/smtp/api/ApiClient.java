@@ -89,7 +89,7 @@ public class ApiClient implements IApiClient {
     }
 
     @Override
-    public MailMessages getMessages(String recipient) {
+    public List<MailMessage> getMessages(String recipient) {
         String normalizedEmail = EmailUtils.normalizeEmailAddress(recipient);
         GetRequest getRequest = new GetRequest().setRecipient(normalizedEmail);
 
@@ -97,18 +97,15 @@ public class ApiClient implements IApiClient {
         response = sendRequestToApiServer(getRequest);
 
         GetResponse getResponse = unmarshalResponse(response, GetResponse.class);
-        return getResponse.getMessages();
+        return getResponse.getMessages().getMessages();
     }
 
     @Override
     public List<MailMessage> getMessagesBySubject(String recipient, String subject) {
         logger.debug("Getting emails matching subject " + subject + " for email address " + recipient);
-        MailMessages allMessages = getMessages(recipient);
+        List<MailMessage> allMessages = getMessages(recipient);
         List<MailMessage> matchingMessages = Lists.newArrayList();
-        if (allMessages.getMessages() == null) {
-            return matchingMessages;
-        }
-        for (MailMessage message : allMessages.getMessages()) {
+        for (MailMessage message : allMessages) {
             logger.debug("Found email with subject " + message.getSubject());
             if (message.getSubject().contains(subject)) {
                 matchingMessages.add(message);

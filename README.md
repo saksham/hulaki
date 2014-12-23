@@ -47,7 +47,7 @@ Current version of the API supports the following actions:
 
 Example
 =======
-For more details on how to start the server, please look at MockServerApp.java.
+For more details on how to start the server, please look at ServerApplication.java.
 
 #### Credits
 This project is based on the original implementation of Dumbster available at: http://quintanasoft.com/dumbster/

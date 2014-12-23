@@ -41,7 +41,7 @@ public class SmtpMessage {
         String charset = getCharset();
         if (charset != null && encoding != null) {
             try {
-                line = decodeFromAscii(line, encoding, charset);
+                line = decodeFromUtf8(line, encoding, charset);
             } catch (Exception ex) {
                 throw new SmtpException("Error decoding String '" + line + "': " + ex.getMessage(), ex);
             }
@@ -105,12 +105,12 @@ public class SmtpMessage {
         return null;
     }
 
-    private static String decodeFromAscii(String line, String encoding, String charset) throws Exception {
+    private static String decodeFromUtf8(String line, String encoding, String charset) throws Exception {
         if (line.length() == 0) {
             return line;
         }
 
-        byte[] asciiBytes = line.getBytes("US-ASCII");
+        byte[] asciiBytes = line.getBytes("UTF-8");
         InputStream decodedStream = MimeUtility.decode(new ByteArrayInputStream(asciiBytes), encoding);
         byte[] tmp = new byte[asciiBytes.length];
         int n = decodedStream.read(tmp);

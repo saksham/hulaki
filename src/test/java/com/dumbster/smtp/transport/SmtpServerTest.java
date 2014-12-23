@@ -101,7 +101,6 @@ public class SmtpServerTest {
         verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
 
         assertEquals(messageCaptor.getValue().getBody(), body);
-        assertEquals(emailCaptor.getValue().getBody(), body);
     }
 
     @Test

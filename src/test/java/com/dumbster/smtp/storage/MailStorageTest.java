@@ -14,8 +14,7 @@
 
 package com.dumbster.smtp.storage;
 
-import com.dumbster.smtp.app.MailProcessor;
-import com.dumbster.smtp.transport.SmtpServer;
+import com.dumbster.smtp.utils.TestInfrastructure;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.AfterMethod;
@@ -31,10 +30,10 @@ public class MailStorageTest {
     public static final String EMAIL_2 = "someone_second@somewhere.com";
     private static final String SMTP_HOSTNAME = "localhost";
     private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/" + "target/emails";
-    private final int SMTP_PORT = 12500;
-    private SmtpServer smtpServer;
-    private MailProcessor mailProcessor;
+    public static final int API_PORT = 6869;
+    private final int SMTP_PORT = 2500;
     private EmailSender emailSender = new EmailSender(SMTP_HOSTNAME, SMTP_PORT);
+    private TestInfrastructure apiInfrastructure;
 
     @Test(dataProvider = "provideMailStorages")
     public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
@@ -78,19 +77,16 @@ public class MailStorageTest {
 
 
     private void startServer(MailMessageDao mailStorage) throws Exception {
-        smtpServer = new SmtpServer(SMTP_PORT);
-        smtpServer.start();
-        mailProcessor = new MailProcessor();
-        smtpServer.addObserver(mailProcessor);
-        Thread mailProcessorThread = new Thread(mailProcessor);
-        mailProcessorThread.start();
+        apiInfrastructure = new TestInfrastructure(SMTP_PORT, API_PORT);
+        apiInfrastructure.setMailMessageDao(mailStorage);
+        apiInfrastructure.ready();
+        apiInfrastructure.startSmtpServer();
+        apiInfrastructure.startMailProcessor();
     }
 
     @AfterMethod
     private void stopSmtpMockServer() throws Exception {
-        smtpServer.removeObserver(mailProcessor);
-        smtpServer.stop();
-        mailProcessor.stop();
+        apiInfrastructure.stop();
     }
 
 }

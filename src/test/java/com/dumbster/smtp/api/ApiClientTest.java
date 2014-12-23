@@ -16,11 +16,10 @@ package com.dumbster.smtp.api;
 
 import com.beust.jcommander.internal.Lists;
 import com.dumbster.smtp.storage.MailMessageDao;
-import com.dumbster.smtp.transport.ApiServer;
-import com.dumbster.smtp.transport.ApiServerHandler;
-import com.dumbster.smtp.transport.ApiServerInitializer;
-import org.mockito.Mockito;
-import org.testng.annotations.*;
+import com.dumbster.smtp.utils.TestInfrastructure;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.List;
 
@@ -30,57 +29,51 @@ import static org.testng.Assert.assertEquals;
 
 @Test(groups = "Component")
 public class ApiClientTest {
-    private static final int PORT = 6869;
+    private static final int SMTP_PORT = 2500;
+    private static final int API_PORT = 6869;
     private static final String SUBJECT = "some subject";
     private static final String BODY = "some body";
+    private IApiClient apiClient = new ApiClient("localhost", API_PORT);
 
-    private IApiClient apiClient = new ApiClient("localhost", PORT);
-    private ApiServer apiServer;
-    private MailMessageDao mailMessageDao = Mockito.mock(MailMessageDao.class);
-
+    private TestInfrastructure testInfrastructure;
 
     @Test
     public void countRequestSentToServer() throws Exception {
+        MailMessageDao mailMessageDao = testInfrastructure.getMailMessageDao();
         when(mailMessageDao.countAllMessagesReceived()).thenReturn(0);
-        
+
         int mailsCount = apiClient.countMails();
-        
+
         assertEquals(mailsCount, 0);
     }
 
     @Test
     public void getRequestProcessedByServer() throws Exception {
         int expectedEmailsCount = 10;
+        MailMessageDao mailMessageDao = testInfrastructure.getMailMessageDao();
         when(mailMessageDao.retrieveMessages(anyString())).thenReturn(newMailMessageList(expectedEmailsCount));
-        
+
         List<MailMessage> messages = apiClient.getMessages("recipient");
-        
+
         assertEquals(messages.size(), expectedEmailsCount);
     }
 
     @BeforeMethod
     private void startApiServer() throws Exception {
-        apiServer = new ApiServer(PORT);
-        apiServer.setApiServerInitializer(newApiServerInitializer());
-        apiServer.start();
+        testInfrastructure = new TestInfrastructure(SMTP_PORT, API_PORT);
+        testInfrastructure.ready();
+        testInfrastructure.startApiServer();
     }
 
     @AfterMethod
     private void stopApiServer() throws Exception {
-        apiServer.stop();
+        testInfrastructure.stop();
     }
 
-    private ApiServerInitializer newApiServerInitializer() {
-        ApiServerInitializer apiServerInitializer = new ApiServerInitializer();
-        ApiServerHandler apiServerHandler = new ApiServerHandler();
-        apiServerInitializer.setApiServerHandler(apiServerHandler);
-        apiServerHandler.setMailMessageDao(mailMessageDao);
-        return apiServerInitializer;
-    }
 
     private List<MailMessage> newMailMessageList(int expectedEmailsCount) {
         List<MailMessage> messages = Lists.newArrayList();
-        for(int i = 0; i < expectedEmailsCount; i++) {
+        for (int i = 0; i < expectedEmailsCount; i++) {
             MailMessage mail = new MailMessage("from", "to", SUBJECT, BODY, false);
             messages.add(mail);
         }

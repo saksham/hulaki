@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -17,8 +18,8 @@ public class ApiServer {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private volatile boolean running = false;
-
-    private ApiServerInitializer apiServerInitializer;
+    private ApiServerInitializerFactory apiServerInitializerFactory;
+    private ApiServerHandlerFactory apiServerHandlerFactory;
 
     public ApiServer(int port) {
         this.port = port;
@@ -50,11 +51,13 @@ public class ApiServer {
             return;
         }
 
+        Assert.notNull(this.apiServerInitializerFactory);
+        Assert.notNull(this.apiServerHandlerFactory);
         logger.info("Starting API server on port: " + port + "...");
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup);
         b.channel(NioServerSocketChannel.class);
-        b.childHandler(apiServerInitializer);
+        b.childHandler(apiServerInitializerFactory.create());
         b.option(ChannelOption.SO_BACKLOG, 128);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
 
@@ -78,7 +81,12 @@ public class ApiServer {
     }
 
     @Required
-    public void setApiServerInitializer(ApiServerInitializer apiServerInitializer) {
-        this.apiServerInitializer = apiServerInitializer;
+    public void setApiServerInitializerFactory(ApiServerInitializerFactory apiServerInitializerFactory) {
+        this.apiServerInitializerFactory = apiServerInitializerFactory;
+    }
+    
+    @Required
+    public void setApiServerHandlerFactory(ApiServerHandlerFactory apiServerHandlerFactory) {
+        this.apiServerHandlerFactory = apiServerHandlerFactory;
     }
 }

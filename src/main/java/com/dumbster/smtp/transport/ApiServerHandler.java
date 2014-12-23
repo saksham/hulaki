@@ -11,16 +11,29 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.util.Assert;
 
 
 public class ApiServerHandler extends ChannelHandlerAdapter {
     
-    private MailMessageDao mailMessageDao;
-    private RelayAddressDao relayAddressDao;
-    private MailProcessor mailProcessor;
-    private SmtpServer smtpServer;
-
+    private final MailMessageDao mailMessageDao;
+    private final RelayAddressDao relayAddressDao;
+    private final MailProcessor mailProcessor;
+    private final SmtpServer smtpServer;
+    
+    public ApiServerHandler(MailMessageDao mailMessageDao, RelayAddressDao relayAddressDao, MailProcessor mailProcessor, SmtpServer smtpServer) {
+        Assert.notNull(mailMessageDao);
+        Assert.notNull(relayAddressDao);
+        Assert.notNull(mailProcessor);
+        Assert.notNull(smtpServer);
+        
+        this.mailMessageDao = mailMessageDao;
+        this.relayAddressDao = relayAddressDao;
+        this.mailProcessor = mailProcessor;
+        this.smtpServer = smtpServer;
+    }
+    
+    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ApiRequest request = (ApiRequest) msg;
@@ -108,25 +121,5 @@ public class ApiServerHandler extends ChannelHandlerAdapter {
             }
         }
         throw new ApiProtocolException("Parameters missing in the request.");
-    }
-
-    @Required
-    public void setMailMessageDao(MailMessageDao mailMessageDao) {
-        this.mailMessageDao = mailMessageDao;
-    }
-
-    @Required
-    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
-        this.relayAddressDao = relayAddressDao;
-    }
-
-    @Required
-    public void setMailProcessor(MailProcessor mailProcessor) {
-        this.mailProcessor = mailProcessor;
-    }
-
-    @Required
-    public void setSmtpServer(SmtpServer smtpServer) {
-        this.smtpServer = smtpServer;
     }
 }

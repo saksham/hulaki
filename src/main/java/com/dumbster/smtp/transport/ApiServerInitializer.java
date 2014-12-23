@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Required;
 
 public class ApiServerInitializer extends ChannelInitializer<SocketChannel> {
 
-    private ApiServerHandler apiServerHandler;
+    private ApiServerHandlerFactory serverHandlerFactory;
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
@@ -17,11 +17,11 @@ public class ApiServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1000, Delimiters.lineDelimiter()));
         pipeline.addLast("decoder", new ApiRequestDecoder());
         pipeline.addLast("encoder", new ApiRequestEncoder());
-        pipeline.addLast("handler", apiServerHandler);
+        pipeline.addLast("handler", serverHandlerFactory.create());
     }
 
     @Required
-    public void setApiServerHandler(ApiServerHandler apiServerHandler) {
-        this.apiServerHandler = apiServerHandler;
+    public void setServerHandlerFactory(ApiServerHandlerFactory serverHandlerFactory) {
+        this.serverHandlerFactory = serverHandlerFactory;
     }
 }

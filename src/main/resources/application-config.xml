@@ -19,9 +19,16 @@
         <constructor-arg name="port" value="2500"/>
     </bean>
 
+
+    <bean name="com.dumbster.smtp.transport.ApiServerInitializerFactory, apiServerInitializerFactory"
+          class="com.dumbster.smtp.transport.ApiServerInitializerFactory" primary="true">
+        <property name="apiServerHandlerFactory" ref="com.dumbster.smtp.transport.ApiServerHandlerFactory"/>
+    </bean>
+    
     <bean name="com.dumbster.smtp.transport.ApiServer" class="com.dumbster.smtp.transport.ApiServer">
         <constructor-arg name="port" value="6869"/>
-        <property name="apiServerInitializer" ref="com.dumbster.smtp.transport.ApiServerInitializer"/>
+        <property name="apiServerInitializerFactory" ref="com.dumbster.smtp.transport.ApiServerInitializerFactory"/>
+        <property name="apiServerHandlerFactory" ref="com.dumbster.smtp.transport.ApiServerHandlerFactory"/>
     </bean>
 
     <bean name="com.dumbster.smtp.storage.MailMessageDaoFactory"
@@ -43,16 +50,11 @@
         <constructor-arg name="smtpPort" value="567"/>
     </bean>
 
-    <bean name="com.dumbster.smtp.transport.ApiServerInitializer"
-          class="com.dumbster.smtp.transport.ApiServerInitializer">
-        <property name="apiServerHandler" ref="com.dumbster.smtp.transport.ApiServerHandler"/>
-    </bean>
-
-    <bean name="com.dumbster.smtp.transport.ApiServerHandler"
-          class="com.dumbster.smtp.transport.ApiServerHandler" scope="prototype">
-        <property name="relayAddressDao" ref="com.dumbster.smtp.storage.RelayAddressDao"/>
+    <bean name="com.dumbster.smtp.transport.ApiServerHandlerFactory,apiServerHandlerFactory"
+          class="com.dumbster.smtp.transport.ApiServerHandlerFactory">
+        <property name="smtpServer" ref="com.dumbster.smtp.transport.SmtpServer"/>
         <property name="mailMessageDao" ref="com.dumbster.smtp.storage.MailMessageDao"/>
         <property name="mailProcessor" ref="com.dumbster.smtp.app.MailProcessor"/>
-        <property name="smtpServer" ref="com.dumbster.smtp.transport.SmtpServer"/>
+        <property name="relayAddressDao" ref="com.dumbster.smtp.storage.RelayAddressDao"/>
     </bean>
 </beans>

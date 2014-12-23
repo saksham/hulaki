@@ -18,8 +18,10 @@ import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.storage.MailMessageDao;
 import com.dumbster.smtp.storage.RelayAddressDao;
 import com.dumbster.smtp.transport.*;
+import org.apache.commons.lang3.NotImplementedException;
 import org.mockito.Mockito;
 
+//@ContextConfiguration(locations = {"classpath:/application-config.xml"})
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
     public static final int SMTP_PORT = 2500;
@@ -47,7 +49,7 @@ public class TestInfrastructure {
     }
 
     public void inject() {
-        apiServer.setApiServerInitializer(newApiServerInitializer());
+        throw new NotImplementedException("Not implemented yet!");
     }
 
     public void startApiServer() throws Exception {
@@ -64,13 +66,7 @@ public class TestInfrastructure {
     }
 
     private ApiServerInitializer newApiServerInitializer() {
-        ApiServerInitializer apiServerInitializer = new ApiServerInitializer();
-        ApiServerHandler apiServerHandler = new ApiServerHandler();
-        apiServerInitializer.setApiServerHandler(apiServerHandler);
-        apiServerHandler.setMailMessageDao(mailMessageDao);
-        apiServerHandler.setSmtpServer(smtpServer);
-        apiServerHandler.setRelayAddressDao(relayAddressDao);
-        return apiServerInitializer;
+        return new ApiServerInitializer();
     }
 
     public void stop() throws Exception {

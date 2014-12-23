@@ -2,12 +2,11 @@ Dumbster Fake SMTP Server
 =========================
 ![Build status](https://travis-ci.org/saksham/dumbster.svg)
 
-The Dumbster is a very simple fake SMTP server designed for unit and system
-testing applications that send email messages.
+The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email messages.
 
-The following are key features of this SMTP test double
+Following are the key features of this SMTP test double
 
-* Understands ESMTP protocol and can receive emails sent using javax.mail
+* Understands ESMTP protocol and can receive emails sent using standard frameworks such as javax.mail or Unix Mail
 * All emails sent to the server can be stored irrespective of whether or not the recipient address or mailbox exists.
 * Can store emails using a variety of mechanisms. All emails are indexed using the recipient address for rapid retrieval.
  * Files: stores the emails in XML files
@@ -15,9 +14,11 @@ The following are key features of this SMTP test double
  * SQLite: stores them in an SQLite database 
 * Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
 * Provides serialization and deserialization methods on all requests and responses for constructing API clients
+* Also provides a client interface library in Java that can talk with the API server
 * Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port
+
 
 The API
 =======
@@ -37,7 +38,7 @@ Current version of the API supports the following actions:
  * For more details, see: GetRequest.java
 * *COUNT*
  * Counts the saved emails.
- * Supports speficying recipient address to selectively download emails.
+ * Supports speficying recipient address to selectively counting emails.
  * For more details, see: CountRequest.java
 * *RELAY*
  * Configures the relay behavior.

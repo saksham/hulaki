@@ -15,7 +15,7 @@ public class ApiRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        String messageFromClient = byteBuf.toString(Charsets.US_ASCII);
+        String messageFromClient = byteBuf.toString(Charsets.UTF_8);
         ApiRequest request = null;
         try {
             request = ApiRequest.fromRequestString(messageFromClient);

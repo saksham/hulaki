@@ -1,21 +1,7 @@
 package com.dumbster.smtp.transport;
 
 
-import com.dumbster.smtp.api.ApiCommand;
-import com.dumbster.smtp.api.ApiRequest;
-import com.dumbster.smtp.api.ApiResponse;
-import com.dumbster.smtp.api.ClearRequest;
-import com.dumbster.smtp.api.CountRequest;
-import com.dumbster.smtp.api.CountResponse;
-import com.dumbster.smtp.api.GetRequest;
-import com.dumbster.smtp.api.GetResponse;
-import com.dumbster.smtp.api.RelayMode;
-import com.dumbster.smtp.api.RelayRequest;
-import com.dumbster.smtp.api.RelayResponse;
-import com.dumbster.smtp.api.ServerName;
-import com.dumbster.smtp.api.ServerStatus;
-import com.dumbster.smtp.api.ServerStatusRequest;
-import com.dumbster.smtp.api.StatusResponse;
+import com.dumbster.smtp.api.*;
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import com.dumbster.smtp.storage.MailMessageDao;
@@ -25,50 +11,47 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Required;
 
 
-@Component
 public class ApiServerHandler extends ChannelHandlerAdapter {
-    @Autowired
+    
     private MailMessageDao mailMessageDao;
-
-    @Autowired
     private RelayAddressDao relayAddressDao;
-
-    @Autowired
     private MailProcessor mailProcessor;
-
-    @Autowired
     private SmtpServer smtpServer;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ApiRequest request = (ApiRequest) msg;
+        ChannelFuture writeHandler = null;
 
         try {
             ApiResponse response;
-            if (request == null || request.getCommand() == ApiCommand.INVALID) {
+            if (request == null || request instanceof InvalidRequest) {
                 response = new StatusResponse(404, "Invalid command!");
-            } else if (request.getCommand() == ApiCommand.COUNT) {
+            } else if (request instanceof CountRequest) {
                 response = process((CountRequest) request);
-            } else if (request.getCommand() == ApiCommand.GET) {
+            } else if (request instanceof GetRequest) {
                 response = process((GetRequest) request);
-            } else if (request.getCommand() == ApiCommand.CLEAR) {
+            } else if (request instanceof ClearRequest) {
                 response = process((ClearRequest) request);
-            } else if (request.getCommand() == ApiCommand.RELAY) {
+            } else if (request instanceof RelayRequest) {
                 response = process((RelayRequest) request);
-            } else if (request.getCommand() == ApiCommand.SERVER_STATUS) {
+            } else if (request instanceof ServerStatusRequest) {
                 response = process((ServerStatusRequest) request);
             } else {
                 response = new StatusResponse(403, "Bad request!");
             }
 
-            ChannelFuture f = ctx.writeAndFlush(response);
-            f.addListener(ChannelFutureListener.CLOSE);
+            writeHandler = ctx.writeAndFlush(response);
         } finally {
             ReferenceCountUtil.release(msg);
+            if(writeHandler != null) {
+                writeHandler.addListener(ChannelFutureListener.CLOSE);
+            } else {
+                ctx.close();
+            }
         }
     }
 
@@ -125,5 +108,25 @@ public class ApiServerHandler extends ChannelHandlerAdapter {
             }
         }
         throw new ApiProtocolException("Parameters missing in the request.");
+    }
+
+    @Required
+    public void setMailMessageDao(MailMessageDao mailMessageDao) {
+        this.mailMessageDao = mailMessageDao;
+    }
+
+    @Required
+    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
+        this.relayAddressDao = relayAddressDao;
+    }
+
+    @Required
+    public void setMailProcessor(MailProcessor mailProcessor) {
+        this.mailProcessor = mailProcessor;
+    }
+
+    @Required
+    public void setSmtpServer(SmtpServer smtpServer) {
+        this.smtpServer = smtpServer;
     }
 }

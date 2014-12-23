@@ -6,14 +6,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 
 
-@Component
 public class ServerApplication implements ApplicationListener<ContextStartedEvent> {
 
     public static void main(String[] args) throws Exception {

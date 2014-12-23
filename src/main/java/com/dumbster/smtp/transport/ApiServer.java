@@ -6,12 +6,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-@Component
 public class ApiServer {
     private static final Logger logger = Logger.getLogger(ApiServer.class);
     private final int port;
@@ -19,11 +18,25 @@ public class ApiServer {
     private EventLoopGroup workerGroup;
     private volatile boolean running = false;
 
+    private ApiServerInitializer apiServerInitializer;
 
     public ApiServer(int port) {
         this.port = port;
         this.bossGroup = new NioEventLoopGroup(10);
         this.workerGroup = new NioEventLoopGroup(20);
+    }
+
+    public static void main(String[] args) throws Exception {
+        final int port = 6869;
+        ApiServer server = new ApiServer(port);
+
+        System.out.println("Type EXIT to quit");
+        server.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to quit");
+        }
+        server.stop();
     }
 
     public boolean isRunning() {
@@ -38,11 +51,10 @@ public class ApiServer {
         }
 
         logger.info("Starting API server on port: " + port + "...");
-        ApiServerInitializer initializer = new ApiServerInitializer();
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup);
         b.channel(NioServerSocketChannel.class);
-        b.childHandler(initializer);
+        b.childHandler(apiServerInitializer);
         b.option(ChannelOption.SO_BACKLOG, 128);
         b.childOption(ChannelOption.SO_KEEPALIVE, true);
 
@@ -65,16 +77,8 @@ public class ApiServer {
         running = false;
     }
 
-    public static void main(String[] args) throws Exception {
-        final int port = 6869;
-        ApiServer server = new ApiServer(port);
-
-        System.out.println("Type EXIT to quit");
-        server.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to quit");
-        }
-        server.stop();
+    @Required
+    public void setApiServerInitializer(ApiServerInitializer apiServerInitializer) {
+        this.apiServerInitializer = apiServerInitializer;
     }
 }

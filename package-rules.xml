@@ -6,6 +6,8 @@
     
     <!-- Use explicit XML wiring -->
     <disallow class="org.springframework.beans.factory.annotation.Autowired"/>
+    <disallow class="org.springframework.stereotype.Component" />
+    <disallow class="org.springframework.stereotype.Service" />
 
 
     <subpackage name="api">

@@ -8,23 +8,16 @@ import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
 import com.dumbster.smtp.utils.EmailUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Required;
 
-@Component
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     private static final Logger logger = Logger.getLogger(MailProcessor.class);
 
     private volatile boolean stopped;
 
-    @Autowired
     private MailMessageDao mailMessageDao;
-
-    @Autowired
     private RelayAddressDao relayAddressDao;
-
-    @Autowired
     private EmailSender emailSender;
 
     @Override
@@ -65,5 +58,20 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
             }
         }
         logger.info("Mail processor stopped!");
+    }
+
+    @Required
+    public void setMailMessageDao(MailMessageDao mailMessageDao) {
+        this.mailMessageDao = mailMessageDao;
+    }
+
+    @Required
+    public void setRelayAddressDao(RelayAddressDao relayAddressDao) {
+        this.relayAddressDao = relayAddressDao;
+    }
+
+    @Required
+    public void setEmailSender(EmailSender emailSender) {
+        this.emailSender = emailSender;
     }
 }

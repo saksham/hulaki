@@ -7,14 +7,12 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
 
-@Component
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
     private final int port;
@@ -32,13 +30,26 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         this.workerGroup = new NioEventLoopGroup(20);
     }
 
+    public static void main(String[] args) throws Exception {
+        int port = 2500;
+
+        System.out.println("Type EXIT to exit the program.");
+        SmtpServer smtpServer = new SmtpServer(port);
+        smtpServer.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to exit the program.");
+        }
+        smtpServer.stop();
+    }
+
     public boolean isRunning() {
         return running && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
                 (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
     public synchronized void start() throws Exception {
-        if(running) {
+        if (running) {
             logger.warn("SMTP Server already started.");
             return;
         }
@@ -56,9 +67,8 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         running = true;
     }
 
-
     public synchronized void stop() throws Exception {
-        if(!running) {
+        if (!running) {
             logger.warn("SMTP Server already stopped.");
             return;
         }
@@ -68,20 +78,6 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         bossGroup.shutdownGracefully().sync();
         logger.info("Stopped SMTP server!");
     }
-
-    public static void main(String[] args) throws Exception {
-        int port = 2500;
-
-        System.out.println("Type EXIT to exit the program.");
-        SmtpServer smtpServer = new SmtpServer(port);
-        smtpServer.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to exit the program.");
-        }
-        smtpServer.stop();
-    }
-
 
     @Override
     public void notify(SmtpMessage data) {

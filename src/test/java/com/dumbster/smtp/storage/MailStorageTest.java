@@ -28,11 +28,8 @@ public class MailStorageTest {
     public static final String SQLITE_DB_FILENAME = "target/test.db";
     public static final String EMAIL_1 = "someone_first@somewhere.com";
     public static final String EMAIL_2 = "someone_second@somewhere.com";
-    private static final String SMTP_HOSTNAME = "localhost";
     private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/" + "target/emails";
-    public static final int API_PORT = 6869;
-    private final int SMTP_PORT = 2500;
-    private EmailSender emailSender = new EmailSender(SMTP_HOSTNAME, SMTP_PORT);
+    private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
     private TestInfrastructure apiInfrastructure;
 
     @Test(dataProvider = "provideMailStorages")
@@ -77,9 +74,9 @@ public class MailStorageTest {
 
 
     private void startServer(MailMessageDao mailStorage) throws Exception {
-        apiInfrastructure = new TestInfrastructure(SMTP_PORT, API_PORT);
+        apiInfrastructure = new TestInfrastructure();
         apiInfrastructure.setMailMessageDao(mailStorage);
-        apiInfrastructure.ready();
+        apiInfrastructure.inject();
         apiInfrastructure.startSmtpServer();
         apiInfrastructure.startMailProcessor();
     }

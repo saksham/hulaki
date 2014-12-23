@@ -14,12 +14,13 @@ import java.util.regex.Pattern;
 public class SmtpMessage {
     private static final Pattern headerPattern = Pattern.compile("(?<name>[^:]*): (?<value>.*)");
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
-    private final Map<String, String> headers = Maps.newHashMap();
-    private final StringBuffer body = new StringBuffer();
+    
+    private Map<String, String> headers = Maps.newHashMap();
+    private StringBuffer body = new StringBuffer();
+    
     private String latestHeader;
     private boolean isReadingHeader = true;
     private boolean closed = false;
-
 
     public void addLine(String line) {
         if(closed) {
@@ -88,7 +89,7 @@ public class SmtpMessage {
     }
 
 
-    String getCharset() {
+    private String getCharset() {
         String contentType = getHeaderValue("Content-Type");
         if (contentType != null) {
             int n = contentType.indexOf("charset=");

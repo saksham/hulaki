@@ -14,6 +14,7 @@
 
 package com.dumbster.smtp.transport;
 
+import com.dumbster.smtp.utils.TestInfrastructure;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,52 +24,51 @@ import static org.testng.Assert.assertTrue;
 
 @Test(groups = "Component")
 public class ApiServerTest {
-
-    public static final int PORT = 6869;
-    private ApiServer apiServer;
+    private TestInfrastructure infrastructure;
 
     @BeforeMethod
     private void createNewServer() {
-        apiServer = new ApiServer(PORT);
+        infrastructure = new TestInfrastructure();
+        infrastructure.inject();
     }
     
     @AfterMethod
     private void stopServer() throws Exception {
-        apiServer.stop();
+        infrastructure.stop();
     }
     
+    @Test
     public void restartApiServerMultipleTimes() throws Exception {
         int numOfRestarts = 2;
 
         for (int i = 0; i < numOfRestarts; i++) {
-            apiServer.start();
-            assertTrue(apiServer.isRunning());
-            apiServer.stop();
-            assertFalse(apiServer.isRunning());
+            infrastructure.getApiServer().start();
+            assertTrue(infrastructure.getApiServer().isRunning());
+            infrastructure.stop();
+            assertFalse(infrastructure.getApiServer().isRunning());
         }
     }
 
+    @Test
     public void serverCanBeStartedMultipleTimes() throws Exception {
         int numOfStarts = 10;
 
         for (int i = 0; i < numOfStarts; i++) {
-            apiServer.start();
-            assertTrue(apiServer.isRunning());
+            infrastructure.getApiServer().start();
+            assertTrue(infrastructure.getApiServer().isRunning());
         }
-        apiServer.stop();
-        assertFalse(apiServer.isRunning());
+        infrastructure.getApiServer().stop();
+        assertFalse(infrastructure.getApiServer().isRunning());
     }
 
+    @Test
     public void serverCanBeStoppedMultipleTimes() throws Exception {
         int numOfStops = 10;
 
-        apiServer.start();
+        infrastructure.getApiServer().start();
         for (int i = 0; i < numOfStops; i++) {
-            apiServer.stop();
+            infrastructure.getApiServer().stop();
         }
-        assertFalse(apiServer.isRunning());
+        assertFalse(infrastructure.getApiServer().isRunning());
     }
-    
-    
-
 }

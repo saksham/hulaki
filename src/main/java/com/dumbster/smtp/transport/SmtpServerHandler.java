@@ -30,7 +30,7 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         String line = (String) msg;
-        logger.debug("CLIENT: " + line);
+        logger.info("CLIENT: " + line);
 
         SmtpResult result = executeCommand(line);
         SmtpState prevState = currentState;

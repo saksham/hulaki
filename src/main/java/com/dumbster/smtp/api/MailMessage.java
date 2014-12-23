@@ -14,8 +14,6 @@
 
 package com.dumbster.smtp.api;
 
-import com.dumbster.smtp.transport.SmtpMessage;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -32,14 +30,6 @@ public class MailMessage implements Serializable {
 
     public MailMessage() {
     } // Empty constructor for JAXB
-
-    public MailMessage(SmtpMessage message, boolean isRelayed) {
-        this.to = message.getHeaderValue("To");
-        this.from = message.getHeaderValue("From");
-        this.subject = message.getHeaderValue("Subject");
-        this.body = message.getBody();
-        this.isRelayed = isRelayed;
-    }
 
     public MailMessage(String from, String to, String subject, String body, boolean isRelayed) {
         this.from = from;

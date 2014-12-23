@@ -46,7 +46,7 @@ public class ApiServer {
 
     public synchronized void start() throws InterruptedException {
         if (running) {
-            logger.warn("Server already started.");
+            logger.warn("API Server already started.");
             return;
         }
 
@@ -65,7 +65,7 @@ public class ApiServer {
 
     public synchronized void stop() throws Exception {
         if (!running) {
-            logger.warn("Server already stopped.");
+            logger.warn("API Server already stopped.");
             return;
         }
         logger.info("Stopping API server...");

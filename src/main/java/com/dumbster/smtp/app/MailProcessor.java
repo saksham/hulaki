@@ -22,17 +22,25 @@ public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     @Override
     public void notify(SmtpMessage smtpMessage) {
-        String recipient = EmailUtils.normalizeEmailAddress(smtpMessage.getHeaderValue("To"));
-        boolean wasMailRelayed = false;
+        String[] toAddresses = smtpMessage.getHeaderValue("To").split(",");
+        for (String toAddress : toAddresses) {
+            String recipient = EmailUtils.normalizeEmailAddress(toAddress);
+            String sender = smtpMessage.getHeaderValue("From");
+            String subject = smtpMessage.getHeaderValue("Subject");
+            String body = smtpMessage.getBody();
+            process(sender, recipient, subject, body);
+        }
+    }
 
+    private void process(String sender, String recipient, String subject, String body) {
+        boolean wasMailRelayed = false;
         if (relayAddressDao.isRelayRecipient(recipient)) {
             wasMailRelayed = true;
-            emailSender.sendEmail(smtpMessage.getHeaderValue("From"), recipient,
-                    smtpMessage.getHeaderValue("Subject"), smtpMessage.getBody());
+            emailSender.sendEmail(sender, recipient, subject, body);
             logger.info("Relayed email to " + recipient);
         }
 
-        MailMessage message = new MailMessage(smtpMessage, wasMailRelayed);
+        MailMessage message = new MailMessage(sender, recipient, subject, body, wasMailRelayed);
         mailMessageDao.storeMessage(recipient, message);
     }
 

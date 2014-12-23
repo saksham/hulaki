@@ -62,6 +62,7 @@ public class EmailSender {
             for (String email : to) {
                 recipients.add(new InternetAddress(email, email));
             }
+            message.setFrom(new InternetAddress(from));
             message.addRecipients(Message.RecipientType.TO, recipients.toArray(new InternetAddress[recipients.size()]));
             message.setSubject(subject);
             message.setText(body);

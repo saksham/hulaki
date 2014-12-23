@@ -13,154 +13,130 @@
  */
 package com.dumbster.smtp.transport;
 
-import com.beust.jcommander.internal.Lists;
 import com.dumbster.smtp.utils.EmailSender;
-import com.dumbster.smtp.utils.SimpleSmtpStorage;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import com.dumbster.smtp.utils.TestInfrastructure;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.mockito.ArgumentCaptor;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
-import java.util.List;
-import java.util.Properties;
-
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 
 @Test(groups = "Component")
 public class SmtpMessageTest {
+    public static final String RECIPIENT = "recipient@email.com";
+    private static final String MAIL_FROM = "sender@email.com";
 
-    public static final int PORT = 2500;
-    public static final String RECIPIENT = "sender@email.com";
-    private static final String MAIL_FROM = "test.from@teste.com";
-    public static final String CHARSET = "UTF-8";
-    private SmtpServer smtpServer;
-    private SimpleSmtpStorage storage;
+    private TestInfrastructure infrastructure;
     private EmailSender emailSender;
 
-    @BeforeClass
+    private static void addHeadersToEmailSender(EmailSender message) throws Exception {
+        message.addHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
+        message.addHeader("X-Accept-Language", "pt-br, pt");
+        message.addHeader("Content-Transfer-Encoding", "quoted-printable");
+    }
+
+    @BeforeMethod
     private void setUp() throws Exception {
-        this.smtpServer = new SmtpServer(PORT);
-        this.smtpServer.start();
-        this.storage = new SimpleSmtpStorage();
-        this.smtpServer.addObserver(this.storage);
-        emailSender = new EmailSender("localhost", PORT);
+        infrastructure = new TestInfrastructure();
+        infrastructure.inject();
+        infrastructure.startSmtpServer();
+
+        emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
+        addHeadersToEmailSender(emailSender);
     }
 
-    @AfterClass
+    @AfterMethod
     public void tearDown() throws Exception {
-        smtpServer.stop();
+        infrastructure.stop();
     }
 
+    @Test
     public void sendEmail() throws Exception {
-        int countBefore = storage.getReceivedEmailSize();
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
         emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Some subject", "Some message text");
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
-        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
+        assertEquals(messageCaptor.getValue().getBody(), "Some message text");
     }
 
-    public void sendEmailMultipleRecipients() throws Exception {
-        int countBefore = storage.getReceivedEmailSize();
-        String recipient = "sender@email.com, otherSender@test.com";
-
-        emailSender.sendEmail(MAIL_FROM, recipient, "Test", "Test Body");
-
-        assertEquals(storage.getReceivedEmailSize(), countBefore + 1);
-    }
-
+    @Test
     public void sendEmailFrom() throws Exception {
-        this.sendMessage(RECIPIENT, "subject", "Test Body");
+        String from = new InternetAddress(MAIL_FROM, MAIL_FROM).toString();
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        assertFrom("\"test.from@teste.com\" <test.from@teste.com>");
+        emailSender.sendEmail(from, RECIPIENT, "Subject", "Body - " + RandomStringUtils.random(10));
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
+
+        assertFromHeaderEquals(messageCaptor.getValue(), from);
+        assertEquals(messageCaptor.getValue().getHeaderValue("To"), new InternetAddress(RECIPIENT, RECIPIENT).toString());
     }
 
+    @Test
     public void sendEmailSubject() throws Exception {
         String subject = "Test Ão çÇá";
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Some message text");
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Test Body");
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
-        assertSubject(subject);
+        assertSubjectEquals(messageCaptor.getValue(), subject);
     }
 
+    @Test
     public void sendEmailSubjectExtended() throws Exception {
         String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
                 + "http://youtube.com/xyz äüö and secret informations";
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Test Body");
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Body - " + RandomStringUtils.random(10));
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
-        assertSubject(subject);
+        assertSubjectEquals(messageCaptor.getValue(), subject);
     }
 
-    public void sendEmailBody() throws Exception{
+    @Test
+    public void sendEmailBody() throws Exception {
         String body = "Ão çÇá";
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject", body);
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject - " + RandomStringUtils.random(10), body);
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
-        assertBody(body);
+        assertBodyEquals(messageCaptor.getValue(), body);
     }
 
-    public void sendEmailBodyMultiline() throws Exception{
+    @Test
+    public void sendEmailBodyMultiline() throws Exception {
         String body = "Somthing\nNew Line\n\nTwo new Lines.\n\n...etc.\n\n\n.";
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        this.sendMessage("sender@email.com", "Test", body);
+        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject - " + RandomStringUtils.random(10), body);
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
-        assertBody(body);
+        assertBodyEquals(messageCaptor.getValue(), body);
     }
 
-    private void assertSubject(final String expected) {
-        assertHeader("Subject", expected);
+    private void assertSubjectEquals(final SmtpMessage message, final String expected) {
+        assertHeaderEquals(message, "Subject", expected);
     }
 
-    private void assertFrom(final String expected) {
-        assertHeader("From", expected);
+    private void assertFromHeaderEquals(final SmtpMessage message, final String expected) {
+        assertHeaderEquals(message, "From", expected);
     }
 
-    private void assertHeader(final String property, final String expected) {
-        String headerValue = storage.getLatestEmail().getHeaderValue(property);
+    private void assertHeaderEquals(final SmtpMessage message, final String property, final String expected) {
+        String headerValue = message.getHeaderValue(property);
         assertEquals(headerValue, expected);
     }
 
-    private void assertBody(final String expected) {
-        assertEquals(storage.getLatestEmail().getBody(), expected);
+    private void assertBodyEquals(final SmtpMessage message, final String expected) {
+        assertEquals(message.getBody(), expected);
     }
-
-    private static void setHeaders(final MimeMessage message) throws Exception {
-        message.setHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
-        message.setHeader("X-Accept-Language", "pt-br, pt");
-        message.setHeader("Content-Transfer-Encoding", "quoted-printable");
-    }
-
-    private void sendMessage(final String recipientsCsv, final String subject, final String body) {
-        final Properties properties = new Properties();
-        properties.put("mail.smtp.host", "localhost");
-        properties.put("mail.smtp.port", PORT);
-        properties.put("mail.mime.charset", CHARSET);
-        properties.put("mail.from", MAIL_FROM);
-        final Session session = Session.getInstance(properties, null);
-        final MimeMessage msg = new MimeMessage(session);
-
-        try {
-            msg.setFrom(new InternetAddress(MAIL_FROM, MAIL_FROM));
-            List<InternetAddress> addresses = Lists.newArrayList();
-            String[] recipients = recipientsCsv.split(",");
-            for (String email : recipients) {
-                addresses.add(new InternetAddress(email, email));
-            }
-            msg.setRecipients(Message.RecipientType.TO, addresses.toArray(new InternetAddress[addresses.size()]));
-            msg.setSubject(subject, CHARSET);
-            msg.setText(body, CHARSET);
-            setHeaders(msg);
-
-            Transport.send(msg);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

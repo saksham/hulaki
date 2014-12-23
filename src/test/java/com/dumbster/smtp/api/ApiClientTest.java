@@ -29,12 +29,10 @@ import static org.testng.Assert.assertEquals;
 
 @Test(groups = "Component")
 public class ApiClientTest {
-    private static final int SMTP_PORT = 2500;
-    private static final int API_PORT = 6869;
     private static final String SUBJECT = "some subject";
     private static final String BODY = "some body";
-    private IApiClient apiClient = new ApiClient("localhost", API_PORT);
-
+    
+    private IApiClient apiClient = new ApiClient("localhost", TestInfrastructure.API_PORT);
     private TestInfrastructure testInfrastructure;
 
     @Test
@@ -60,8 +58,8 @@ public class ApiClientTest {
 
     @BeforeMethod
     private void startApiServer() throws Exception {
-        testInfrastructure = new TestInfrastructure(SMTP_PORT, API_PORT);
-        testInfrastructure.ready();
+        testInfrastructure = new TestInfrastructure();
+        testInfrastructure.inject();
         testInfrastructure.startApiServer();
     }
 

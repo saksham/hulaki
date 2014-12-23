@@ -33,22 +33,12 @@ public class SmtpMessageTest {
     private static final String MAIL_FROM = "sender@email.com";
 
     private TestInfrastructure infrastructure;
-    private EmailSender emailSender;
-
-    private static void addHeadersToEmailSender(EmailSender message) throws Exception {
-        message.addHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
-        message.addHeader("X-Accept-Language", "pt-br, pt");
-        message.addHeader("Content-Transfer-Encoding", "quoted-printable");
-    }
 
     @BeforeMethod
     private void setUp() throws Exception {
         infrastructure = new TestInfrastructure();
         infrastructure.inject();
         infrastructure.startSmtpServer();
-
-        emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
-        addHeadersToEmailSender(emailSender);
     }
 
     @AfterMethod
@@ -58,6 +48,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmail() throws Exception {
+        EmailSender emailSender = newEmailSender();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
         emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Some subject", "Some message text");
@@ -68,6 +59,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmailFrom() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String from = new InternetAddress(MAIL_FROM, MAIL_FROM).toString();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
@@ -80,6 +72,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmailSubject() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String subject = "Test Ão çÇá";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
@@ -91,6 +84,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmailSubjectExtended() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String subject = "Test Subject with very Long Text (over 76 chars) and special chars: "
                 + "http://youtube.com/xyz äüö and secret informations";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
@@ -103,6 +97,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmailBody() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String body = "Ão çÇá";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
@@ -114,6 +109,7 @@ public class SmtpMessageTest {
 
     @Test
     public void sendEmailBodyMultiline() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String body = "Somthing\nNew Line\n\nTwo new Lines.\n\n...etc.\n\n\n.";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
@@ -138,5 +134,13 @@ public class SmtpMessageTest {
 
     private void assertBodyEquals(final SmtpMessage message, final String expected) {
         assertEquals(message.getBody(), expected);
+    }
+
+    private EmailSender newEmailSender() throws Exception {
+        EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
+        emailSender.addHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
+        emailSender.addHeader("X-Accept-Language", "pt-br, pt");
+        emailSender.addHeader("Content-Transfer-Encoding", "quoted-printable");
+        return emailSender;
     }
 }

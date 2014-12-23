@@ -45,8 +45,6 @@ public class MailStorageTest {
             emailSender.sendEmail(EMAIL_1, EMAIL_2, subject + i, messageBody + i);
         }
 
-        Thread.sleep(2000);
-
         // Then
         assertEquals(mailStorage.countAllMessagesReceived(), 3 * 2, "All emails should be received");
         assertEquals(mailStorage.countMessagesForRecipient(EMAIL_1), 3, "Email should have been stored by the server");
@@ -82,7 +80,7 @@ public class MailStorageTest {
     }
 
     @AfterMethod
-    private void stopSmtpMockServer() throws Exception {
+    private void stopServer() throws Exception {
         apiInfrastructure.stop();
     }
 

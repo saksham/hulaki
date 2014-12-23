@@ -37,7 +37,6 @@ public class SmtpServerTest {
 
     public static final String RECIPIENT = "recipient@here.com";
     public static final String SENDER = "sender@here.com";
-    private EmailSender emailSender;
     private TestInfrastructure infrastructure;
 
     @Test
@@ -50,6 +49,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendNormalEmail() throws Exception {
+        EmailSender emailSender = newEmailSender();
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
         emailSender.sendEmail(SENDER, RECIPIENT, "Test", "Test Body");
@@ -61,6 +61,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendEmailWithCarriageReturn() throws Exception {
+        EmailSender emailSender = newEmailSender();
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
         String bodyWithCR = "\n\nKeep these pesky carriage returns\n\n.\n\n...";
 
@@ -73,6 +74,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendCharsetWithJapaneseMessage() throws Exception {
+        EmailSender emailSender = newEmailSender();
         emailSender.setCharset("iso-2022-jp");
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
         String body = "\u3042\u3044\u3046\u3048\u304a";
@@ -87,20 +89,24 @@ public class SmtpServerTest {
 
     @Test
     public void sendEncoding7BitJapaneseMessage() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("7bit");
+        ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
-
+        
         emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", body);
+        verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
         verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
 
-        assertEquals(emailCaptor.getValue().getSubject(), "EncodedMessage");
+        assertEquals(messageCaptor.getValue().getBody(), body);
         assertEquals(emailCaptor.getValue().getBody(), body);
     }
 
     @Test
     public void sendEncodingQuotedPrintableJapaneseMessage() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("quoted-printable");
@@ -115,6 +121,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendEncodingBase64EncodedJapaneseMessage() throws Exception {
+        EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("base64");
@@ -129,6 +136,7 @@ public class SmtpServerTest {
 
     @Test
     public void continuedHeadersArriveIntact() throws Exception {
+        EmailSender emailSender = newEmailSender();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         emailSender.addHeaderLine("X-LongHeader: 12345");
         emailSender.addHeaderLine("\t67890");
@@ -146,6 +154,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendTwoMessagesSameConnection() throws Exception {
+        EmailSender emailSender = newEmailSender();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         Session smtpSession = emailSender.newSmtpSession(SENDER);
         MimeMessage first = createMessage(smtpSession, SENDER, "receiver@home.com", "Doodle1", "Bug1");
@@ -159,6 +168,7 @@ public class SmtpServerTest {
 
     @Test
     public void sendTwoMessagesWithLogin() throws Exception {
+        EmailSender emailSender = newEmailSender();
         emailSender.setUsername("username");
         emailSender.setPassword("password");
         Session smtpSession = emailSender.newSmtpSession(SENDER);
@@ -178,7 +188,6 @@ public class SmtpServerTest {
         infrastructure = new TestInfrastructure();
         infrastructure.inject();
         infrastructure.getSmtpServer().start();
-        emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
     }
 
     @AfterMethod
@@ -194,5 +203,9 @@ public class SmtpServerTest {
         msg.setText(body);
         msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
         return msg;
+    }
+    
+    private EmailSender newEmailSender() {
+        return new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
     }
 }

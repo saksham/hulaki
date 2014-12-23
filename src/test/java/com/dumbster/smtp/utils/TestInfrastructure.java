@@ -25,8 +25,7 @@ import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.transport.SmtpServer;
 import org.mockito.Mockito;
 
-//TODO: wire the infrastructure instead of doing this explicitly
-//@ContextConfiguration(locations = {"classpath:/application-config.xml"})
+
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
     public static final int SMTP_PORT = 2500;

@@ -20,9 +20,7 @@ import com.dumbster.smtp.transport.ApiServer;
 import com.dumbster.smtp.transport.ApiServerHandler;
 import com.dumbster.smtp.transport.ApiServerInitializer;
 import org.mockito.Mockito;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class ApiClientTest {
     private static final String BODY = "some body";
 
     private IApiClient apiClient = new ApiClient("localhost", PORT);
-    private ApiServer apiServer = new ApiServer(PORT);
+    private ApiServer apiServer;
     private MailMessageDao mailMessageDao = Mockito.mock(MailMessageDao.class);
 
 
@@ -60,13 +58,14 @@ public class ApiClientTest {
         assertEquals(messages.size(), expectedEmailsCount);
     }
 
-    @BeforeClass
+    @BeforeMethod
     private void startApiServer() throws Exception {
+        apiServer = new ApiServer(PORT);
         apiServer.setApiServerInitializer(newApiServerInitializer());
         apiServer.start();
     }
 
-    @AfterClass
+    @AfterMethod
     private void stopApiServer() throws Exception {
         apiServer.stop();
     }

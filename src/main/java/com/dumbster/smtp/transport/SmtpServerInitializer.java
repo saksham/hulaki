@@ -22,7 +22,7 @@ public class SmtpServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1000, Delimiters.lineDelimiter()));
-        pipeline.addLast("decoder", new StringDecoder(CharsetUtil.US_ASCII));
+        pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
         pipeline.addLast("encoder", new StringEncoder());
 
         SmtpServerHandler serverHandler = new SmtpServerHandler();

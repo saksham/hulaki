@@ -22,7 +22,7 @@
 
     <bean name="com.dumbster.smtp.transport.ApiServerInitializerFactory, apiServerInitializerFactory"
           class="com.dumbster.smtp.transport.ApiServerInitializerFactory" primary="true">
-        <property name="apiServerHandlerFactory" ref="com.dumbster.smtp.transport.ApiServerHandlerFactory"/>
+        <constructor-arg ref="com.dumbster.smtp.transport.ApiServerHandlerFactory"/>
     </bean>
     
     <bean name="com.dumbster.smtp.transport.ApiServer" class="com.dumbster.smtp.transport.ApiServer">
@@ -52,9 +52,9 @@
 
     <bean name="com.dumbster.smtp.transport.ApiServerHandlerFactory,apiServerHandlerFactory"
           class="com.dumbster.smtp.transport.ApiServerHandlerFactory">
-        <property name="smtpServer" ref="com.dumbster.smtp.transport.SmtpServer"/>
-        <property name="mailMessageDao" ref="com.dumbster.smtp.storage.MailMessageDao"/>
-        <property name="mailProcessor" ref="com.dumbster.smtp.app.MailProcessor"/>
-        <property name="relayAddressDao" ref="com.dumbster.smtp.storage.RelayAddressDao"/>
+        <constructor-arg name="smtpServer" ref="com.dumbster.smtp.transport.SmtpServer"/>
+        <constructor-arg name="mailMessageDao" ref="com.dumbster.smtp.storage.MailMessageDao"/>
+        <constructor-arg name="mailProcessor" ref="com.dumbster.smtp.app.MailProcessor"/>
+        <constructor-arg name="relayAddressDao" ref="com.dumbster.smtp.storage.RelayAddressDao"/>
     </bean>
 </beans>

@@ -17,10 +17,15 @@ package com.dumbster.smtp.utils;
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.storage.MailMessageDao;
 import com.dumbster.smtp.storage.RelayAddressDao;
-import com.dumbster.smtp.transport.*;
-import org.apache.commons.lang3.NotImplementedException;
+import com.dumbster.smtp.transport.ApiServer;
+import com.dumbster.smtp.transport.ApiServerHandlerFactory;
+import com.dumbster.smtp.transport.ApiServerInitializerFactory;
+import com.dumbster.smtp.transport.Observer;
+import com.dumbster.smtp.transport.SmtpMessage;
+import com.dumbster.smtp.transport.SmtpServer;
 import org.mockito.Mockito;
 
+//TODO: wire the infrastructure instead of doing this explicitly
 //@ContextConfiguration(locations = {"classpath:/application-config.xml"})
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
@@ -41,15 +46,20 @@ public class TestInfrastructure {
         this.mailProcessor = new MailProcessor();
         this.smtpServer.addObserver(this.mailProcessor);
         this.smtpServer.addObserver(smtpMessageObserver);
-        
+
         this.mailMessageDao = Mockito.mock(MailMessageDao.class);
         this.relayAddressDao = Mockito.mock(RelayAddressDao.class);
         this.mailProcessor.setMailMessageDao(this.mailMessageDao);
         this.mailProcessor.setRelayAddressDao(this.relayAddressDao);
+
+        ApiServerHandlerFactory apiServerHandlerFactory = new ApiServerHandlerFactory(this.mailMessageDao, this.relayAddressDao, this.mailProcessor, this.smtpServer);
+        ApiServerInitializerFactory serverInitializerFactory = new ApiServerInitializerFactory(apiServerHandlerFactory);
+        this.apiServer.setApiServerHandlerFactory(apiServerHandlerFactory);
+        this.apiServer.setApiServerInitializerFactory(serverInitializerFactory);
     }
 
     public void inject() {
-        throw new NotImplementedException("Not implemented yet!");
+
     }
 
     public void startApiServer() throws Exception {
@@ -63,10 +73,6 @@ public class TestInfrastructure {
     public void startMailProcessor() throws Exception {
         Thread mailProcessorThread = new Thread(mailProcessor);
         mailProcessorThread.start();
-    }
-
-    private ApiServerInitializer newApiServerInitializer() {
-        return new ApiServerInitializer();
     }
 
     public void stop() throws Exception {

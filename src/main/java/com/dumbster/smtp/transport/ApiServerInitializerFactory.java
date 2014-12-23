@@ -1,13 +1,13 @@
 package com.dumbster.smtp.transport;
 
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.util.Assert;
 
 public class ApiServerInitializerFactory {
     
-    private ApiServerHandlerFactory apiServerHandlerFactory;
+    private final ApiServerHandlerFactory apiServerHandlerFactory;
 
-    private ApiServerInitializerFactory() {
+    public ApiServerInitializerFactory(ApiServerHandlerFactory apiServerHandlerFactory) {
+        this.apiServerHandlerFactory = apiServerHandlerFactory;
     }
 
     public ApiServerInitializer create() {
@@ -16,10 +16,5 @@ public class ApiServerInitializerFactory {
         ApiServerInitializer apiServerInitializer = new ApiServerInitializer();
         apiServerInitializer.setServerHandlerFactory(this.apiServerHandlerFactory);
         return apiServerInitializer;
-    }
-    
-    @Required
-    public void setApiServerHandlerFactory(ApiServerHandlerFactory apiServerHandlerFactory) {
-        this.apiServerHandlerFactory = apiServerHandlerFactory;
     }
 }

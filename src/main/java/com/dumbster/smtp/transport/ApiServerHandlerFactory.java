@@ -6,25 +6,12 @@ import com.dumbster.smtp.storage.RelayAddressDao;
 import org.springframework.beans.factory.annotation.Required;
 
 public class ApiServerHandlerFactory {
-    private static volatile ApiServerHandlerFactory instance = null;
     private MailMessageDao mailMessageDao;
     private RelayAddressDao relayAddressDao;
     private MailProcessor mailProcessor;
     private SmtpServer smtpServer;
 
-    private ApiServerHandlerFactory() {
-    }
-
-
-    public static ApiServerHandlerFactory getInstance() {
-        if (instance == null) {
-            synchronized (ApiServerHandlerFactory.class) {
-                if (instance == null) {
-                    instance = new ApiServerHandlerFactory();
-                }
-            }
-        }
-        return instance;
+    public ApiServerHandlerFactory() {
     }
 
 

@@ -25,6 +25,8 @@ import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.transport.SmtpServer;
 import org.mockito.Mockito;
 
+import static org.mockito.Mockito.reset;
+
 
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
@@ -96,5 +98,10 @@ public class TestInfrastructure {
 
     public Observer<SmtpMessage> getSmtpMessageObserver() {
         return smtpMessageObserver;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void resetSmtpMessageObserverMock() {
+        reset(this.smtpMessageObserver);
     }
 }

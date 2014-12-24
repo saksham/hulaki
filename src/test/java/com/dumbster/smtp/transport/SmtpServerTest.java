@@ -27,7 +27,6 @@ import javax.mail.internet.MimeMessage;
 import java.util.Date;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
@@ -101,7 +100,7 @@ public class SmtpServerTest {
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
-        resetSmtpMessageObserverMock();
+        infrastructure.resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, recipient, "EncodedMessage", body);
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
         verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
@@ -152,7 +151,7 @@ public class SmtpServerTest {
         emailSender.addHeaderLine("   foo bar");
         emailSender.addHeaderLine(" quux");
 
-        resetSmtpMessageObserverMock();
+        infrastructure.resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, recipient, "EncodedMessage", "Some text");
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
@@ -170,7 +169,7 @@ public class SmtpServerTest {
         MimeMessage first = createMessage(smtpSession, SENDER, recipients[0], "Doodle1", "Bug1");
         MimeMessage second = createMessage(smtpSession, SENDER, recipients[1], "Doodle2", "Bug2");
 
-        resetSmtpMessageObserverMock();
+        infrastructure.resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, first, second);
         verify(infrastructure.getSmtpMessageObserver(), times(2)).notify(messageCaptor.capture());
 
@@ -187,16 +186,11 @@ public class SmtpServerTest {
         MimeMessage second = createMessage(smtpSession, SENDER, RandomData.email(), "Doodle2", "Bug2");
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        resetSmtpMessageObserverMock();
+        infrastructure.resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, first, second);
         verify(infrastructure.getSmtpMessageObserver(), times(2)).notify(messageCaptor.capture());
 
         assertEquals(messageCaptor.getAllValues().get(1).getBody(), "Bug2");
-    }
-
-    @SuppressWarnings("unchecked")
-    private void resetSmtpMessageObserverMock() {
-        reset(infrastructure.getSmtpMessageObserver());
     }
 
     private MimeMessage createMessage(Session session, String from, String to, String subject, String body) throws Exception {

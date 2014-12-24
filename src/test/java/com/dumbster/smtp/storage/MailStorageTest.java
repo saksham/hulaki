@@ -28,16 +28,16 @@ public class MailStorageTest {
     public static final String EMAIL_2 = "someone_second@somewhere.com";
     private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/target/emails";
     private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
-    private TestInfrastructure apiInfrastructure = new TestInfrastructure();
+    private TestInfrastructure apiInfrastructure;
 
-
-    @BeforeClass
-    private void startServers() throws Exception {
+    
+    private void startServers(MailMessageDao mailMessageDao) throws Exception {
+        apiInfrastructure = new TestInfrastructure(mailMessageDao);
         apiInfrastructure.startMailProcessor();
         apiInfrastructure.startSmtpServer();
     }
 
-    @AfterClass
+    @AfterMethod
     private void stopServer() throws Exception {
         apiInfrastructure.stop();
     }
@@ -45,7 +45,7 @@ public class MailStorageTest {
     
     @Test(dataProvider = "provideMailStorages")
     public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
-        apiInfrastructure.setMailMessageDao(mailStorage);
+        startServers(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
         String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(100);
 
@@ -63,8 +63,7 @@ public class MailStorageTest {
 
     @Test(dataProvider = "provideMailStorages")
     public void shouldClearEmails(MailMessageDao mailStorage) throws Exception {
-        apiInfrastructure.setMailMessageDao(mailStorage);
-
+        startServers(mailStorage);
         
         for (int i = 0; i < 10; i++) {
             emailSender.sendEmail(EMAIL_1, EMAIL_1, "Subject", "Body");

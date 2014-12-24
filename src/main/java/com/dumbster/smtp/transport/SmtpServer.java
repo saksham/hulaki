@@ -8,21 +8,18 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
 
 
-public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage> {
+public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage>, Server {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
-    
+
     private static final int BOSS_GROUP_THREAD_COUNT = 10;
     private static final int WORKER_GROUP_THREAD_COUNT = 20;
+    private final int port;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private volatile boolean started = false;
-    
-    private final int port;
     private List<Observer<SmtpMessage>> observers;
 
 
@@ -31,25 +28,14 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         this.observers = Lists.newArrayList();
     }
 
-    public static void main(String[] args) throws Exception {
-        int port = 2500;
-
-        System.out.println("Type EXIT to exit the program.");
-        SmtpServer smtpServer = new SmtpServer(port);
-        smtpServer.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to exit the program.");
-        }
-        smtpServer.stop();
-    }
-
+    @Override
     public boolean isRunning() {
         return started && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
                 (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
-    public synchronized void start() throws Exception {
+    @Override
+    public synchronized void start() throws InterruptedException {
         if (started) {
             logger.warn("SMTP Server already started.");
             return;
@@ -70,7 +56,8 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         logger.info("Started SMTP server!");
     }
 
-    public synchronized void stop() throws Exception {
+    @Override
+    public synchronized void stop() throws InterruptedException {
         if (!started) {
             logger.warn("SMTP Server already stopped.");
             return;

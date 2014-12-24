@@ -14,7 +14,9 @@
 
 package com.dumbster.smtp;
 
+import com.dumbster.smtp.api.ApiClient;
 import com.dumbster.smtp.api.MailMessage;
+import com.dumbster.smtp.storage.InMemoryMailMessageDao;
 import com.dumbster.smtp.transport.SmtpMessage;
 import com.dumbster.smtp.utils.EmailSender;
 import com.dumbster.smtp.utils.RandomData;
@@ -24,38 +26,39 @@ import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.eq;
+import java.util.List;
+
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
-@Test(groups = "Unit")
+@Test(groups = "Integration")
 public class SampleTest {
-    private TestInfrastructure infrastructure = new TestInfrastructure();
+    private TestInfrastructure infrastructure;
     private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
+    private ApiClient apiClient = new ApiClient(TestInfrastructure.API_HOSTNAME, TestInfrastructure.API_PORT);
 
     @BeforeClass
     private void startAllServers() throws Exception {
+        infrastructure = new TestInfrastructure(new InMemoryMailMessageDao());
         infrastructure.startMailProcessor();
         infrastructure.startSmtpServer();
         infrastructure.startApiServer();
     }
-    
+
     @Test
-    public void startInfrastructureAndSendMessage() {
+    public void startInfrastructureAndSendMessage() throws Exception {
         String sender = RandomData.email();
         String recipient = RandomData.email();
         String subject = RandomStringUtils.random(10);
-        String body = RandomStringUtils.random(20);
+        String body = RandomStringUtils.random(10);
         ArgumentCaptor<SmtpMessage> smtpMessageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
-        ArgumentCaptor<MailMessage> mailMessageCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
         infrastructure.resetSmtpMessageObserverMock();
         emailSender.sendEmail(sender, recipient, subject, body);
-        
         verify(infrastructure.getSmtpMessageObserver()).notify(smtpMessageCaptor.capture());
-        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), mailMessageCaptor.capture());
-        assertEquals(mailMessageCaptor.getValue().getSubject(), subject);
+        List<MailMessage> storedMessages = apiClient.getMessages(recipient);
+
         assertEquals(smtpMessageCaptor.getValue().getBody(), body);
-        assertEquals(mailMessageCaptor.getValue().getBody(), body);
+        assertEquals(storedMessages.size(), 1);
     }
 }

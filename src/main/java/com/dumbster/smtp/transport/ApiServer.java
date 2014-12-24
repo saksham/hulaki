@@ -14,10 +14,14 @@ import java.io.InputStreamReader;
 
 public class ApiServer {
     private static final Logger logger = Logger.getLogger(ApiServer.class);
-    private final int port;
+
+    private static final int BOSS_GROUP_THREAD_COUNT = 10;
+    private static final int WORKER_GROUP_THREAD_COUNT = 20;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
-    private volatile boolean running = false;
+    private volatile boolean started = false;
+    
+    private final int port;
     private ApiServerInitializerFactory apiServerInitializerFactory;
     private ApiServerHandlerFactory apiServerHandlerFactory;
 
@@ -41,21 +45,24 @@ public class ApiServer {
     }
 
     public boolean isRunning() {
-        return running && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
+        return started && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
                 (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
     public synchronized void start() throws InterruptedException {
-        if (running) {
+        Assert.notNull(this.apiServerInitializerFactory);
+        Assert.notNull(this.apiServerHandlerFactory);
+        
+        if (started) {
             logger.warn("API Server already started.");
             return;
         }
 
-        running = true;
-        Assert.notNull(this.apiServerInitializerFactory);
-        Assert.notNull(this.apiServerHandlerFactory);
+        started = true;
         logger.info("Starting API server on port: " + port + "...");
         ServerBootstrap b = new ServerBootstrap();
+        bossGroup = new NioEventLoopGroup(BOSS_GROUP_THREAD_COUNT);
+        workerGroup = new NioEventLoopGroup(WORKER_GROUP_THREAD_COUNT);
         b.group(bossGroup, workerGroup);
         b.channel(NioServerSocketChannel.class);
         b.childHandler(apiServerInitializerFactory.create());
@@ -67,7 +74,7 @@ public class ApiServer {
     }
 
     public synchronized void stop() throws Exception {
-        if (!running) {
+        if (!started) {
             logger.warn("API Server already stopped.");
             return;
         }
@@ -77,7 +84,7 @@ public class ApiServer {
         bossGroup.shutdownGracefully();
         bossGroup.terminationFuture().sync();
         logger.info("Stopped API server!");
-        running = false;
+        started = false;
     }
 
     @Required

@@ -15,19 +15,20 @@ import java.util.List;
 
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage> {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
-    private final int port;
-    private volatile boolean running = false;
-    private List<Observer<SmtpMessage>> observers;
+    
+    private static final int BOSS_GROUP_THREAD_COUNT = 10;
+    private static final int WORKER_GROUP_THREAD_COUNT = 20;
     private EventLoopGroup bossGroup;
-
     private EventLoopGroup workerGroup;
+    private volatile boolean started = false;
+    
+    private final int port;
+    private List<Observer<SmtpMessage>> observers;
 
 
     public SmtpServer(int port) {
         this.port = port;
         this.observers = Lists.newArrayList();
-        this.bossGroup = new NioEventLoopGroup(10);
-        this.workerGroup = new NioEventLoopGroup(20);
     }
 
     public static void main(String[] args) throws Exception {
@@ -44,18 +45,21 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
     }
 
     public boolean isRunning() {
-        return running && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
+        return started && (!this.bossGroup.isShutdown() && !this.bossGroup.isShuttingDown()) &&
                 (!this.workerGroup.isShutdown() && !this.workerGroup.isShuttingDown());
     }
 
     public synchronized void start() throws Exception {
-        if (running) {
+        if (started) {
             logger.warn("SMTP Server already started.");
             return;
         }
 
+        started = true;
         logger.info("Starting SMTP server on port: " + port + "...");
         ServerBootstrap b = new ServerBootstrap();
+        bossGroup = new NioEventLoopGroup(BOSS_GROUP_THREAD_COUNT);
+        workerGroup = new NioEventLoopGroup(WORKER_GROUP_THREAD_COUNT);
         b.group(bossGroup, workerGroup);
         b.channel(NioServerSocketChannel.class);
         b.childHandler(new SmtpServerInitializer(this));
@@ -64,15 +68,14 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
 
         b.bind(port).sync();
         logger.info("Started SMTP server!");
-        running = true;
     }
 
     public synchronized void stop() throws Exception {
-        if (!running) {
+        if (!started) {
             logger.warn("SMTP Server already stopped.");
             return;
         }
-        running = false;
+        started = false;
         logger.info("Stopping SMTP server...");
         workerGroup.shutdownGracefully().sync();
         bossGroup.shutdownGracefully().sync();

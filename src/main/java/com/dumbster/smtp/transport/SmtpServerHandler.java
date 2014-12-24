@@ -53,7 +53,12 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
             if (result.getSmtpResponse() != null) {
                 ChannelFuture f = ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
                 if (currentState == SmtpState.DISCONNECT) {
-                    f.addListener(ChannelFutureListener.CLOSE);
+                    f.addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                            channelFuture.channel().close();
+                        }
+                    }).sync();
                 }
             }
         } finally {

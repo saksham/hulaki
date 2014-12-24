@@ -7,6 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -65,7 +66,9 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         started = false;
         logger.info("Stopping SMTP server...");
         workerGroup.shutdownGracefully().sync();
+        Assert.isTrue(workerGroup.isShutdown());
         bossGroup.shutdownGracefully().sync();
+        Assert.isTrue(bossGroup.isShutdown());
         logger.info("Stopped SMTP server!");
     }
 

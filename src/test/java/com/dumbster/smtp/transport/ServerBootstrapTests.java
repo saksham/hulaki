@@ -22,7 +22,7 @@ public class ServerBootstrapTests {
     
     @Test(dataProvider = "serverDataProvider")
     public void restartServerMultipleTimes(Server server) throws Exception {
-        int numOfRestarts = 10;
+        int numOfRestarts = 5;
 
         for (int i = 0; i < numOfRestarts; i++) {
             server.start();

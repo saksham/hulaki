@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -32,17 +33,21 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
         String line = (String) msg;
         logger.debug("CLIENT: " + line);
 
-        SmtpResult result = executeCommand(line);
-        SmtpState prevState = currentState;
-        currentState = result.getNextState();
+        try {
+            SmtpResult result = executeCommand(line);
+            SmtpState prevState = currentState;
+            currentState = result.getNextState();
 
-        if (prevState == SmtpState.DATA_HEADER || prevState == SmtpState.DATA_BODY) {
-            onData(line, prevState);
-        }
+            if (prevState == SmtpState.DATA_HEADER || prevState == SmtpState.DATA_BODY) {
+                onData(line, prevState);
+            }
 
 
-        if (result.getSmtpResponse() != null) {
-            ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
+            if (result.getSmtpResponse() != null) {
+                ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
+            }
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 

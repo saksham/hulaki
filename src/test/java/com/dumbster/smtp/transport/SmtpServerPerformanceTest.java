@@ -16,6 +16,7 @@ package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.api.MailMessage;
 import com.dumbster.smtp.utils.EmailSender;
+import com.dumbster.smtp.utils.RandomData;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
@@ -46,8 +47,8 @@ public class SmtpServerPerformanceTest {
 
     @Test(threadPoolSize = 50, invocationCount = 50)
     public void handles50ConcurrentSmtpConnections() {
-        String sender = RandomStringUtils.randomAlphanumeric(20) + "@email.com";
-        String recipient = RandomStringUtils.randomAlphanumeric(20) + "@email.com";
+        String sender = RandomData.email();
+        String recipient = RandomData.email();
         ArgumentCaptor<MailMessage> messageCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
         emailSender.sendEmail(sender, recipient, "Subject", "Body " + RandomStringUtils.random(10));
@@ -55,14 +56,5 @@ public class SmtpServerPerformanceTest {
 
         assertEquals(messageCaptor.getValue().getFrom(), sender);
         assertEquals(messageCaptor.getValue().getTo(), recipient);
-    }
-
-
-    @Test
-    public void restartSmtpServerMulitpleTimes() throws Exception {
-        for (int i = 0; i < 5; i++) {
-            testInfrastructure.getSmtpServer().start();
-            testInfrastructure.getSmtpServer().stop();
-        }
     }
 }

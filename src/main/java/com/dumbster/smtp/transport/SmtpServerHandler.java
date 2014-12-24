@@ -46,6 +46,10 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
             if (result.getSmtpResponse() != null) {
                 ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
             }
+            
+            if (currentState == SmtpState.QUIT && prevState == SmtpState.QUIT) {
+                ctx.channel().close();
+            }
         } finally {
             ReferenceCountUtil.release(msg);
         }

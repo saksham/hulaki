@@ -29,7 +29,7 @@ public class InMemoryMailMessageDao implements MailMessageDao {
         if (emailsByRecipients.containsKey(recipient)) {
             result.addAll(emailsByRecipients.get(recipient));
         }
-        logger.info("Retrieved " + result.size() + " messages for " + recipient + ".");
+        logger.info("Retrieved " + result.size() + " messages for " + recipient);
         return result;
     }
 
@@ -38,7 +38,7 @@ public class InMemoryMailMessageDao implements MailMessageDao {
         if (this.emailsByRecipients.containsKey(recipient)) {
             count = this.emailsByRecipients.get(recipient).size();
         }
-        logger.info("Counted  " + count + " messages for " + recipient + ".");
+        logger.info("Counted  " + count + " messages for " + recipient);
         return count;
     }
 
@@ -48,16 +48,19 @@ public class InMemoryMailMessageDao implements MailMessageDao {
             this.storedEmailCount -= count;
             this.emailsByRecipients.get(recipient).clear();
             this.emailsByRecipients.remove(recipient);
+            logger.info("Cleared  " + count + " messages for " + recipient);
         }
     }
 
     public synchronized void clearMessages() {
         this.emailsByRecipients.clear();
+        logger.info("Cleared  " + this.storedEmailCount + " messages");
         this.storedEmailCount = 0;
     }
 
 
     public synchronized int countAllMessagesReceived() {
+        logger.info("Counted " + this.storedEmailCount + " messages");
         return this.storedEmailCount;
     }
 

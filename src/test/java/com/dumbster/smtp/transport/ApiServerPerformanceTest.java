@@ -29,15 +29,6 @@ import static org.mockito.Mockito.verify;
 public class ApiServerPerformanceTest {
     private TestInfrastructure testInfrastructure = new TestInfrastructure();
 
-    @Test(threadPoolSize = 50, invocationCount = 50)
-    public void handles50ConcurrentApiConnections() {
-        ApiClient client = new ApiClient(TestInfrastructure.API_HOSTNAME, TestInfrastructure.API_PORT);
-        String recipient = RandomStringUtils.randomAlphabetic(15) + "@email.com";
-
-        client.getMessages(recipient);
-
-        verify(testInfrastructure.getMailMessageDao()).retrieveMessages(eq(recipient));
-    }
 
     @BeforeClass
     public void startInfrastructure() throws Exception {
@@ -48,4 +39,15 @@ public class ApiServerPerformanceTest {
     public void teardownInfrastructure() throws Exception {
         testInfrastructure.stop();
     }
+    
+    @Test(threadPoolSize = 50, invocationCount = 50)
+    public void handles50ConcurrentApiConnections() {
+        ApiClient client = new ApiClient(TestInfrastructure.API_HOSTNAME, TestInfrastructure.API_PORT);
+        String recipient = RandomStringUtils.randomAlphabetic(15) + "@email.com";
+
+        client.getMessages(recipient);
+
+        verify(testInfrastructure.getMailMessageDao()).retrieveMessages(eq(recipient));
+    }
+
 }

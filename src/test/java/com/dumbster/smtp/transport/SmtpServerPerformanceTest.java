@@ -32,6 +32,18 @@ public class SmtpServerPerformanceTest {
     private TestInfrastructure testInfrastructure = new TestInfrastructure();
     private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
 
+    @BeforeClass
+    public void startInfrastructure() throws Exception {
+        testInfrastructure.startSmtpServer();
+        testInfrastructure.startApiServer();
+        testInfrastructure.startMailProcessor();
+    }
+
+    @AfterClass
+    public void teardownInfrastructure() throws Exception {
+        testInfrastructure.stop();
+    }
+
     @Test(threadPoolSize = 50, invocationCount = 50)
     public void handles50ConcurrentSmtpConnections() {
         String sender = RandomStringUtils.randomAlphanumeric(20) + "@email.com";
@@ -45,15 +57,12 @@ public class SmtpServerPerformanceTest {
         assertEquals(messageCaptor.getValue().getTo(), recipient);
     }
 
-    @BeforeClass
-    public void startInfrastructure() throws Exception {
-        testInfrastructure.startSmtpServer();
-        testInfrastructure.startApiServer();
-        testInfrastructure.startMailProcessor();
-    }
 
-    @AfterClass
-    public void teardownInfrastructure() throws Exception {
-        testInfrastructure.stop();
+    @Test
+    public void restartSmtpServerMulitpleTimes() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            testInfrastructure.getSmtpServer().start();
+            testInfrastructure.getSmtpServer().stop();
+        }
     }
 }

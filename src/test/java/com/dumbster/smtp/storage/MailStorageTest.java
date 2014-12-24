@@ -17,9 +17,7 @@ package com.dumbster.smtp.storage;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import com.dumbster.smtp.utils.EmailSender;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.assertEquals;
 
@@ -28,36 +26,54 @@ public class MailStorageTest {
     public static final String SQLITE_DB_FILENAME = "target/test.db";
     public static final String EMAIL_1 = "someone_first@somewhere.com";
     public static final String EMAIL_2 = "someone_second@somewhere.com";
-    private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/" + "target/emails";
+    private static final String MAILS_FOLDER = System.getProperty("user.dir") + "/target/emails";
     private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
-    private TestInfrastructure apiInfrastructure;
+    private TestInfrastructure apiInfrastructure = new TestInfrastructure();
 
+
+    @BeforeClass
+    private void startServers() throws Exception {
+        apiInfrastructure.startMailProcessor();
+        apiInfrastructure.startSmtpServer();
+    }
+
+    @AfterClass
+    private void stopServer() throws Exception {
+        apiInfrastructure.stop();
+    }
+    
+    
     @Test(dataProvider = "provideMailStorages")
     public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
-        // Given
-        startServer(mailStorage);
+        apiInfrastructure.setMailMessageDao(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
         String messageBody = "Body - " + RandomStringUtils.randomAlphabetic(100);
 
-        // When
         for (int i = 0; i < 3; i++) {
             emailSender.sendEmail(EMAIL_1, EMAIL_1, subject + i, messageBody + i);
             emailSender.sendEmail(EMAIL_1, EMAIL_2, subject + i, messageBody + i);
         }
 
-        // Then
         assertEquals(mailStorage.countAllMessagesReceived(), 3 * 2, "All emails should be received");
         assertEquals(mailStorage.countMessagesForRecipient(EMAIL_1), 3, "Email should have been stored by the server");
         assertEquals(mailStorage.retrieveMessages(EMAIL_1).get(0).getSubject(), subject + "0", "Body should match");
         assertEquals(mailStorage.retrieveMessages(EMAIL_1).get(0).getBody(), messageBody + "0", "Body should match");
+    }
 
 
-        // When
+    @Test(dataProvider = "provideMailStorages")
+    public void shouldClearEmails(MailMessageDao mailStorage) throws Exception {
+        apiInfrastructure.setMailMessageDao(mailStorage);
+
+        
+        for (int i = 0; i < 10; i++) {
+            emailSender.sendEmail(EMAIL_1, EMAIL_1, "Subject", "Body");
+        }
         mailStorage.clearMessages();
 
-        // Then
         assertEquals(mailStorage.countAllMessagesReceived(), 0);
     }
+    
 
 
     @DataProvider
@@ -68,20 +84,4 @@ public class MailStorageTest {
                 {new SqliteMailMessageDao(SQLITE_DB_FILENAME)}
         };
     }
-
-
-
-    private void startServer(MailMessageDao mailStorage) throws Exception {
-        apiInfrastructure = new TestInfrastructure();
-        apiInfrastructure.setMailMessageDao(mailStorage);
-        apiInfrastructure.inject();
-        apiInfrastructure.startSmtpServer();
-        apiInfrastructure.startMailProcessor();
-    }
-
-    @AfterMethod
-    private void stopServer() throws Exception {
-        apiInfrastructure.stop();
-    }
-
 }

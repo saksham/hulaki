@@ -59,7 +59,6 @@ public class ApiClientTest {
     @BeforeMethod
     private void startApiServer() throws Exception {
         testInfrastructure = new TestInfrastructure();
-        testInfrastructure.inject();
         testInfrastructure.startApiServer();
     }
 

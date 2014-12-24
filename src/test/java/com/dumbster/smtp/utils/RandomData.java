@@ -12,24 +12,17 @@
  * limitations under the License.
  */
 
-package com.dumbster.smtp.transport;
+package com.dumbster.smtp.utils;
 
-import com.dumbster.smtp.utils.TestInfrastructure;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.apache.commons.lang3.RandomStringUtils;
 
-@Test(groups = "Unit")
-public class ApiServerTest {
-    private TestInfrastructure infrastructure = new TestInfrastructure();
-
-    @BeforeMethod
-    private void startApiServer() throws Exception {
-        infrastructure.getApiServer().start();
+public class RandomData {
+    
+    public static String email() {
+        return email(TestInfrastructure.SMTP_HOSTNAME);
     }
-
-    @AfterClass
-    private void teardownInfrastructure() throws Exception {
-        infrastructure.stop();
+    
+    public static String email(String domain) {
+        return RandomStringUtils.randomAlphanumeric(15) + "@" + domain;
     }
 }

@@ -15,11 +15,10 @@ package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.api.MailMessage;
 import com.dumbster.smtp.utils.EmailSender;
+import com.dumbster.smtp.utils.RandomData;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import org.mockito.ArgumentCaptor;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import javax.mail.Message;
 import javax.mail.Session;
@@ -27,33 +26,36 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Date;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 @Test(groups = "Component")
 public class SmtpServerTest {
-
-    public static final String RECIPIENT = "recipient@here.com";
     public static final String SENDER = "sender@here.com";
-    private TestInfrastructure infrastructure;
+    private TestInfrastructure infrastructure = new TestInfrastructure();
 
-    @Test
-    public void restartServerMulitpleTimes() throws Exception {
-        for (int i = 0; i < 5; i++) {
-            stopSmtpServer();
-            startSmtpServer();
-        }
+    @BeforeClass
+    private void startSmtpServer() throws Exception {
+        infrastructure.startSmtpServer();
+        infrastructure.startMailProcessor();
+    }
+    
+    @AfterClass
+    private void teardownInfrastructure() throws Exception {
+        infrastructure.getSmtpServer().stop();
     }
 
     @Test
     public void sendNormalEmail() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "Test", "Test Body");
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        emailSender.sendEmail(SENDER, recipient, "Test", "Test Body");
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(emailCaptor.getValue().getSubject(), "Test");
         assertEquals(emailCaptor.getValue().getBody(), "Test Body");
@@ -61,12 +63,13 @@ public class SmtpServerTest {
 
     @Test
     public void sendEmailWithCarriageReturn() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
         String bodyWithCR = "\n\nKeep these pesky carriage returns\n\n.\n\n...";
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "CR Test", bodyWithCR);
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        emailSender.sendEmail(SENDER, recipient, "CR Test", bodyWithCR);
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(emailCaptor.getValue().getSubject(), "CR Test");
         assertEquals(emailCaptor.getValue().getBody(), bodyWithCR);
@@ -74,13 +77,14 @@ public class SmtpServerTest {
 
     @Test
     public void sendCharsetWithJapaneseMessage() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         emailSender.setCharset("iso-2022-jp");
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
         String body = "\u3042\u3044\u3046\u3048\u304a";
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", body);
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", body);
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(emailCaptor.getValue().getSubject(), "EncodedMessage");
         assertEquals(emailCaptor.getValue().getBody(), body);
@@ -89,30 +93,33 @@ public class SmtpServerTest {
 
     @Test
     public void sendEncoding7BitJapaneseMessage() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("7bit");
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
-        
-        emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", body);
+
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", body);
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(messageCaptor.getValue().getBody(), body);
     }
 
     @Test
     public void sendEncodingQuotedPrintableJapaneseMessage() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("quoted-printable");
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", body);
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", body);
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(emailCaptor.getValue().getSubject(), "EncodedMessage");
         assertEquals(emailCaptor.getValue().getBody(), body);
@@ -120,14 +127,15 @@ public class SmtpServerTest {
 
     @Test
     public void sendEncodingBase64EncodedJapaneseMessage() throws Exception {
+        String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
         String body = "\u3042\u3044\u3046\u3048\u304a";
         emailSender.setCharset("iso-2022-jp");
         emailSender.setEncoding("base64");
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", body);
-        verify(infrastructure.getMailMessageDao()).storeMessage(anyString(), emailCaptor.capture());
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", body);
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
 
         assertEquals(emailCaptor.getValue().getSubject(), "EncodedMessage");
         assertEquals(emailCaptor.getValue().getBody(), body);
@@ -136,6 +144,7 @@ public class SmtpServerTest {
     @Test
     public void continuedHeadersArriveIntact() throws Exception {
         EmailSender emailSender = newEmailSender();
+        String recipient = RandomData.email();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         emailSender.addHeaderLine("X-LongHeader: 12345");
         emailSender.addHeaderLine("\t67890");
@@ -143,7 +152,8 @@ public class SmtpServerTest {
         emailSender.addHeaderLine("   foo bar");
         emailSender.addHeaderLine(" quux");
 
-        emailSender.sendEmail(SENDER, RECIPIENT, "EncodedMessage", "Some text");
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", "Some text");
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
 
@@ -156,9 +166,11 @@ public class SmtpServerTest {
         EmailSender emailSender = newEmailSender();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
         Session smtpSession = emailSender.newSmtpSession(SENDER);
-        MimeMessage first = createMessage(smtpSession, SENDER, "receiver@home.com", "Doodle1", "Bug1");
-        MimeMessage second = createMessage(smtpSession, SENDER, "receiver@home.com", "Doodle2", "Bug2");
+        String[] recipients = {RandomData.email(), RandomData.email()};
+        MimeMessage first = createMessage(smtpSession, SENDER, recipients[0], "Doodle1", "Bug1");
+        MimeMessage second = createMessage(smtpSession, SENDER, recipients[1], "Doodle2", "Bug2");
 
+        resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, first, second);
         verify(infrastructure.getSmtpMessageObserver(), times(2)).notify(messageCaptor.capture());
 
@@ -171,27 +183,20 @@ public class SmtpServerTest {
         emailSender.setUsername("username");
         emailSender.setPassword("password");
         Session smtpSession = emailSender.newSmtpSession(SENDER);
-        MimeMessage first = createMessage(smtpSession, SENDER, "receiver@home.com", "Doodle1", "Bug1");
-        MimeMessage second = createMessage(smtpSession, SENDER, "receiver@home.com", "Doodle2", "Bug2");
+        MimeMessage first = createMessage(smtpSession, SENDER, RandomData.email(), "Doodle1", "Bug1");
+        MimeMessage second = createMessage(smtpSession, SENDER, RandomData.email(), "Doodle2", "Bug2");
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
+        resetSmtpMessageObserverMock();
         emailSender.sendEmail(SENDER, first, second);
         verify(infrastructure.getSmtpMessageObserver(), times(2)).notify(messageCaptor.capture());
 
         assertEquals(messageCaptor.getAllValues().get(1).getBody(), "Bug2");
     }
 
-
-    @BeforeMethod
-    private void startSmtpServer() throws Exception {
-        infrastructure = new TestInfrastructure();
-        infrastructure.inject();
-        infrastructure.getSmtpServer().start();
-    }
-
-    @AfterMethod
-    private void stopSmtpServer() throws Exception {
-        infrastructure.getSmtpServer().stop();
+    @SuppressWarnings("unchecked")
+    private void resetSmtpMessageObserverMock() {
+        reset(infrastructure.getSmtpMessageObserver());
     }
 
     private MimeMessage createMessage(Session session, String from, String to, String subject, String body) throws Exception {
@@ -203,7 +208,7 @@ public class SmtpServerTest {
         msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
         return msg;
     }
-    
+
     private EmailSender newEmailSender() {
         return new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);
     }

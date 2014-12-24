@@ -58,10 +58,6 @@ public class TestInfrastructure {
         this.apiServer.setApiServerInitializerFactory(serverInitializerFactory);
     }
 
-    public void inject() {
-
-    }
-
     public void startApiServer() throws Exception {
         apiServer.start();
     }

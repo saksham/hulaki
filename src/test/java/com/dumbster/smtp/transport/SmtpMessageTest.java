@@ -14,35 +14,32 @@
 package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.utils.EmailSender;
+import com.dumbster.smtp.utils.RandomData;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import javax.mail.internet.InternetAddress;
 
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 
 @Test(groups = "Component")
 public class SmtpMessageTest {
-    public static final String RECIPIENT = "recipient@email.com";
     private static final String MAIL_FROM = "sender@email.com";
 
-    private TestInfrastructure infrastructure;
+    private TestInfrastructure infrastructure = new TestInfrastructure();
 
-    @BeforeMethod
+    @BeforeClass
     private void setUp() throws Exception {
-        infrastructure = new TestInfrastructure();
-        infrastructure.inject();
         infrastructure.startSmtpServer();
     }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
+    @AfterClass
+    public void teardownInfrastructure() throws Exception {
         infrastructure.stop();
     }
 
@@ -51,7 +48,7 @@ public class SmtpMessageTest {
         EmailSender emailSender = newEmailSender();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Some subject", "Some message text");
+        emailSender.sendEmail(MAIL_FROM, RandomData.email(), "Some subject", "Some message text");
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertEquals(messageCaptor.getValue().getBody(), "Some message text");
@@ -61,13 +58,15 @@ public class SmtpMessageTest {
     public void sendEmailFrom() throws Exception {
         EmailSender emailSender = newEmailSender();
         String from = new InternetAddress(MAIL_FROM, MAIL_FROM).toString();
+        String recipient = RandomData.email();
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(from, RECIPIENT, "Subject", "Body - " + RandomStringUtils.random(10));
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(from, recipient, "Subject", "Body - " + RandomStringUtils.random(10));
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertFromHeaderEquals(messageCaptor.getValue(), from);
-        assertEquals(messageCaptor.getValue().getHeaderValue("To"), new InternetAddress(RECIPIENT, RECIPIENT).toString());
+        assertEquals(messageCaptor.getValue().getHeaderValue("To"), new InternetAddress(recipient, recipient).toString());
     }
 
     @Test
@@ -76,7 +75,8 @@ public class SmtpMessageTest {
         String subject = "Test Ão çÇá";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Test Body");
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(MAIL_FROM, RandomData.email(), subject, "Test Body");
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertSubjectEquals(messageCaptor.getValue(), subject);
@@ -89,7 +89,8 @@ public class SmtpMessageTest {
                 + "http://youtube.com/xyz äüö and secret informations";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, subject, "Body - " + RandomStringUtils.random(10));
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(MAIL_FROM, RandomData.email(), subject, "Body - " + RandomStringUtils.random(10));
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertSubjectEquals(messageCaptor.getValue(), subject);
@@ -101,7 +102,8 @@ public class SmtpMessageTest {
         String body = "Ão çÇá";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject - " + RandomStringUtils.random(10), body);
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(MAIL_FROM, RandomData.email(), "Subject - " + RandomStringUtils.random(10), body);
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertBodyEquals(messageCaptor.getValue(), body);
@@ -113,10 +115,16 @@ public class SmtpMessageTest {
         String body = "Somthing\nNew Line\n\nTwo new Lines.\n\n...etc.\n\n\n.";
         ArgumentCaptor<SmtpMessage> messageCaptor = ArgumentCaptor.forClass(SmtpMessage.class);
 
-        emailSender.sendEmail(MAIL_FROM, RECIPIENT, "Subject - " + RandomStringUtils.random(10), body);
+        resetSmtpMessageObserverMock();
+        emailSender.sendEmail(MAIL_FROM, RandomData.email(), "Subject - " + RandomStringUtils.random(10), body);
         verify(infrastructure.getSmtpMessageObserver()).notify(messageCaptor.capture());
 
         assertBodyEquals(messageCaptor.getValue(), body);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void resetSmtpMessageObserverMock() {
+        reset(infrastructure.getSmtpMessageObserver());
     }
 
     private void assertSubjectEquals(final SmtpMessage message, final String expected) {

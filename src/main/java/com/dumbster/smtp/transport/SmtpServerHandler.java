@@ -1,11 +1,10 @@
 package com.dumbster.smtp.transport;
 
 import com.google.common.collect.Lists;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -21,11 +20,19 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+        Assert.notEmpty(observers);
+
         logger.debug("Connected!");
         SmtpRequest request = new SmtpRequest(currentState, SmtpCommand.CONNECT);
         SmtpResult result = request.execute();
         this.currentState = result.getNextState();
         ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        ctx.close();
     }
 
     @Override
@@ -44,11 +51,10 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
 
 
             if (result.getSmtpResponse() != null) {
-                ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
-            }
-            
-            if (currentState == SmtpState.QUIT && prevState == SmtpState.QUIT) {
-                ctx.channel().close();
+                ChannelFuture f = ctx.writeAndFlush(result.toSmtpResponseString() + "\r\n");
+                if (currentState == SmtpState.DISCONNECT) {
+                    f.addListener(ChannelFutureListener.CLOSE);
+                }
             }
         } finally {
             ReferenceCountUtil.release(msg);
@@ -80,11 +86,6 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("Completed reading data");
-    }
-
-    @Override
     public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
         this.observers.clear();
         this.observers = null;
@@ -95,7 +96,9 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
         logger.error("An error occurred while processing the request", cause);
         this.observers.clear();
         this.observers = null;
-        ctx.channel().close();
+        if (ctx.channel().isOpen()) {
+            ctx.channel().close();
+        }
     }
 
     @Override
@@ -108,11 +111,5 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
         this.observers.remove(observer);
     }
 
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
-        ctx.disconnect();
-        ctx.pipeline().remove(this);
-        logger.debug("Disconnected the inactive channel.");
-    }
+
 }

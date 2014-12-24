@@ -8,5 +8,6 @@ public enum SmtpState {
     RCPT,
     DATA_HEADER,
     DATA_BODY,
-    QUIT
+    QUIT,
+    DISCONNECT
 }

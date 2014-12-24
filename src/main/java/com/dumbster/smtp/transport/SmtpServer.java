@@ -50,7 +50,7 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         b.channel(NioServerSocketChannel.class);
         b.childHandler(new SmtpServerInitializer(this));
         b.option(ChannelOption.SO_BACKLOG, 128);
-        b.childOption(ChannelOption.SO_KEEPALIVE, true);
+        b.childOption(ChannelOption.SO_KEEPALIVE, false);
 
         b.bind(port).sync();
         logger.info("Started SMTP server!");

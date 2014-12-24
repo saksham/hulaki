@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
     public static final int SMTP_PORT = 2500;
+    public static final String API_HOSTNAME = "localhost";
     public static final int API_PORT = 6869;
     private SmtpServer smtpServer;
     private ApiServer apiServer;

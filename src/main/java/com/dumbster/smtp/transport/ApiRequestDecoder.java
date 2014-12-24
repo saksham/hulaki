@@ -1,6 +1,7 @@
 package com.dumbster.smtp.transport;
 
 import com.dumbster.smtp.api.ApiRequest;
+import com.dumbster.smtp.api.InvalidRequest;
 import com.dumbster.smtp.exceptions.ApiProtocolException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,7 +17,7 @@ public class ApiRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
         String messageFromClient = byteBuf.toString(Charsets.UTF_8);
-        ApiRequest request = null;
+        ApiRequest request = new InvalidRequest(messageFromClient);
         try {
             request = ApiRequest.fromRequestString(messageFromClient);
             logger.info("CLIENT: " + request.toRequestString());

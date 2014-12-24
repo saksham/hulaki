@@ -107,4 +107,12 @@ public class SmtpServerHandler extends ChannelHandlerAdapter
     public void removeObserver(Observer<SmtpMessage> observer) {
         this.observers.remove(observer);
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        ctx.disconnect();
+        ctx.pipeline().remove(this);
+        logger.debug("Disconnected the inactive channel.");
+    }
 }

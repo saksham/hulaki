@@ -15,6 +15,7 @@ Following are the key features of this SMTP test double
 * Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
 * Provides serialization and deserialization methods on all requests and responses for constructing API clients
 * Also provides a client interface library in Java that can talk with the API server
+* Both SMTP and API servers are self can be started within a process or in a separate machine from where the tests can send and retrieve emails.
 * Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port

@@ -61,6 +61,19 @@ public class SmtpServerTest {
     }
 
     @Test
+    public void sendBlankBody() throws Exception {
+        String recipient = RandomData.email();
+        EmailSender emailSender = newEmailSender();
+        ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
+
+        emailSender.sendEmail(SENDER, recipient, "Test", "");
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
+
+        assertEquals(emailCaptor.getValue().getSubject(), "Test");
+        assertEquals(emailCaptor.getValue().getBody(), "");
+    }
+
+    @Test
     public void sendEmailWithCarriageReturn() throws Exception {
         String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
@@ -73,6 +86,7 @@ public class SmtpServerTest {
         assertEquals(emailCaptor.getValue().getSubject(), "CR Test");
         assertEquals(emailCaptor.getValue().getBody(), bodyWithCR);
     }
+
 
     @Test
     public void sendCharsetWithJapaneseMessage() throws Exception {
@@ -88,7 +102,6 @@ public class SmtpServerTest {
         assertEquals(emailCaptor.getValue().getSubject(), "EncodedMessage");
         assertEquals(emailCaptor.getValue().getBody(), body);
     }
-
 
     @Test
     public void sendEncoding7BitJapaneseMessage() throws Exception {

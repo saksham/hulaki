@@ -53,7 +53,9 @@ public class SmtpMessage {
 
     public void close() {
         this.closed = true;
-        body.deleteCharAt(body.length() - 1);
+        if(body.length() > 0) {
+            body.deleteCharAt(body.length() - 1);
+        }
     }
 
 

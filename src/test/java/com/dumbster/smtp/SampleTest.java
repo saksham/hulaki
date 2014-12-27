@@ -23,6 +23,7 @@ import com.dumbster.smtp.utils.RandomData;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,6 +44,11 @@ public class SampleTest {
         infrastructure.startMailProcessor();
         infrastructure.startSmtpServer();
         infrastructure.startApiServer();
+    }
+    
+    @AfterClass
+    private void tearDownInfrastructure() throws Exception {
+        infrastructure.stop();
     }
 
     @Test

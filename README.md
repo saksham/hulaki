@@ -12,10 +12,10 @@ Following are the key features of this SMTP test double
  * Files: stores the emails in XML files
  * In memory: stores them in memory for quick access
  * SQLite: stores them in an SQLite database 
-* Exposes the emails to TCP clients using its own HTTP-like API protocol (XML over TCP)
+* The SMTP server can be started within a process or in a separate machine from where the tests can send and retrieve emails.
+* When the SMTP server is run in a separate process or a separate machine, the emails can be retrieved using an HTTP-like API protocol (XML over TCP)
 * Provides serialization and deserialization methods on all requests and responses for constructing API clients
 * Also provides a client interface library in Java that can talk with the API server
-* Both SMTP and API servers are self can be started within a process or in a separate machine from where the tests can send and retrieve emails.
 * Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
 * The two servers (SMTP and API) can be started on any port

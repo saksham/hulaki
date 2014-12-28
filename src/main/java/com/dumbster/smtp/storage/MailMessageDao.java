@@ -1,10 +1,12 @@
 package com.dumbster.smtp.storage;
 
 import com.dumbster.smtp.api.MailMessage;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 
+@Component
 public interface MailMessageDao {
     void storeMessage(String recipient, MailMessage email);
 

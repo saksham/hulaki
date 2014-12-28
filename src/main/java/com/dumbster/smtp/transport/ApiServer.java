@@ -7,8 +7,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+@Component
 public class ApiServer implements Server {
     private static final Logger logger = Logger.getLogger(ApiServer.class);
 

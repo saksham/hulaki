@@ -9,7 +9,9 @@ import com.dumbster.smtp.utils.EmailSender;
 import com.dumbster.smtp.utils.EmailUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
     private static final Logger logger = Logger.getLogger(MailProcessor.class);

@@ -3,7 +3,9 @@ package com.dumbster.smtp.transport;
 import com.dumbster.smtp.app.MailProcessor;
 import com.dumbster.smtp.storage.MailMessageDao;
 import com.dumbster.smtp.storage.RelayAddressDao;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ApiServerHandlerFactory {
     private final MailMessageDao mailMessageDao;
     private final RelayAddressDao relayAddressDao;

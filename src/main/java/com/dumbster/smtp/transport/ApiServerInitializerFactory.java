@@ -1,7 +1,9 @@
 package com.dumbster.smtp.transport;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+@Component
 public class ApiServerInitializerFactory {
     
     private final ApiServerHandlerFactory apiServerHandlerFactory;

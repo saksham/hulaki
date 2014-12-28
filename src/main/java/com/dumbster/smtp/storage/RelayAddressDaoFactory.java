@@ -1,6 +1,9 @@
 package com.dumbster.smtp.storage;
 
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class RelayAddressDaoFactory {
     private static volatile RelayAddressDaoFactory instance = null;
     private RelayAddressDao dao;

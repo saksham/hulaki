@@ -1,7 +1,10 @@
 package com.dumbster.smtp.storage;
 
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
+@Component
 public interface RelayAddressDao {
     List<String> getRelayRecipients();
 

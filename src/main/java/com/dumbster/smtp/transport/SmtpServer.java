@@ -7,11 +7,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.util.List;
 
 
+@Component
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage>, Server {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
 
@@ -51,7 +53,7 @@ public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage
         b.channel(NioServerSocketChannel.class);
         b.childHandler(new SmtpServerInitializer(this));
         b.option(ChannelOption.SO_BACKLOG, 128);
-        b.childOption(ChannelOption.SO_KEEPALIVE, false);
+        b.childOption(ChannelOption.SO_KEEPALIVE, true);
 
         b.bind(port).sync();
         logger.info("Started SMTP server!");

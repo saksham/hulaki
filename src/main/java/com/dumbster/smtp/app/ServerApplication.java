@@ -4,6 +4,7 @@ import com.dumbster.smtp.storage.MailMessageDaoFactory;
 import com.dumbster.smtp.transport.ApiServer;
 import com.dumbster.smtp.transport.SmtpServer;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextStartedEvent;
@@ -16,11 +17,13 @@ import java.net.URL;
 
 public class ServerApplication implements ApplicationListener<ContextStartedEvent> {
 
-    
+    private static final Logger logger = Logger.getLogger(ServerApplication.class);
+    public static final String CONFIG_STORAGE_MODE = "storage.mode";
+
 
     public static void main(String[] args) throws Exception {
         setupMailMessageDaoFactory();
-        
+
         ClassLoader classLoader = ServerApplication.class.getClassLoader();
         URL appConfigResource = classLoader.getResource("application-config.xml");
         assert appConfigResource != null;
@@ -36,24 +39,28 @@ public class ServerApplication implements ApplicationListener<ContextStartedEven
         smtpServer.addObserver(mailProcessor);
         Thread mailProcessorThread = new Thread(mailProcessor);
         mailProcessorThread.start();
-        
-        System.out.println("Type EXIT to quit");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while (!reader.readLine().equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to quit");
-        }
 
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Type EXIT to close the application");
+        String line = reader.readLine();
+        while(!line.equalsIgnoreCase("EXIT")) {
+            System.out.println("Type EXIT to close the application");
+            line = reader.readLine();
+        }
         apiServer.stop();
         smtpServer.stop();
         mailProcessor.stop();
-
     }
 
     private static void setupMailMessageDaoFactory() {
-        String storageModeProp = System.getProperty("smtp.storage.mode");
-        MailMessageDaoFactory.StorageMode storageMode = MailMessageDaoFactory.StorageMode.IN_MEMORY;
-        if(!StringUtils.isEmpty(storageModeProp)) {
+        String storageModeProp = System.getProperty(CONFIG_STORAGE_MODE);
+        MailMessageDaoFactory.StorageMode storageMode;
+        if (!StringUtils.isEmpty(storageModeProp)) {
             storageMode = MailMessageDaoFactory.StorageMode.valueOf(storageModeProp.toUpperCase());
+            logger.info("Using " + storageMode.name() + " storage...");
+        } else {
+            storageMode = MailMessageDaoFactory.StorageMode.IN_MEMORY;
+            logger.warn("No explicit storage mode specified. IN_MEMORY storage will be used.");
         }
         MailMessageDaoFactory.setStorageMode(storageMode);
     }

@@ -1,12 +1,11 @@
 package com.dumbster.smtp.storage;
 
+import com.dumbster.smtp.app.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 @Component
 public class MailMessageDaoFactory {
-    public static final String CONFIG_SMTP_STORAGE_FILE_FILEPATH = "smtp.storage.file.filepath";
-    public static final String CONFIG_SMTP_STORAGE_SQLITE_DBFILEPATH = "smtp.storage.sqlite.filepath";
 
     private static volatile MailMessageDaoFactory instance;
     private static StorageMode storageMode;
@@ -20,15 +19,17 @@ public class MailMessageDaoFactory {
 
 
     private MailMessageDaoFactory() {
+        ApplicationContext context = new ApplicationContextProvider().getApplicationContext();
+        
         switch (storageMode) {
             case SQLITE:
-                dao = new SqliteMailMessageDao(System.getProperty(CONFIG_SMTP_STORAGE_SQLITE_DBFILEPATH));
+                dao = context.getBean(SqliteMailMessageDao.class);
                 break;
             case FILE_BASED:
-                dao = new FileBasedMailMessageDao(System.getProperty(CONFIG_SMTP_STORAGE_FILE_FILEPATH));
+                dao = context.getBean(FileBasedMailMessageDao.class);
                 break;
             case IN_MEMORY:
-                dao = new InMemoryMailMessageDao();
+                dao = context.getBean(InMemoryMailMessageDao.class);
                 break;
             default:
                 throw new IllegalStateException("Storage mode not initialized correctly.");
@@ -52,15 +53,5 @@ public class MailMessageDaoFactory {
 
     public static void setStorageMode(StorageMode mode) {
         storageMode = mode;
-        switch (mode) {
-            case FILE_BASED:
-                Assert.notNull(System.getProperty(CONFIG_SMTP_STORAGE_FILE_FILEPATH));
-                break;
-            case SQLITE:
-                Assert.notNull(System.getProperty(CONFIG_SMTP_STORAGE_SQLITE_DBFILEPATH));
-                break;
-            default:
-                break;
-        }
     }
 }

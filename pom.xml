@@ -150,7 +150,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>*.xml</include>
-                    <include>dumbster.properties</include>
+                    <include>*.properties</include>
                 </includes>
             </resource>
         </resources>
@@ -168,7 +168,6 @@
                             <Implementation-Title>${project.name}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
                             <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                            <Implementation-Vendor-Id>com.quintanasoft</Implementation-Vendor-Id>
                             <build-time>${maven.build.timestamp}</build-time>
                         </manifestEntries>
                     </archive>

@@ -8,11 +8,10 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URL;
 
 
 public class ServerApplication implements ApplicationListener<ContextStartedEvent> {
@@ -23,12 +22,7 @@ public class ServerApplication implements ApplicationListener<ContextStartedEven
 
     public static void main(String[] args) throws Exception {
         setupMailMessageDaoFactory();
-
-        ClassLoader classLoader = ServerApplication.class.getClassLoader();
-        URL appConfigResource = classLoader.getResource("application-config.xml");
-        assert appConfigResource != null;
-
-        ApplicationContext context = new FileSystemXmlApplicationContext(appConfigResource.getFile());
+        ApplicationContext context = new ClassPathXmlApplicationContext("application-config.xml");
 
         ApiServer apiServer = context.getBean(ApiServer.class);
         apiServer.start();
@@ -43,7 +37,7 @@ public class ServerApplication implements ApplicationListener<ContextStartedEven
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Type EXIT to close the application");
         String line = reader.readLine();
-        while(!line.equalsIgnoreCase("EXIT")) {
+        while (!line.equalsIgnoreCase("EXIT")) {
             System.out.println("Type EXIT to close the application");
             line = reader.readLine();
         }

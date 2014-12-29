@@ -29,8 +29,6 @@ public interface IApiClient {
 
     List<MailMessage> getMessages(String recipient);
 
-    List<MailMessage> getMessagesBySubject(String recipient, String subject);
-
     boolean isRelayRecipient(String recipient);
 
     void addRelayRecipient(String recipient);

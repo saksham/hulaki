@@ -17,7 +17,6 @@ package com.dumbster.smtp.api;
 import com.dumbster.smtp.exceptions.ApiException;
 import com.dumbster.smtp.exceptions.SmtpTimeoutException;
 import com.dumbster.smtp.utils.EmailUtils;
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
@@ -111,22 +110,6 @@ public class ApiClient implements IApiClient {
         GetResponse getResponse = unmarshalResponse(response, GetResponse.class);
         logger.debug("Retrieved " + getResponse.getMessages().size() + " emails for recipient: " + recipient);
         return getResponse.getMessages();
-    }
-
-    @Override
-    public List<MailMessage> getMessagesBySubject(String recipient, String subject) {
-        logger.debug("Getting emails matching subject " + subject + " for email address " + recipient + "...");
-        List<MailMessage> allMessages = getMessages(recipient);
-        List<MailMessage> matchingMessages = Lists.newArrayList();
-        for (MailMessage message : allMessages) {
-            logger.debug("Found email with subject " + message.getSubject());
-            if (message.getSubject().contains(subject)) {
-                matchingMessages.add(message);
-            }
-        }
-
-        logger.debug("Retrieved " + matchingMessages.size() + " emails for recipient: " + recipient);
-        return matchingMessages;
     }
 
     @Override

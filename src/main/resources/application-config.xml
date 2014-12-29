@@ -33,7 +33,7 @@
 
     <bean name="com.dumbster.smtp.storage.MailMessageDaoFactory"
           class="com.dumbster.smtp.storage.MailMessageDaoFactory"
-          factory-method="getInstance"/>
+          factory-method="getInstance" lazy-init="true"/>
 
     <bean name="com.dumbster.smtp.storage.MailMessageDao"
           factory-bean="com.dumbster.smtp.storage.MailMessageDaoFactory" factory-method="getDao"/>

@@ -24,6 +24,11 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <scm>
+        <connection>https://github.com/saksham/dumbster</connection>
+        <developerConnection>https://github.com/saksham/dumbster</developerConnection>
+        <url>https://github.com/saksham/dumbster</url>
+    </scm>
     <developers>
         <developer>
             <name>Saksham Gautam</name>

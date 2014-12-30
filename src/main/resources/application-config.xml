@@ -54,6 +54,11 @@
         <constructor-arg name="dbFilepath" value="${storage.sqlite.filepath}" />
     </bean>
 
+    <bean name="com.dumbster.smtp.storage.MapDbMailMessageDao, mapDbMailMessageDao" class="com.dumbster.smtp.storage.MapDbMailMessageDao"
+          lazy-init="true">
+        <constructor-arg name="dbFilepath" value="${storage.mapdb.filepath}" />
+    </bean>
+
 
     <bean name="com.dumbster.smtp.storage.FileBaseMailMessageDao, fileBasedMailMessageDao" class="com.dumbster.smtp.storage.FileBasedMailMessageDao"
           lazy-init="true">

@@ -15,6 +15,7 @@ public class MailMessageDaoFactory {
         SQLITE,
         FILE_BASED,
         IN_MEMORY,
+        MAP_DB,
     }
 
 
@@ -30,6 +31,9 @@ public class MailMessageDaoFactory {
                 break;
             case IN_MEMORY:
                 dao = context.getBean(InMemoryMailMessageDao.class);
+                break;
+            case MAP_DB:
+                dao = context.getBean(MapDbMailMessageDao.class);
                 break;
             default:
                 throw new IllegalStateException("Storage mode not initialized correctly.");

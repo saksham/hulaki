@@ -23,7 +23,7 @@ import static org.testng.Assert.assertEquals;
 
 @Test(groups = "Component")
 public class MailStorageTest {
-    public static final String SQLITE_DB_FILENAME = "target/test.db";
+    public static final String SQLITE_DB_FILENAME = "target/sqlitetest.db";
     public static final String MAPDB_FILENAME = "target/mapdbtest.db";
     public static final String EMAIL_1 = "someone_first@somewhere.com";
     public static final String EMAIL_2 = "someone_second@somewhere.com";

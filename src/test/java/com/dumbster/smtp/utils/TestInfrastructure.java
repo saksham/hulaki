@@ -30,9 +30,9 @@ import static org.mockito.Mockito.reset;
 
 public class TestInfrastructure {
     public static final String SMTP_HOSTNAME = "localhost";
-    public static final int SMTP_PORT = 2500;
+    public static final int SMTP_PORT = 2501;
     public static final String API_HOSTNAME = "localhost";
-    public static final int API_PORT = 6869;
+    public static final int API_PORT = 6870;
     private final SmtpServer smtpServer;
     private final ApiServer apiServer;
     private final MailProcessor mailProcessor;

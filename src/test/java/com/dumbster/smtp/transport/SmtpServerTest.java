@@ -18,13 +18,14 @@ import com.dumbster.smtp.utils.EmailSender;
 import com.dumbster.smtp.utils.RandomData;
 import com.dumbster.smtp.utils.TestInfrastructure;
 import org.mockito.ArgumentCaptor;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 import java.util.Date;
 
 import static org.mockito.Matchers.eq;
@@ -42,7 +43,7 @@ public class SmtpServerTest {
         infrastructure.startSmtpServer();
         infrastructure.startMailProcessor();
     }
-    
+
     @AfterClass
     private void teardownInfrastructure() throws Exception {
         infrastructure.getSmtpServer().stop();
@@ -142,8 +143,7 @@ public class SmtpServerTest {
     public void sendEncodingQuotedPrintableSoftLineBreaks() throws Exception {
         String recipient = RandomData.email();
         EmailSender emailSender = newEmailSender();
-        String plain = "= Hello there ==\r\n";
-        String encoded = MimeUtility.encodeText(plain, "UTF-8", "quoted-printable");
+        String encoded = "= Hello there ==\r\n";
         emailSender.setEncoding("quoted-printable");
         ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
 
@@ -153,8 +153,7 @@ public class SmtpServerTest {
         assertEquals(emailCaptor.getValue().getBody(), "= Hello there =");
     }
 
-    
-    
+
     @Test
     public void sendEncodingBase64EncodedJapaneseMessage() throws Exception {
         String recipient = RandomData.email();

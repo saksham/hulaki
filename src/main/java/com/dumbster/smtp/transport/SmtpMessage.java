@@ -16,7 +16,8 @@ public class SmtpMessage {
     private static final Logger logger = Logger.getLogger(SmtpServer.class);
     
     private Map<String, String> headers = Maps.newHashMap();
-    private StringBuffer body = new StringBuffer();
+    private StringBuffer bodyBuffer = new StringBuffer();
+    private String body;
     
     private String latestHeader;
     private boolean isReadingHeader = true;
@@ -36,31 +37,40 @@ public class SmtpMessage {
             addHeader(line);
             return;
         }
-
-        String encoding = getHeaderValue("Content-Transfer-Encoding");
-        String charset = getCharset();
-        boolean softBreak = false;
-        if (charset != null && encoding != null) {
-            try {
-                softBreak = (encoding.equalsIgnoreCase("quoted-printable") && line.endsWith("=3D"));
-                line = decodeFromUtf8(line, encoding, charset);
-            } catch (Exception ex) {
-                throw new SmtpException("Error decoding String '" + line + "': " + ex.getMessage(), ex);
-            }
-        }
         
-        body.append(line);
-        if(!softBreak) {
-            body.append("\n");
+        bodyBuffer.append(line).append("\n");
+        String encoding = getEncoding();
+        if(encoding != null) {
+            boolean isSoftBreak = encoding.equalsIgnoreCase("quoted-printable") && line.endsWith("=3D");
+            if(isSoftBreak) {
+                bodyBuffer.delete(bodyBuffer.length() - 4, bodyBuffer.length() - 1);
+            }
         }
     }
 
 
     public void close() {
         this.closed = true;
-        if(body.length() > 0) {
-            body.deleteCharAt(body.length() - 1);
+        if(bodyBuffer.length() > 0) {
+            bodyBuffer.deleteCharAt(bodyBuffer.length() - 1);
         }
+
+        String encoding = getEncoding();
+        String charset = getCharset();
+        if (charset != null && encoding != null) {
+            try {
+                body = decodeFromUtf8(bodyBuffer.toString(), encoding, charset);
+            } catch (Exception ex) {
+                throw new SmtpException("Error decoding body '" + bodyBuffer + "': " + ex.getMessage(), ex);
+            }
+        } else {
+            body = bodyBuffer.toString();
+        }
+        
+    }
+
+    private String getEncoding() {
+        return getHeaderValue("Content-Transfer-Encoding");
     }
 
 
@@ -112,12 +122,12 @@ public class SmtpMessage {
         return null;
     }
 
-    private static String decodeFromUtf8(String line, String encoding, String charset) throws Exception {
-        if (line.length() == 0) {
-            return line;
+    private static String decodeFromUtf8(String text, String encoding, String charset) throws Exception {
+        if (text.length() == 0) {
+            return text;
         }
 
-        byte[] asciiBytes = line.getBytes("UTF-8");
+        byte[] asciiBytes = text.getBytes("UTF-8");
         InputStream decodedStream = MimeUtility.decode(new ByteArrayInputStream(asciiBytes), encoding);
         byte[] tmp = new byte[asciiBytes.length];
         int n = decodedStream.read(tmp);
@@ -127,6 +137,6 @@ public class SmtpMessage {
     }
 
     public String getBody() {
-        return body.toString();
+        return body;
     }
 }

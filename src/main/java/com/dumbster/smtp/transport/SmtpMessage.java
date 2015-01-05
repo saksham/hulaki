@@ -39,15 +39,20 @@ public class SmtpMessage {
 
         String encoding = getHeaderValue("Content-Transfer-Encoding");
         String charset = getCharset();
+        boolean softBreak = false;
         if (charset != null && encoding != null) {
             try {
+                softBreak = (encoding.equalsIgnoreCase("quoted-printable") && line.endsWith("=3D"));
                 line = decodeFromUtf8(line, encoding, charset);
             } catch (Exception ex) {
                 throw new SmtpException("Error decoding String '" + line + "': " + ex.getMessage(), ex);
             }
         }
+        
         body.append(line);
-        body.append("\n");
+        if(!softBreak) {
+            body.append("\n");
+        }
     }
 
 

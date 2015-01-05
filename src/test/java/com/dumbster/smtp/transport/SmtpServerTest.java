@@ -24,6 +24,7 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import java.util.Date;
 
 import static org.mockito.Matchers.eq;
@@ -137,6 +138,23 @@ public class SmtpServerTest {
         assertEquals(emailCaptor.getValue().getBody(), body);
     }
 
+    @Test
+    public void sendEncodingQuotedPrintableSoftLineBreaks() throws Exception {
+        String recipient = RandomData.email();
+        EmailSender emailSender = newEmailSender();
+        String plain = "= Hello there ==\r\n";
+        String encoded = MimeUtility.encodeText(plain, "UTF-8", "quoted-printable");
+        emailSender.setEncoding("quoted-printable");
+        ArgumentCaptor<MailMessage> emailCaptor = ArgumentCaptor.forClass(MailMessage.class);
+
+        emailSender.sendEmail(SENDER, recipient, "EncodedMessage", encoded);
+        verify(infrastructure.getMailMessageDao()).storeMessage(eq(recipient), emailCaptor.capture());
+
+        assertEquals(emailCaptor.getValue().getBody(), "= Hello there =");
+    }
+
+    
+    
     @Test
     public void sendEncodingBase64EncodedJapaneseMessage() throws Exception {
         String recipient = RandomData.email();

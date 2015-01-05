@@ -73,8 +73,8 @@
           factory-bean="com.dumbster.smtp.storage.RelayAddressDaoFactory" factory-method="getDao"/>
 
     <bean name="com.dumbster.smtp.utils.EmailSender" class="com.dumbster.smtp.utils.EmailSender">
-        <constructor-arg name="smtpHostname" value="smtp.gmail.com"/>
-        <constructor-arg name="smtpPort" value="567"/>
+        <constructor-arg name="smtpHostname" value="${relay.smtp.hostname}"/>
+        <constructor-arg name="smtpPort" value="${relay.smtp.port}"/>
     </bean>
 
     <bean name="com.dumbster.smtp.transport.ApiServerHandlerFactory,apiServerHandlerFactory"

@@ -51,4 +51,4 @@ Example
 For more details on how to start the server, please look at ServerApplication.java.
 
 #### Credits
-This project is based on the original implementation of Dumbster available at: http://quintanasoft.com/dumbster/
+Part of this project (specifically, the SMTP state machine) is based on the original implementation of Dumbster available at: http://quintanasoft.com/dumbster/

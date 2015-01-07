@@ -27,6 +27,7 @@ public class MapDbMailMessageDao implements MailMessageDao {
                 .compressionEnable()
                 .make();
         this.map = db.getTreeMap(COLLECTION_NAME);
+        this.map.clear();
     }
 
     @Override

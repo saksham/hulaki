@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>dumbster</groupId>
-    <artifactId>dumbster</artifactId>
-    <version>2.0.1-RC3</version>
+    <groupId>com.github.saksham</groupId>
+    <artifactId>hulaki</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <description>
-        The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email
-        messages.
+        Hulaki (postman in Nepali) is a very simple fake SMTP server designed for unit and system testing applications 
+        that send email messages.
     </description>
-    <url>https://github.com/saksham/dumbster</url>
+    <url>https://github.com/saksham/hulaki</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -25,9 +25,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>https://github.com/saksham/dumbster</connection>
-        <developerConnection>https://github.com/saksham/dumbster</developerConnection>
-        <url>https://github.com/saksham/dumbster</url>
+        <connection>https://github.com/saksham/hulaki</connection>
+        <developerConnection>https://github.com/saksham/hulaki</developerConnection>
+        <url>https://github.com/saksham/hulaki</url>
     </scm>
     <developers>
         <developer>
@@ -38,16 +38,12 @@
                 <role>Core Developer</role>
             </roles>
         </developer>
-        <developer>
-            <name>Jason Kitchen</name>
-            <id>jasonkitchen</id>
-            <email>jasonkitchen@user.sourceforge.net</email>
-            <roles>
-                <role>Core Developer</role>
-            </roles>
-        </developer>
     </developers>
     <contributors>
+        <contributor>
+            <name>Jason Kitchen</name>
+            <email>jasonkitchen@user.sourceforge.net</email>
+        </contributor>
         <contributor>
             <name>Charles Hudak</name>
         </contributor>
@@ -74,9 +70,6 @@
                 <role>Developer</role>
             </roles>
             <timezone>+1</timezone>
-        </contributor>
-        <contributor>
-            <name>Saksham Gautam</name>
         </contributor>
     </contributors>
     <dependencies>
@@ -174,10 +167,8 @@
                         <manifestEntries>
                             <Specification-Title>${project.name}</Specification-Title>
                             <Specification-Version>${project.version}</Specification-Version>
-                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
                             <Implementation-Title>${project.name}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
-                            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                             <build-time>${maven.build.timestamp}</build-time>
                         </manifestEntries>
                     </archive>

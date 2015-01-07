@@ -1,12 +1,12 @@
-Dumbster Fake SMTP Server
+Hulaki - A Fake SMTP Server
 =========================
-![Build status](https://travis-ci.org/saksham/dumbster.svg)
+![Build status](https://travis-ci.org/saksham/hulaki.svg)
 
-The Dumbster is a very simple fake SMTP server designed for unit and system testing applications that send email messages.
+Hulaki (postman in Nepali) is a very simple fake SMTP server designed for unit and system testing applications that send email messages.
 
 Following are the key features of this SMTP test double
 
-* Understands ESMTP protocol and can receive emails sent using standard frameworks such as javax.mail or Unix Mail
+* Understands SMTP protocol and can receive emails sent using standard frameworks such as javax.mail or Unix Mail
 * All emails sent to the server can be stored irrespective of whether or not the recipient address or mailbox exists.
 * Can store emails using a variety of mechanisms. All emails are indexed using the recipient address for rapid retrieval.
  * Files: stores the emails in XML files
@@ -14,7 +14,7 @@ Following are the key features of this SMTP test double
  * SQLite: stores them in an SQLite database 
 * The SMTP server can be started within a process or in a separate machine from where the tests can send and retrieve emails.
 * When the SMTP server is run in a separate process or a separate machine, the emails can be retrieved using an HTTP-like API protocol (XML over TCP)
-* Provides serialization and deserialization methods on all requests and responses for constructing API clients
+* Provides serialization and de-serialization methods on all requests and responses for constructing API clients
 * Also provides a client interface library in Java that can talk with the API server
 * Can selectively relay emails sent to specific email addresses. These addresses too can be configured via the API.
 * Uses [netty](http://netty.io) for dealing with networking 
@@ -39,7 +39,7 @@ Current version of the API supports the following actions:
  * For more details, see: GetRequest.java
 * *COUNT*
  * Counts the saved emails.
- * Supports speficying recipient address to selectively counting emails.
+ * Supports specifying recipient address to selectively counting emails.
  * For more details, see: CountRequest.java
 * *RELAY*
  * Configures the relay behavior.

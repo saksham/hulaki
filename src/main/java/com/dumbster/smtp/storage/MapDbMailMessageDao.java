@@ -28,6 +28,7 @@ public class MapDbMailMessageDao implements MailMessageDao {
                 .make();
         this.map = db.getTreeMap(COLLECTION_NAME);
         this.map.clear();
+        db.commit();
     }
 
     @Override

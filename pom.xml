@@ -25,8 +25,8 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:ssh://git@github.com:saksham/hulaki.git</connection>
-        <developerConnection>scm:git:ssh://github.com/saksham/hulaki</developerConnection>
+        <connection>scm:git:git@github.com:saksham/hulaki.git</connection>
+        <developerConnection>scm:git:git@github.com/saksham/hulaki.git</developerConnection>
         <url>https://github.com/saksham/hulaki</url>
         <tag>hulaki-1.0.0</tag>
     </scm>

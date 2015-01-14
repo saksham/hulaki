@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.saksham</groupId>
     <artifactId>hulaki</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
     <description>
         Hulaki (postman in Nepali) is a very simple fake SMTP server designed for unit and system testing applications
@@ -27,7 +27,7 @@
         <connection>scm:git:ssh://git@github.com:saksham/hulaki.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/saksham/hulaki.git</developerConnection>
         <url>https://github.com/saksham/hulaki</url>
-        <tag>hulaki-1.0.1</tag>
+        <tag>hulaki-1.0.2</tag>
     </scm>
     <developers>
         <developer>

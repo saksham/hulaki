@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.saksham</groupId>
     <artifactId>hulaki</artifactId>
+    <name>Hulaki</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>

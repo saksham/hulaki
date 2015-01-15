@@ -34,7 +34,7 @@
         <developer>
             <name>Saksham Gautam</name>
             <id>saksham</id>
-            <email>saksham.gautam@github.com</email>
+            <email>saksham@users.noreply.github.com</email>
             <roles>
                 <role>Core Developer</role>
             </roles>
@@ -271,5 +271,6 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <downloadUrl>https://oss.sonatype.org/content/repositories/releases/</downloadUrl>
     </distributionManagement>
 </project>

@@ -65,12 +65,6 @@
         </contributor>
         <contributor>
             <name>Harald Brabenetz</name>
-            <email>brabenetz@user.sourceforge.net</email>
-            <organization>INFONOVA Gmbh</organization>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>+1</timezone>
         </contributor>
     </contributors>
     <dependencies>

@@ -33,9 +33,8 @@ Current version of the API supports the following actions:
  * Queries the server status.
  * Can query status of mail-processor or the SMTP server
  * For more details, see: ServerStatusRequest.java
- * Examples:
- ** SERVER_STATUS MAIL_PROCESSOR
- ** SERVER_STATUS SMTP_SERVER
+ * Examples: SERVER_STATUS MAIL_PROCESSOR and SERVER_STATUS SMTP_SERVER
+
 * *GET*
  * Retrieves the saved emails.
  * Supports specifying recipient address to selectively download emails.

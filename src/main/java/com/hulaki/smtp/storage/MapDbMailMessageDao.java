@@ -2,7 +2,9 @@ package com.hulaki.smtp.storage;
 
 import com.hulaki.smtp.api.MailMessage;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
@@ -12,7 +14,7 @@ import java.util.concurrent.ConcurrentNavigableMap;
 
 public class MapDbMailMessageDao implements MailMessageDao {
     private static final String COLLECTION_NAME = "emails";
-    private static final Logger logger = Logger.getLogger(MapDbMailMessageDao.class);
+    private static final Logger logger = LogManager.getLogger(MapDbMailMessageDao.class);
     
     private volatile int storedEmailsCount = 0;
     private final ConcurrentNavigableMap<String, List<MailMessage>> map;

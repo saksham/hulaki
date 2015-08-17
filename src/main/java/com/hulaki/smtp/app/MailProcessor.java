@@ -7,14 +7,15 @@ import com.hulaki.smtp.transport.Observer;
 import com.hulaki.smtp.transport.SmtpMessage;
 import com.hulaki.smtp.utils.EmailSender;
 import com.hulaki.smtp.utils.EmailUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MailProcessor implements Observer<SmtpMessage>, Runnable {
 
-    private static final Logger logger = Logger.getLogger(MailProcessor.class);
+    private static final Logger logger = LogManager.getLogger(MailProcessor.class);
 
     private volatile boolean stopped;
 

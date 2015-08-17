@@ -5,7 +5,9 @@ import com.hulaki.smtp.api.MailMessage;
 import com.hulaki.smtp.exceptions.SmtpException;
 import com.google.common.collect.Lists;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SqliteMailMessageDao implements MailMessageDao {
-    private static final Logger log = Logger.getLogger(SqliteMailMessageDao.class);
+    private static final Logger log = LogManager.getLogger(SqliteMailMessageDao.class);
     private final String dbFilename;
 
     public SqliteMailMessageDao(String dbFilepath) {
@@ -99,7 +101,7 @@ public class SqliteMailMessageDao implements MailMessageDao {
     public void clearMessages() {
         JdbcTemplate template = new JdbcTemplate(getDataSource());
         template.execute("DELETE FROM emails");
-        log.info(String.format("Deleted ALL message"));
+        log.info("Deleted ALL message");
     }
 
     @Override

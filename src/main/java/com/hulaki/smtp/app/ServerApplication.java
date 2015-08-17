@@ -4,7 +4,8 @@ import com.hulaki.smtp.storage.MailMessageDaoFactory;
 import com.hulaki.smtp.transport.ApiServer;
 import com.hulaki.smtp.transport.SmtpServer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextStartedEvent;
@@ -16,7 +17,7 @@ import java.io.InputStreamReader;
 
 public class ServerApplication implements ApplicationListener<ContextStartedEvent> {
 
-    private static final Logger logger = Logger.getLogger(ServerApplication.class);
+    private static final Logger logger = LogManager.getLogger(ServerApplication.class);
     public static final String CONFIG_STORAGE_MODE = "storage.mode";
 
 

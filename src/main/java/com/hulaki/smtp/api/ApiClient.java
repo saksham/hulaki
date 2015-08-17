@@ -17,7 +17,8 @@ package com.hulaki.smtp.api;
 import com.hulaki.smtp.exceptions.ApiException;
 import com.hulaki.smtp.exceptions.SmtpTimeoutException;
 import com.hulaki.smtp.utils.EmailUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
@@ -29,7 +30,7 @@ import java.net.Socket;
 import java.util.List;
 
 public class ApiClient implements IApiClient {
-    private final Logger logger = Logger.getLogger(ApiClient.class);
+    private final Logger logger = LogManager.getLogger(ApiClient.class);
     private final long DEFAULT_TIMEOUT_IN_MILLIS = 8000L;
     private final long MAX_NUM_OF_TIMES_TO_POLL = 8;
     private final String apiServerHostname;

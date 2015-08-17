@@ -6,7 +6,8 @@ import com.hulaki.smtp.exceptions.SmtpException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class FileBasedMailMessageDao implements MailMessageDao {
     private static final String EMAIL_FILE_PREFIX = "EML_";
     public static final String EMAIL_FILE_SUFFIX = ".xml";
-    private static final Logger logger = Logger.getLogger(FileBasedMailMessageDao.class);
+    private static final Logger logger = LogManager.getLogger(FileBasedMailMessageDao.class);
     private final File mailsFolder;
     private Map<String, List<String>> fileNamesByRecipients = Maps.newConcurrentMap();
     private int storedEmailsCount = 0;

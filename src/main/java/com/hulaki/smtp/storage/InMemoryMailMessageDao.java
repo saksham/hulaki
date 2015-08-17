@@ -3,7 +3,8 @@ package com.hulaki.smtp.storage;
 
 import com.hulaki.smtp.api.MailMessage;
 import com.google.common.collect.Maps;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class InMemoryMailMessageDao implements MailMessageDao {
 
     private Map<String, ArrayList<MailMessage>> emailsByRecipients = Maps.newConcurrentMap();
     private int storedEmailCount = 0;
-    private Logger logger = Logger.getLogger(this.getClass());
+    private Logger logger = LogManager.getLogger(this.getClass());
 
     public synchronized void storeMessage(String recipient, MailMessage email) {
         if (!emailsByRecipients.containsKey(recipient)) {

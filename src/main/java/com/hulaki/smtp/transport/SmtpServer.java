@@ -6,7 +6,9 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -15,7 +17,7 @@ import java.util.List;
 
 @Component
 public class SmtpServer implements Observable<SmtpMessage>, Observer<SmtpMessage>, Server {
-    private static final Logger logger = Logger.getLogger(SmtpServer.class);
+    private static final Logger logger = LogManager.getLogger(SmtpServer.class);
 
     private static final int BOSS_GROUP_THREAD_COUNT = 10;
     private static final int WORKER_GROUP_THREAD_COUNT = 20;

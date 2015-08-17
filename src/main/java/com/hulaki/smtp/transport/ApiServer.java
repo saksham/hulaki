@@ -5,14 +5,16 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
 public class ApiServer implements Server {
-    private static final Logger logger = Logger.getLogger(ApiServer.class);
+    private static final Logger logger = LogManager.getLogger(ApiServer.class);
 
     private static final int BOSS_GROUP_THREAD_COUNT = 10;
     private static final int WORKER_GROUP_THREAD_COUNT = 20;

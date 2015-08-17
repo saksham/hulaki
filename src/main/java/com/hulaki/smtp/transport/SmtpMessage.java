@@ -3,7 +3,9 @@ package com.hulaki.smtp.transport;
 import com.hulaki.smtp.exceptions.SmtpException;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.mail.internet.MimeUtility;
 import java.io.*;
@@ -13,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class SmtpMessage {
     private static final Pattern headerPattern = Pattern.compile("(?<name>[^:]*): (?<value>.*)");
-    private static final Logger logger = Logger.getLogger(SmtpServer.class);
+    private static final Logger logger = LogManager.getLogger(SmtpServer.class);
     
     private Map<String, String> headers = Maps.newHashMap();
     private StringBuffer bodyBuffer = new StringBuffer();

@@ -14,12 +14,13 @@
 
 package com.hulaki.smtp.transport;
 
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = "Unit")
+@Test(groups = TestGroups.COMPONENT)
 public class ApiServerTest {
     private TestInfrastructure infrastructure = new TestInfrastructure();
 

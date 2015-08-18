@@ -14,6 +14,7 @@
 
 package com.hulaki.smtp.storage;
 
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import com.hulaki.smtp.utils.EmailSender;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -21,7 +22,7 @@ import org.testng.annotations.*;
 
 import static org.testng.Assert.assertEquals;
 
-@Test(groups = "Component")
+@Test(groups = TestGroups.COMPONENT)
 public class MailStorageTest {
     public static final String SQLITE_DB_FILENAME = "target/sqlitetest.db";
     public static final String MAPDB_FILENAME = "target/mapdbtest.db";
@@ -44,7 +45,7 @@ public class MailStorageTest {
     }
     
     
-    @Test(dataProvider = "provideMailStorages")
+    @Test(dataProvider = "provideMailStorage")
     public void shouldStoreAndRetrieveEmails(MailMessageDao mailStorage) throws Exception {
         startServers(mailStorage);
         String subject = "Subject " + RandomStringUtils.randomAlphabetic(15);
@@ -62,7 +63,7 @@ public class MailStorageTest {
     }
 
 
-    @Test(dataProvider = "provideMailStorages")
+    @Test(dataProvider = "provideMailStorage")
     public void shouldClearEmails(MailMessageDao mailStorage) throws Exception {
         startServers(mailStorage);
         
@@ -77,7 +78,7 @@ public class MailStorageTest {
 
 
     @DataProvider
-    private Object[][] provideMailStorages() {
+    private Object[][] provideMailStorage() {
         return new Object[][]{
                 {new InMemoryMailMessageDao()},
                 {new FileBasedMailMessageDao(MAILS_FOLDER)},

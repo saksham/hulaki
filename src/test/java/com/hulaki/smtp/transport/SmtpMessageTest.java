@@ -13,6 +13,7 @@
  */
 package com.hulaki.smtp.transport;
 
+import com.hulaki.smtp.storage.InMemoryMailMessageDao;
 import com.hulaki.smtp.utils.EmailSender;
 import com.hulaki.smtp.utils.RandomData;
 import com.hulaki.smtp.utils.TestInfrastructure;
@@ -30,7 +31,7 @@ import static org.testng.Assert.assertEquals;
 public class SmtpMessageTest {
     private static final String MAIL_FROM = "sender@email.com";
 
-    private TestInfrastructure infrastructure = new TestInfrastructure();
+    private TestInfrastructure infrastructure = new TestInfrastructure(new InMemoryMailMessageDao());
 
     @BeforeClass
     private void setUp() throws Exception {

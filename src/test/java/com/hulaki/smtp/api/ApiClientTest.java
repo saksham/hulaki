@@ -16,6 +16,7 @@ package com.hulaki.smtp.api;
 
 import com.beust.jcommander.internal.Lists;
 import com.hulaki.smtp.storage.MailMessageDao;
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +28,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-@Test(groups = "Component")
+@Test(groups = TestGroups.COMPONENT)
 public class ApiClientTest {
     private static final String SUBJECT = "some subject";
     private static final String BODY = "some body";

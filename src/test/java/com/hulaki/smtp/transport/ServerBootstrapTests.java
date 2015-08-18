@@ -1,5 +1,6 @@
 package com.hulaki.smtp.transport;
 
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -7,7 +8,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-@Test(groups = "Unit")
+@Test(groups = TestGroups.UNIT)
 public class ServerBootstrapTests {
 
     private TestInfrastructure testInfrastructure = new TestInfrastructure();

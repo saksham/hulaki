@@ -17,6 +17,7 @@ package com.hulaki.smtp.transport;
 import com.hulaki.smtp.api.MailMessage;
 import com.hulaki.smtp.utils.EmailSender;
 import com.hulaki.smtp.utils.RandomData;
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +29,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
-@Test(groups = "Performance")
+@Test(groups = TestGroups.PERFORMANCE)
 public class SmtpServerPerformanceTest {
     private TestInfrastructure testInfrastructure = new TestInfrastructure();
     private EmailSender emailSender = new EmailSender(TestInfrastructure.SMTP_HOSTNAME, TestInfrastructure.SMTP_PORT);

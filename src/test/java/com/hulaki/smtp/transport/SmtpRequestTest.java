@@ -15,6 +15,7 @@
 package com.hulaki.smtp.transport;
 
 import com.beust.jcommander.internal.Lists;
+import com.hulaki.smtp.utils.TestGroups;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -24,7 +25,7 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-@Test(groups = "Unit")
+@Test(groups = TestGroups.UNIT)
 public class SmtpRequestTest {
 
     private static final SmtpCommand[] statelessCommands = {SmtpCommand.RSET, SmtpCommand.VRFY, SmtpCommand.EXPN, SmtpCommand.HELP, SmtpCommand.NOOP};

@@ -14,12 +14,13 @@
 
 package com.hulaki.smtp.api;
 
+import com.hulaki.smtp.utils.TestGroups;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
 
-@Test(groups = "Unit")
+@Test(groups = TestGroups.UNIT)
 public class ApiResponseTest {
 
     @Test(dataProvider = "allApiResponses")

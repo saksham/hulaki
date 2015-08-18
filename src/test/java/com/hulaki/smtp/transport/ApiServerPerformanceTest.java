@@ -16,6 +16,7 @@ package com.hulaki.smtp.transport;
 
 
 import com.hulaki.smtp.api.ApiClient;
+import com.hulaki.smtp.utils.TestGroups;
 import com.hulaki.smtp.utils.TestInfrastructure;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.AfterClass;
@@ -25,7 +26,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
-@Test(groups = "Performance")
+@Test(groups = TestGroups.PERFORMANCE)
 public class ApiServerPerformanceTest {
     private TestInfrastructure testInfrastructure = new TestInfrastructure();
 

@@ -9,7 +9,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
-public class ApiRequestEncoder extends MessageToMessageEncoder<ApiResponse> {
+public class ApiResponseEncoder extends MessageToMessageEncoder<ApiResponse> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ApiResponse apiResponse, List<Object> out) throws Exception {
         String apiResponseAsString = apiResponse.marshalResponse();

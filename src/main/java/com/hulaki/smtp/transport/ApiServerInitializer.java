@@ -16,7 +16,7 @@ public class ApiServerInitializer extends ChannelInitializer<SocketChannel> {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1000, Delimiters.lineDelimiter()));
         pipeline.addLast("decoder", new ApiRequestDecoder());
-        pipeline.addLast("encoder", new ApiRequestEncoder());
+        pipeline.addLast("encoder", new ApiResponseEncoder());
         pipeline.addLast("handler", serverHandlerFactory.create());
     }
 

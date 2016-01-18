@@ -12,7 +12,9 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.Executors;
 
 
 public class ServerApplication implements ApplicationListener<ContextStartedEvent> {
@@ -25,26 +27,39 @@ public class ServerApplication implements ApplicationListener<ContextStartedEven
         setupMailMessageDaoFactory();
         ApplicationContext context = new ClassPathXmlApplicationContext("application-config.xml");
 
-        ApiServer apiServer = context.getBean(ApiServer.class);
+        final ApiServer apiServer = context.getBean(ApiServer.class);
+        final SmtpServer smtpServer = context.getBean(SmtpServer.class);
+        final MailProcessor mailProcessor = context.getBean(MailProcessor.class);
+
         apiServer.start();
-        SmtpServer smtpServer = context.getBean(SmtpServer.class);
         smtpServer.start();
 
-        MailProcessor mailProcessor = context.getBean(MailProcessor.class);
         smtpServer.addObserver(mailProcessor);
-        Thread mailProcessorThread = new Thread(mailProcessor);
-        mailProcessorThread.start();
+        Executors.newSingleThreadExecutor().execute(mailProcessor);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Type EXIT to close the application");
-        String line = reader.readLine();
-        while (!line.equalsIgnoreCase("EXIT")) {
-            System.out.println("Type EXIT to close the application");
-            line = reader.readLine();
-        }
+        waitForInterruption();
+
         apiServer.stop();
         smtpServer.stop();
         mailProcessor.stop();
+    }
+
+    private static void waitForInterruption() throws IOException, InterruptedException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        if(reader != null) {
+            // Started in interactive mode => close when user types in EXIT
+            System.out.println("Type EXIT to close the application");
+            String line = reader.readLine();
+            while (!line.equalsIgnoreCase("EXIT")) {
+                System.out.println("Type EXIT to close the application");
+                line = reader.readLine();
+            }
+        } else {
+            // Started in headless mode => wait forever
+            while(true) {
+                Thread.sleep(500L);
+            }
+        }
     }
 
     private static void setupMailMessageDaoFactory() {
@@ -62,6 +77,5 @@ public class ServerApplication implements ApplicationListener<ContextStartedEven
 
     @Override
     public void onApplicationEvent(ContextStartedEvent contextStartedEvent) {
-
     }
 }

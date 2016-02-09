@@ -40,9 +40,4 @@
         <disallow pkg="com.github.saksham.hulaki.transport" />
     </subpackage>
 
-    <subpackage name="transport">
-        <!-- Transport package should not know about how the application starts up or how the data is stored -->
-        <disallow pkg="com.github.saksham.hulaki.app" />
-    </subpackage>
-
 </import-control>

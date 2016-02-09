@@ -1,6 +1,6 @@
 <!DOCTYPE import-control PUBLIC "-//Puppy Crawl//DTD Import Control 1.1//EN"
         "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
-<import-control pkg="com.hulaki">
+<import-control pkg="com.github.saksham.hulaki">
 
     <allow pkg=".*" regex="true"/>
     
@@ -10,9 +10,9 @@
 
     <subpackage name="api">
         <!-- API package should not make any references to other core packages because it is intended to contain only entities -->
-        <disallow pkg="com.hulaki.app" />
-        <disallow pkg="com.hulaki.storage" />
-        <disallow pkg="com.hulaki.transport" />
+        <disallow pkg="com.github.saksham.hulaki.app" />
+        <disallow pkg="com.github.saksham.hulaki.storage" />
+        <disallow pkg="com.github.saksham.hulaki.transport" />
 
         <disallow pkg="javax.sql" />
         <disallow pkg="java.sql" />
@@ -26,25 +26,23 @@
 
     <subpackage name="exceptions">
         <!-- Exception package should not make any references to other core packages because it is intended to contain only entities -->
-        <disallow pkg="com.hulaki.api" />
-        <disallow pkg="com.hulaki.app" />
-        <disallow pkg="com.hulaki.storage" />
-        <disallow pkg="com.hulaki.transport" />
+        <disallow pkg="com.github.saksham.hulaki.api" />
+        <disallow pkg="com.github.saksham.hulaki.app" />
+        <disallow pkg="com.github.saksham.hulaki.storage" />
+        <disallow pkg="com.github.saksham.hulaki.transport" />
 
         <disallow pkg="javax.sql" />
         <disallow pkg="java.sql" />
     </subpackage>
 
     <subpackage name="storage">
-        <!-- Storage package should not know about application or transport -->
-        <disallow pkg="com.hulaki.app" />
-        <disallow pkg="com.hulaki.transport" />
+        <!-- Storage package should not know about transport -->
+        <disallow pkg="com.github.saksham.hulaki.transport" />
     </subpackage>
 
     <subpackage name="transport">
         <!-- Transport package should not know about how the application starts up or how the data is stored -->
-        <disallow pkg="com.hulaki.app" />
-        <disallow pkg="com.hulaki.storage" />
+        <disallow pkg="com.github.saksham.hulaki.app" />
     </subpackage>
 
 </import-control>

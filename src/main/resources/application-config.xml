@@ -8,80 +8,80 @@
     <context:component-scan base-package="com.hulaki.smtp.app, com.hulaki.smtp.storage, com.hulaki.smtp.transport"
                             use-default-filters="false"/>
 
-    <bean id="applicationContextProvider" class="com.hulaki.smtp.app.ApplicationContextProvider"/>
+    <bean id="applicationContextProvider" class="com.github.saksham.hulaki.app.ApplicationContextProvider"/>
     
     <bean id="hulaki.properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
         <property name="location" value="classpath:hulaki.properties" />
     </bean>
-    <bean name="mailProcessor,com.hulaki.smtp.app.MailProcessor" class="com.hulaki.smtp.app.MailProcessor"
+    <bean name="mailProcessor,com.github.saksham.hulaki.app.MailProcessor" class="com.github.saksham.hulaki.app.MailProcessor"
           lazy-init="false">
-        <property name="mailMessageDao" ref="com.hulaki.smtp.storage.MailMessageDao"/>
-        <property name="emailSender" ref="com.hulaki.smtp.utils.EmailSender"/>
-        <property name="relayAddressDao" ref="com.hulaki.smtp.storage.RelayAddressDao"/>
+        <property name="mailMessageDao" ref="com.github.saksham.hulaki.storage.MailMessageDao"/>
+        <property name="emailSender" ref="com.github.saksham.hulaki.utils.EmailSender"/>
+        <property name="relayAddressDao" ref="com.github.saksham.hulaki.storage.RelayAddressDao"/>
     </bean>
 
-    <bean name="com.hulaki.smtp.transport.SmtpServer" class="com.hulaki.smtp.transport.SmtpServer">
+    <bean name="com.github.saksham.hulaki.transport.SmtpServer" class="com.github.saksham.hulaki.transport.SmtpServer">
         <constructor-arg name="port" value="${smtp.port}"/>
     </bean>
 
 
-    <bean name="com.hulaki.smtp.transport.ApiServerInitializerFactory, apiServerInitializerFactory"
-          class="com.hulaki.smtp.transport.ApiServerInitializerFactory" primary="true">
-        <constructor-arg ref="com.hulaki.smtp.transport.ApiServerHandlerFactory"/>
+    <bean name="com.github.saksham.hulaki.transport.ApiServerInitializerFactory, apiServerInitializerFactory"
+          class="com.github.saksham.hulaki.transport.ApiServerInitializerFactory" primary="true">
+        <constructor-arg ref="com.github.saksham.hulaki.transport.ApiServerHandlerFactory"/>
     </bean>
     
-    <bean name="com.hulaki.smtp.transport.ApiServer" class="com.hulaki.smtp.transport.ApiServer">
+    <bean name="com.github.saksham.hulaki.transport.ApiServer" class="com.github.saksham.hulaki.transport.ApiServer">
         <constructor-arg name="port" value="${api.port}"/>
-        <property name="apiServerInitializerFactory" ref="com.hulaki.smtp.transport.ApiServerInitializerFactory"/>
-        <property name="apiServerHandlerFactory" ref="com.hulaki.smtp.transport.ApiServerHandlerFactory"/>
+        <property name="apiServerInitializerFactory" ref="com.github.saksham.hulaki.transport.ApiServerInitializerFactory"/>
+        <property name="apiServerHandlerFactory" ref="com.github.saksham.hulaki.transport.ApiServerHandlerFactory"/>
     </bean>
 
-    <bean name="com.hulaki.smtp.storage.MailMessageDaoFactory"
-          class="com.hulaki.smtp.storage.MailMessageDaoFactory"
+    <bean name="com.github.saksham.hulaki.storage.MailMessageDaoFactory"
+          class="com.github.saksham.hulaki.storage.MailMessageDaoFactory"
           factory-method="getInstance" lazy-init="true">
     </bean>
 
-    <bean name="com.hulaki.smtp.storage.MailMessageDao"
-          factory-bean="com.hulaki.smtp.storage.MailMessageDaoFactory" factory-method="getDao"/>
+    <bean name="com.github.saksham.hulaki.storage.MailMessageDao"
+          factory-bean="com.github.saksham.hulaki.storage.MailMessageDaoFactory" factory-method="getDao"/>
 
-    <bean name="com.hulaki.smtp.storage.InMemoryMailMessageDao, inMemoryMailMessageDao" class="com.hulaki.smtp.storage.InMemoryMailMessageDao"
-            lazy-init="true">
+    <bean name="com.github.saksham.hulaki.storage.InMemoryMailMessageDao, inMemoryMailMessageDao" class="com.github.saksham.hulaki.storage.InMemoryMailMessageDao"
+          lazy-init="true">
     </bean>
     
-    <bean name="com.hulaki.smtp.storage.SqliteMailMessageDao, sqliteMailMessageDao" class="com.hulaki.smtp.storage.SqliteMailMessageDao"
+    <bean name="com.github.saksham.hulaki.storage.SqliteMailMessageDao, sqliteMailMessageDao" class="com.github.saksham.hulaki.storage.SqliteMailMessageDao"
           lazy-init="true">
         <constructor-arg name="dbFilepath" value="${storage.sqlite.filepath}" />
     </bean>
 
-    <bean name="com.hulaki.smtp.storage.MapDbMailMessageDao, mapDbMailMessageDao" class="com.hulaki.smtp.storage.MapDbMailMessageDao"
+    <bean name="com.github.saksham.hulaki.storage.MapDbMailMessageDao, mapDbMailMessageDao" class="com.github.saksham.hulaki.storage.MapDbMailMessageDao"
           lazy-init="true">
         <constructor-arg name="dbFilepath" value="${storage.mapdb.filepath}" />
     </bean>
 
 
-    <bean name="com.hulaki.smtp.storage.FileBaseMailMessageDao, fileBasedMailMessageDao" class="com.hulaki.smtp.storage.FileBasedMailMessageDao"
+    <bean name="com.hulaki.smtp.storage.FileBaseMailMessageDao, fileBasedMailMessageDao" class="com.github.saksham.hulaki.storage.FileBasedMailMessageDao"
           lazy-init="true">
         <constructor-arg name="mailsFolderPath" value="${storage.filebased.filepath}" />
     </bean>
     
-    <bean name="com.hulaki.smtp.storage.RelayAddressDaoFactory,relayAddressDaoFactory"
-          class="com.hulaki.smtp.storage.RelayAddressDaoFactory"
+    <bean name="com.github.saksham.hulaki.storage.RelayAddressDaoFactory,relayAddressDaoFactory"
+          class="com.github.saksham.hulaki.storage.RelayAddressDaoFactory"
           factory-method="getInstance"/>
 
-    <bean name="com.hulaki.smtp.storage.RelayAddressDao,relayAddressDao"
-          factory-bean="com.hulaki.smtp.storage.RelayAddressDaoFactory" factory-method="getDao"/>
+    <bean name="com.github.saksham.hulaki.storage.RelayAddressDao,relayAddressDao"
+          factory-bean="com.github.saksham.hulaki.storage.RelayAddressDaoFactory" factory-method="getDao"/>
 
-    <bean name="com.hulaki.smtp.utils.EmailSender" class="com.hulaki.smtp.utils.EmailSender">
+    <bean name="com.github.saksham.hulaki.utils.EmailSender" class="com.github.saksham.hulaki.utils.EmailSender">
         <constructor-arg name="smtpHostname" value="${relay.smtp.hostname}"/>
         <constructor-arg name="smtpPort" value="${relay.smtp.port}"/>
     </bean>
 
-    <bean name="com.hulaki.smtp.transport.ApiServerHandlerFactory,apiServerHandlerFactory"
-          class="com.hulaki.smtp.transport.ApiServerHandlerFactory">
-        <constructor-arg name="smtpServer" ref="com.hulaki.smtp.transport.SmtpServer"/>
-        <constructor-arg name="mailMessageDao" ref="com.hulaki.smtp.storage.MailMessageDao"/>
-        <constructor-arg name="mailProcessor" ref="com.hulaki.smtp.app.MailProcessor"/>
-        <constructor-arg name="relayAddressDao" ref="com.hulaki.smtp.storage.RelayAddressDao"/>
+    <bean name="com.github.saksham.hulaki.transport.ApiServerHandlerFactory,apiServerHandlerFactory"
+          class="com.github.saksham.hulaki.transport.ApiServerHandlerFactory">
+        <constructor-arg name="smtpServer" ref="com.github.saksham.hulaki.transport.SmtpServer"/>
+        <constructor-arg name="mailMessageDao" ref="com.github.saksham.hulaki.storage.MailMessageDao"/>
+        <constructor-arg name="mailProcessor" ref="com.github.saksham.hulaki.app.MailProcessor"/>
+        <constructor-arg name="relayAddressDao" ref="com.github.saksham.hulaki.storage.RelayAddressDao"/>
     </bean>
 </beans>

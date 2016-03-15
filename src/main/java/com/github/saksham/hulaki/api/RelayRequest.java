@@ -33,13 +33,13 @@ public class RelayRequest extends ApiRequest {
         super(requestBody, ApiCommand.RELAY);
         String[] tokens = requestBody.split(" ");
         if (tokens.length == 2) {
-            this.relayMode = RelayMode.parse(tokens[1]);
+            this.relayMode = RelayMode.valueOf(tokens[1].toUpperCase());
         } else if (tokens.length == 3) {
-            this.relayMode = RelayMode.parse(tokens[1]);
+            this.relayMode = RelayMode.valueOf(tokens[1].toUpperCase());
             this.recipient = EmailUtils.normalizeEmailAddress(tokens[2]);
         } else {
             throw new ApiProtocolException("Invalid format. Should be in format: " + ApiCommand.RELAY.toString() + " [" +
-                    StringUtils.join(RelayMode.all(), "|") + "] [email-address]");
+                    StringUtils.join(RelayMode.values(), "|") + "] [email-address]");
         }
     }
 

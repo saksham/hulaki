@@ -47,15 +47,15 @@ public abstract class ApiRequest {
 
         String[] tokens = requestBody.split(" ");
         String command = tokens[0];
-        if (command.equalsIgnoreCase(ApiCommand.COUNT.getCommand())) {
+        if (command.equalsIgnoreCase(ApiCommand.COUNT.name())) {
             return new CountRequest(requestBody);
-        } else if (command.equalsIgnoreCase(ApiCommand.GET.getCommand())) {
+        } else if (command.equalsIgnoreCase(ApiCommand.GET.name())) {
             return new GetRequest(requestBody);
-        } else if (command.equalsIgnoreCase(ApiCommand.CLEAR.getCommand())) {
+        } else if (command.equalsIgnoreCase(ApiCommand.CLEAR.name())) {
             return new ClearRequest(requestBody);
-        } else if (command.equalsIgnoreCase(ApiCommand.RELAY.getCommand())) {
+        } else if (command.equalsIgnoreCase(ApiCommand.RELAY.name())) {
             return new RelayRequest(requestBody);
-        } else if (command.equalsIgnoreCase(ApiCommand.SERVER_STATUS.getCommand())) {
+        } else if (command.equalsIgnoreCase(ApiCommand.SERVER_STATUS.name())) {
             return new ServerStatusRequest(requestBody);
         } else {
             return new InvalidRequest(requestBody);

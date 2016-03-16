@@ -198,7 +198,7 @@ public class ApiClient implements IApiClient {
             clientSocket.close();
             return response.toString();
         } catch (ConnectException e) {
-            throw new ApiException("SMTP mock not available at " + apiServerHostname + ":" + apiServerPort);
+            throw new ApiException("Hulaki not available at " + apiServerHostname + ":" + apiServerPort);
         } catch (IOException e) {
             throw new ApiException(e);
         }

@@ -47,10 +47,14 @@ Current version of the API supports the following actions:
  * Configures the relay behavior.
  * Can add/remove relay recipients.
  * For more details, see: RelayRequest.java
-
-Example
-=======
-For more details on how to start the server, please look at ServerApplication.java.
+ 
+Using Hulaki
+============
+####Running standalone Server
+For more details on how to start the server, please look at ServerApplication.java. Once the server starts up, you can start sending emails to it. Furthermore, you can use tools like _netcat_ to send API commands to the API server port.
+ 
+####API client as a dependency
+Refer to the [release notes](https://github.com/saksham/hulaki/releases) to check out the latest version of the project and how to include it as a dependency. Refer to ApiClient.java on how to use the API client library in your code. 
 
 #### Credits
 Part of this project (specifically, the SMTP state machine) is based on the original implementation of Dumbster available at: http://quintanasoft.com/dumbster/ 

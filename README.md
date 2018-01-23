@@ -26,34 +26,33 @@ The API
 Current version of the API supports the following actions:
 
 * *CLEAR*
- * Deletes the emails for a given recipient.
- * Can be used without parameters to delete all saved emails.
- * For more details: see: ClearRequest.java
+  * Deletes the emails for a given recipient.
+  * Can be used without parameters to delete all saved emails.
+  * For more details: see: ClearRequest.java
 * *SERVER_STATUS*
- * Queries the server status.
- * Can query status of mail-processor or the SMTP server
- * For more details, see: ServerStatusRequest.java
- * Examples: SERVER_STATUS MAIL_PROCESSOR and SERVER_STATUS SMTP_SERVER
-
+  * Queries the server status.
+  * Can query status of mail-processor or the SMTP server
+  * For more details, see: ServerStatusRequest.java
+  * Examples: SERVER_STATUS MAIL_PROCESSOR and SERVER_STATUS SMTP_SERVER
 * *GET*
- * Retrieves the saved emails.
- * Supports specifying recipient address to selectively download emails.
- * For more details, see: GetRequest.java
+  * Retrieves the saved emails.
+  * Supports specifying recipient address to selectively download emails.
+  * For more details, see: GetRequest.java
 * *COUNT*
- * Counts the saved emails.
- * Supports specifying recipient address to selectively counting emails.
- * For more details, see: CountRequest.java
+  * Counts the saved emails.
+  * Supports specifying recipient address to selectively counting emails.
+  * For more details, see: CountRequest.java
 * *RELAY*
- * Configures the relay behavior.
- * Can add/remove relay recipients.
- * For more details, see: RelayRequest.java
+  * Configures the relay behavior.
+  * Can add/remove relay recipients.
+  * For more details, see: RelayRequest.java
  
 Using Hulaki
 ============
-####Running standalone Server
+#### Running standalone Server
 For more details on how to start the server, please look at ServerApplication.java. Once the server starts up, you can start sending emails to it. Furthermore, you can use tools like _netcat_ to send API commands to the API server port.
  
-####API client as a dependency
+#### API client as a dependency
 Refer to the [release notes](https://github.com/saksham/hulaki/releases) to check out the latest version of the project and how to include it as a dependency. Refer to ApiClient.java on how to use the API client library in your code. 
 
 #### Credits

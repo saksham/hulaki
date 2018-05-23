@@ -9,9 +9,9 @@ Following are the key features of this SMTP test double
 * Understands SMTP protocol and can receive emails sent using standard frameworks such as javax.mail or Unix Mail
 * All emails sent to the server can be stored irrespective of whether or not the recipient address or mailbox exists.
 * Can store emails using a variety of mechanisms. All emails are indexed using the recipient address for rapid retrieval.
- * Files: stores the emails in XML files
- * In memory: stores them in memory for quick access
- * SQLite: stores them in an SQLite database 
+  * Files: stores the emails in XML files
+  * In memory: stores them in memory for quick access
+  * SQLite: stores them in an SQLite database 
 * The SMTP server can be started within a process or in a separate machine from where the tests can send and retrieve emails.
 * When the SMTP server is run in a separate process or a separate machine, the emails can be retrieved using an HTTP-like API protocol (XML over TCP)
 * Provides serialization and de-serialization methods on all requests and responses for constructing API clients
